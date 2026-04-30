@@ -82,4 +82,6 @@
 
     <Style TargetType="p:ToggleButton" BasedOn="{StaticResource Sakura.Toggle}"/>
 
+    <Style x:Key="Sakura.ToggleButton" TargetType="p:ToggleButton" BasedOn="{StaticResource Sakura.Toggle}"/>
+
 </ResourceDictionary>

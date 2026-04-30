@@ -41,6 +41,9 @@
     <SolidColorBrush x:Key="Sakura.Brush.StateErr"       Color="{StaticResource Sakura.Color.StateErr}"/>
     <SolidColorBrush x:Key="Sakura.Brush.CloseHover"     Color="{StaticResource Sakura.Color.CloseHover}"/>
     <SolidColorBrush x:Key="Sakura.Brush.Transparent"    Color="{StaticResource Sakura.Color.Transparent}"/>
+    <!-- aliases -->
+    <SolidColorBrush x:Key="Sakura.Brush.Accent"         Color="{StaticResource Sakura.Color.AccentPink}"/>
+    <SolidColorBrush x:Key="Sakura.Brush.Surface"        Color="{StaticResource Sakura.Color.BgRaised}"/>
 
     <!-- ── Shape tokens ───────────────────────────────────────────────────── -->
     <CornerRadius x:Key="Sakura.Radius.Card">12</CornerRadius>

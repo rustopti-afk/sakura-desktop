@@ -122,4 +122,10 @@
 
     <Style TargetType="Button" BasedOn="{StaticResource Sakura.Button}"/>
 
+    <Style x:Key="Sakura.Button.Secondary" TargetType="Button" BasedOn="{StaticResource Sakura.Button}">
+        <Setter Property="Background"   Value="{StaticResource Sakura.Brush.BgOverlay}"/>
+        <Setter Property="BorderBrush"  Value="{StaticResource Sakura.Brush.StrokeSubtle}"/>
+        <Setter Property="Foreground"   Value="{StaticResource Sakura.Brush.FgSecondary}"/>
+    </Style>
+
 </ResourceDictionary>
