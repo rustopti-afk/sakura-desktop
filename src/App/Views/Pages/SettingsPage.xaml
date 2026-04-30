@@ -1,0 +1,148 @@
+<Page x:Class="Sakura.App.Views.Pages.SettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:loc="clr-namespace:Sakura.App.Localization"
+      Title="Settings">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24,16,24,24" MaxWidth="600">
+
+            <TextBlock Text="{Binding [Settings_Title], Source={x:Static loc:LocalizationService.Instance}}"
+                       Style="{StaticResource Sakura.Text.Title}"
+                       Margin="0,0,0,24"/>
+
+            <!-- ── Language ──────────────────────────────────────────────── -->
+            <TextBlock Text="{Binding [Settings_Language], Source={x:Static loc:LocalizationService.Instance}}"
+                       Style="{StaticResource Sakura.Text.Body}"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,10"/>
+
+            <Border Style="{StaticResource Sakura.Card}" Margin="0,0,0,20">
+                <ComboBox ItemsSource="{Binding Languages}"
+                          SelectedItem="{Binding SelectedLanguage}"
+                          DisplayMemberPath="DisplayName"
+                          MinWidth="160"/>
+            </Border>
+
+            <!-- ── Paths ──────────────────────────────────────────────────── -->
+            <TextBlock Text="{Binding [Settings_Section_Paths], Source={x:Static loc:LocalizationService.Instance}}"
+                       Style="{StaticResource Sakura.Text.Body}"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,10"/>
+
+            <Border Style="{StaticResource Sakura.Card}" Margin="0,0,0,20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Backup root -->
+                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,12">
+                        <TextBlock Text="Backup folder"
+                                   Style="{StaticResource Sakura.Text.Caption}"
+                                   Opacity="0.7"/>
+                        <TextBlock Text="{Binding BackupRoot}"
+                                   Style="{StaticResource Sakura.Text.Caption}"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                    <Button Grid.Row="0" Grid.Column="1" Content="Open"
+                            Command="{Binding OpenBackupFolderCommand}"
+                            Style="{StaticResource Sakura.Button.Secondary}"
+                            Padding="12,4" VerticalAlignment="Top" Margin="0,0,0,12"/>
+
+                    <!-- Profiles dir -->
+                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,12,12">
+                        <TextBlock Text="Profiles folder"
+                                   Style="{StaticResource Sakura.Text.Caption}"
+                                   Opacity="0.7"/>
+                        <TextBlock Text="{Binding ProfilesDir}"
+                                   Style="{StaticResource Sakura.Text.Caption}"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                    <Button Grid.Row="1" Grid.Column="1" Content="Open"
+                            Command="{Binding OpenProfilesFolderCommand}"
+                            Style="{StaticResource Sakura.Button.Secondary}"
+                            Padding="12,4" VerticalAlignment="Top" Margin="0,0,0,12"/>
+
+                    <!-- Logs -->
+                    <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,12,0">
+                        <TextBlock Text="Logs folder"
+                                   Style="{StaticResource Sakura.Text.Caption}"
+                                   Opacity="0.7"/>
+                        <TextBlock Text="%ProgramData%\Sakura\logs"
+                                   Style="{StaticResource Sakura.Text.Caption}"
+                                   Opacity="0.6"/>
+                    </StackPanel>
+                    <Button Grid.Row="2" Grid.Column="1" Content="Open"
+                            Command="{Binding OpenLogsFolderCommand}"
+                            Style="{StaticResource Sakura.Button.Secondary}"
+                            Padding="12,4" VerticalAlignment="Top"/>
+                </Grid>
+            </Border>
+
+            <!-- ── About ──────────────────────────────────────────────────── -->
+            <TextBlock Text="{Binding [Settings_Section_About], Source={x:Static loc:LocalizationService.Instance}}"
+                       Style="{StaticResource Sakura.Text.Body}"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,10"/>
+
+            <Border Style="{StaticResource Sakura.Card}" Margin="0,0,0,20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Version"
+                               Style="{StaticResource Sakura.Text.Caption}" Opacity="0.6"/>
+                    <TextBlock Grid.Row="0" Grid.Column="1"
+                               Text="{Binding AppVersion}"
+                               Style="{StaticResource Sakura.Text.Caption}"/>
+                    <Button Grid.Row="0" Grid.Column="2" Content="Copy"
+                            Command="{Binding CopyVersionToClipboardCommand}"
+                            Style="{StaticResource Sakura.Button.Secondary}"
+                            Padding="8,3" FontSize="11"/>
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Platform"
+                               Style="{StaticResource Sakura.Text.Caption}"
+                               Opacity="0.6" Margin="0,6,0,0"/>
+                    <TextBlock Grid.Row="1" Grid.Column="1"
+                               Text=".NET 8 / WPF / Windows 11"
+                               Style="{StaticResource Sakura.Text.Caption}"
+                               Margin="0,6,0,0"/>
+
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="License"
+                               Style="{StaticResource Sakura.Text.Caption}"
+                               Opacity="0.6" Margin="0,6,0,0"/>
+                    <TextBlock Grid.Row="2" Grid.Column="1" Text="MIT"
+                               Style="{StaticResource Sakura.Text.Caption}"
+                               Margin="0,6,0,0"/>
+                </Grid>
+            </Border>
+
+            <!-- status -->
+            <TextBlock Text="{Binding StatusMessage}"
+                       TextWrapping="Wrap"
+                       Visibility="{Binding StatusMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource Sakura.Text.Caption}">
+                        <Setter Property="Opacity" Value="0.7"/>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

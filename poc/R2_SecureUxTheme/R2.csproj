@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>R2_SecureUxTheme</AssemblyName>
+    <RootNamespace>Sakura.PoC.R2</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Core\Core.csproj"/>
+  </ItemGroup>
+</Project>

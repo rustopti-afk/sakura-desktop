@@ -1,0 +1,202 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://sakuradesktop.dev/schemas/profile-1.json",
+  "title": "Sakura Desktop Rice Profile",
+  "description": "Schema for Sakura Desktop rice profile JSON files (schemaVersion 1)",
+  "type": "object",
+  "required": ["profile", "compositor"],
+  "additionalProperties": true,
+
+  "properties": {
+    "$schema":        { "type": "string" },
+    "schemaVersion":  { "type": "integer", "minimum": 1 },
+
+    "profile": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "id":          { "type": "string" },
+        "name":        { "type": "string", "minLength": 1 },
+        "author":      { "type": "string" },
+        "description": { "type": "string" },
+        "version":     { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+        "createdUtc":  { "type": "string", "format": "date-time" },
+        "minOsBuild":  { "type": "integer", "minimum": 0 },
+        "tags":        { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "compositor": {
+      "type": "object",
+      "properties": {
+        "darkMode":          { "type": "boolean" },
+        "transparency":      { "type": "boolean" },
+        "colorPrevalence":   { "type": "boolean" },
+        "backdropType":      { "type": "integer", "minimum": 0, "maximum": 4,
+                               "description": "0=none 1=dwm 2=acrylic 3=mica 4=micaAlt" },
+        "cornerPref":        { "type": "integer", "minimum": 0, "maximum": 3,
+                               "description": "0=default 1=doNotRound 2=round 3=roundSmall" },
+        "accentColor":       { "type": "string", "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$" },
+        "captionColor":      { "type": "string", "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$" },
+        "textColor":         { "type": "string", "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$" },
+        "borderColor":       { "type": "string", "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$" },
+        "animationsEnabled": { "type": "boolean" },
+        "menuDelay":         { "type": "integer", "minimum": 0, "maximum": 4000 }
+      }
+    },
+
+    "shell": {
+      "type": "object",
+      "properties": {
+        "taskbarAlignment":    { "type": "integer", "minimum": 0, "maximum": 1,
+                                 "description": "0=left 1=center" },
+        "showSearch":          { "type": "boolean" },
+        "showTaskView":        { "type": "boolean" },
+        "showWidgets":         { "type": "boolean" },
+        "showChat":            { "type": "boolean" },
+        "clockFormat":         { "type": "string" },
+        "explorerPatcherJson": { "type": ["string", "null"] }
+      }
+    },
+
+    "theme": {
+      "type": "object",
+      "properties": {
+        "msstylesPath":     { "type": ["string", "null"] },
+        "themeName":        { "type": ["string", "null"] },
+        "secureUxRequired": { "type": "boolean" }
+      }
+    },
+
+    "fonts": {
+      "type": "object",
+      "properties": {
+        "systemUi":      { "type": "string" },
+        "mono":          { "type": "string" },
+        "substitutes":   { "type": "object", "additionalProperties": { "type": "string" } },
+        "macTypeProfile":{ "type": ["string", "null"] }
+      }
+    },
+
+    "icons": {
+      "type": "object",
+      "properties": {
+        "pack":         { "type": ["string", "null"] },
+        "patchTargets": { "type": "array", "items": { "type": "string" } },
+        "cursorPack":   { "type": ["string", "null"] }
+      }
+    },
+
+    "wallpaper": {
+      "type": "object",
+      "properties": {
+        "engine":     { "type": "string", "enum": ["windows", "lively"] },
+        "path":       { "type": ["string", "null"] },
+        "fit":        { "type": "integer", "minimum": 0, "maximum": 6 },
+        "perMonitor": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["monitorPath", "wallpaper"],
+            "properties": {
+              "monitorPath": { "type": "string" },
+              "wallpaper":   { "type": "string" },
+              "fit":         { "type": "integer", "minimum": 0, "maximum": 6 }
+            }
+          }
+        }
+      }
+    },
+
+    "terminal": {
+      "type": "object",
+      "properties": {
+        "applyColorScheme": { "type": "boolean" },
+        "schemeName":       { "type": "string" },
+        "applyOhMyPosh":    { "type": "boolean" },
+        "fontFace":         { "type": "string" },
+        "fontSize":         { "type": "integer", "minimum": 6, "maximum": 72 },
+        "opacity":          { "type": "integer", "minimum": 20, "maximum": 100 },
+        "useAcrylic":       { "type": "boolean" }
+      }
+    },
+
+    "boot": {
+      "type": "object",
+      "properties": {
+        "hackBgrtEnabled": { "type": "boolean" },
+        "splashPath":      { "type": ["string", "null"] }
+      }
+    },
+
+    "wm": {
+      "type": "object",
+      "properties": {
+        "engine":        { "type": "string", "enum": ["none", "komorebi", "glazewm"] },
+        "layout":        { "type": "string", "enum": ["bsp", "columns", "rows", "grid", "spirals"] },
+        "outerGap":      { "type": "integer", "minimum": 0, "maximum": 64 },
+        "innerGap":      { "type": "integer", "minimum": 0, "maximum": 64 },
+        "borderEnabled": { "type": "boolean" },
+        "borderWidth":   { "type": "integer", "minimum": 1, "maximum": 8 },
+        "borderActive":  { "type": "string", "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$" },
+        "borderInactive":{ "type": "string", "pattern": "^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$" }
+      }
+    },
+
+    "rainmeter": {
+      "type": "object",
+      "properties": {
+        "apply":  { "type": "boolean" },
+        "layout": { "type": "string" },
+        "skins":  {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["config"],
+            "properties": {
+              "config": { "type": "string" },
+              "ini":    { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+
+    "windhawk": {
+      "type": "object",
+      "properties": {
+        "apply": { "type": "boolean" },
+        "mods": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "properties": {
+              "id":      { "type": "string" },
+              "enabled": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+
+    "lively": {
+      "type": "object",
+      "properties": {
+        "apply":         { "type": "boolean" },
+        "wallpaperPath": { "type": ["string", "null"] },
+        "wallpaperType": { "type": "string", "enum": ["video", "gif", "web", "godot", "unity", "bizhawk"] },
+        "monitor":       { "type": ["integer", "null"], "minimum": 0 },
+        "layout":        { "type": "string", "enum": ["per-display", "clone", "span"] }
+      }
+    },
+
+    "dependencies": {
+      "type": "object",
+      "properties": {
+        "required": { "type": "array", "items": { "type": "string" } },
+        "optional": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

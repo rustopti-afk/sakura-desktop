@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Sakura Desktop — WiX v4 Bootstrapper Bundle
+  Installs: .NET 8 Runtime (prerequisite) + Sakura.msi (main package)
+  Run as administrator. Elevated helper and TI service registered via MSI.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal">
+
+  <Bundle Name="Sakura Desktop"
+          Version="0.2.0"
+          Manufacturer="Sakura Desktop Project"
+          UpgradeCode="A1B2C3D4-E5F6-7890-ABCD-EF1234567890"
+          IconSourceFile="..\src\App\Resources\sakura.ico"
+          AboutUrl="https://github.com/sakura-desktop"
+          HelpUrl="https://github.com/sakura-desktop/issues"
+          Copyright="Copyright © 2026 Sakura Desktop Project">
+
+    <BootstrapperApplication>
+      <bal:WixStandardBootstrapperApplication
+        LicenseFile="License.rtf"
+        LogoFile="..\src\App\Resources\splash.png"
+        Theme="hyperlinkLicense"
+        LocalizationFile=""
+        ShowVersion="yes"
+        SuppressOptionsUI="no"/>
+    </BootstrapperApplication>
+
+    <!-- Prerequisite: .NET 8 Desktop Runtime x64 -->
+    <Chain>
+      <PackageGroupRef Id="NetFx80DesktopRuntime"/>
+      <MsiPackage Id="SakuraMsi"
+                  SourceFile="..\publish\msi\Sakura.msi"
+                  DisplayInternalUI="no"
+                  Vital="yes"/>
+    </Chain>
+  </Bundle>
+
+  <!-- .NET 8 Desktop Runtime detection + download -->
+  <Fragment>
+    <PackageGroup Id="NetFx80DesktopRuntime">
+      <ExePackage Id="NetFx80DesktopRuntimeExe"
+                  DisplayName=".NET 8 Desktop Runtime (x64)"
+                  Description="Required runtime for Sakura Desktop"
+                  DownloadUrl="https://dotnetcli.azureedge.net/dotnet/WindowsDesktop/8.0.0/windowsdesktop-runtime-8.0.0-win-x64.exe"
+                  DetectCondition="DotNet8DesktopRuntimeInstalled"
+                  InstallCondition="NOT DotNet8DesktopRuntimeInstalled"
+                  InstallArguments="/install /quiet /norestart"
+                  RepairArguments="/repair /quiet /norestart"
+                  UninstallArguments="/uninstall /quiet /norestart"
+                  Vital="yes"
+                  PerMachine="yes"/>
+    </PackageGroup>
+  </Fragment>
+
+  <!-- Detect .NET 8 Desktop Runtime via registry -->
+  <Fragment>
+    <util:RegistrySearch xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util"
+                         Id="DotNet8DesktopRuntimeSearch"
+                         Root="HKLM"
+                         Key="SOFTWARE\dotnet\Setup\InstalledVersions\x64\sharedfx\Microsoft.WindowsDesktop.App"
+                         Value="8.0.0"
+                         Variable="DotNet8DesktopRuntimeInstalled"
+                         Result="exists"/>
+  </Fragment>
+
+</Wix>

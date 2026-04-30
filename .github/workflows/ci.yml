@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'sakura-desktop/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'sakura-desktop/**'
+      - '.github/workflows/ci.yml'
+
+defaults:
+  run:
+    working-directory: sakura-desktop
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore SakuraDesktop.sln
+
+      - name: Build
+        run: dotnet build SakuraDesktop.sln -c Release --no-restore
+
+      - name: Test
+        run: >
+          dotnet test SakuraDesktop.sln -c Release --no-restore
+          --logger "trx;LogFileName=test-results.trx"
+          --logger "console;verbosity=normal"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: sakura-desktop/tests/Core.Tests/TestResults/test-results.trx
+
+  publish:
+    name: Publish (App + Helper)
+    runs-on: windows-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore SakuraDesktop.sln
+
+      - name: Publish App
+        run: >
+          dotnet publish src/App/App.csproj -c Release
+          -r win-x64 --self-contained false
+          -o publish/app
+
+      - name: Publish Helper
+        run: >
+          dotnet publish src/Helper/Helper.csproj -c Release
+          -r win-x64 --self-contained false
+          -o publish/helper
+
+      - name: Publish Helper.TI
+        run: >
+          dotnet publish src/Helper.TI/Helper.TI.csproj -c Release
+          -r win-x64 --self-contained false
+          -o publish/helper-ti
+
+      - name: Upload publish artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sakura-desktop-${{ github.sha }}
+          path: |
+            sakura-desktop/publish/app/
+            sakura-desktop/publish/helper/
+            sakura-desktop/publish/helper-ti/
+          retention-days: 7

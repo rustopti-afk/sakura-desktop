@@ -1,0 +1,164 @@
+<Page x:Class="Sakura.App.Views.Pages.TerminalPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:loc="clr-namespace:Sakura.App.Localization"
+      Title="Terminal">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24,16,24,24" MaxWidth="680">
+
+            <TextBlock Text="{Binding [Terminal_Title], Source={x:Static loc:LocalizationService.Instance}}"
+                       Style="{StaticResource Sakura.Text.Title}"
+                       Margin="0,0,0,4"/>
+            <TextBlock Text="{Binding [Terminal_Subtitle], Source={x:Static loc:LocalizationService.Instance}}"
+                       Style="{StaticResource Sakura.Text.Caption}"
+                       Opacity="0.65"
+                       Margin="0,0,0,24"/>
+
+            <!-- ── Color scheme ──────────────────────────────────────────── -->
+            <Border Style="{StaticResource Sakura.Card}" Margin="0,0,0,12">
+                <StackPanel>
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="{Binding [Terminal_Section_ColorScheme], Source={x:Static loc:LocalizationService.Instance}}"
+                                       Style="{StaticResource Sakura.Text.Body}"
+                                       FontWeight="SemiBold"/>
+                            <TextBlock Text="Writes Sakura Yoru theme into Windows Terminal settings.json"
+                                       Style="{StaticResource Sakura.Text.Caption}"
+                                       Opacity="0.65"/>
+                        </StackPanel>
+                        <ToggleButton Grid.Column="1"
+                                      IsChecked="{Binding ApplyColorScheme}"
+                                      Style="{StaticResource Sakura.ToggleButton}"
+                                      VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <Grid IsEnabled="{Binding ApplyColorScheme}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="160"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Scheme name"
+                                   Style="{StaticResource Sakura.Text.Caption}"
+                                   Opacity="0.7" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="0" Grid.Column="1"
+                                 Text="{Binding SchemeName, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource Sakura.TextBox}"
+                                 Margin="0,0,0,8"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Font face"
+                                   Style="{StaticResource Sakura.Text.Caption}"
+                                   Opacity="0.7" VerticalAlignment="Center"/>
+                        <TextBox Grid.Row="1" Grid.Column="1"
+                                 Text="{Binding FontFace, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource Sakura.TextBox}"
+                                 Margin="0,0,0,8"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Font size"
+                                   Style="{StaticResource Sakura.Text.Caption}"
+                                   Opacity="0.7" VerticalAlignment="Center"/>
+                        <ComboBox Grid.Row="2" Grid.Column="1"
+                                  ItemsSource="{Binding FontSizeOptions}"
+                                  SelectedItem="{Binding FontSize}"
+                                  Style="{StaticResource Sakura.ComboBox}"
+                                  Margin="0,0,0,8"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Opacity"
+                                   Style="{StaticResource Sakura.Text.Caption}"
+                                   Opacity="0.7" VerticalAlignment="Center"/>
+                        <ComboBox Grid.Row="3" Grid.Column="1"
+                                  ItemsSource="{Binding OpacityOptions}"
+                                  SelectedItem="{Binding Opacity}"
+                                  Style="{StaticResource Sakura.ComboBox}"
+                                  Margin="0,0,0,8"/>
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Use Acrylic"
+                                   Style="{StaticResource Sakura.Text.Caption}"
+                                   Opacity="0.7" VerticalAlignment="Center"/>
+                        <ToggleButton Grid.Row="4" Grid.Column="1"
+                                      IsChecked="{Binding UseAcrylic}"
+                                      Style="{StaticResource Sakura.ToggleButton}"
+                                      HorizontalAlignment="Left"/>
+                    </Grid>
+
+                    <Button Content="Apply Scheme Only"
+                            Command="{Binding ApplySchemeOnlyCommand}"
+                            IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
+                            Style="{StaticResource Sakura.Button.Secondary}"
+                            HorizontalAlignment="Left"
+                            Padding="14,6" Margin="0,16,0,0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ── Oh My Posh ────────────────────────────────────────────── -->
+            <Border Style="{StaticResource Sakura.Card}" Margin="0,0,0,12">
+                <StackPanel>
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Oh My Posh"
+                                       Style="{StaticResource Sakura.Text.Body}"
+                                       FontWeight="SemiBold"/>
+                            <TextBlock Text="Deploys Sakura prompt theme and sets it in PowerShell profile"
+                                       Style="{StaticResource Sakura.Text.Caption}"
+                                       Opacity="0.65"/>
+                        </StackPanel>
+                        <ToggleButton Grid.Column="1"
+                                      IsChecked="{Binding ApplyOhMyPosh}"
+                                      Style="{StaticResource Sakura.ToggleButton}"
+                                      VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <Button Content="Deploy Theme Only"
+                            Command="{Binding DeployOhMyPoshCommand}"
+                            IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
+                            Style="{StaticResource Sakura.Button.Secondary}"
+                            HorizontalAlignment="Left"
+                            Padding="14,6"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ── Apply all ─────────────────────────────────────────────── -->
+            <Button Content="Apply All Terminal Settings"
+                    Command="{Binding ApplyCommand}"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
+                    Style="{StaticResource Sakura.Button.Primary}"
+                    HorizontalAlignment="Left"
+                    Padding="20,8" Margin="0,8,0,12"/>
+
+            <ProgressBar Minimum="0" Maximum="100" IsIndeterminate="True"
+                         Height="4" Margin="0,0,0,8"
+                         Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+            <TextBlock Text="{Binding StatusMessage}"
+                       TextWrapping="Wrap"
+                       Visibility="{Binding StatusMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource Sakura.Text.Caption}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding StatusSuccess}" Value="True">
+                                <Setter Property="Foreground" Value="{StaticResource Sakura.Brush.Accent}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

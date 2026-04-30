@@ -1,0 +1,271 @@
+<Page x:Class="Sakura.App.Views.Pages.BackupPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:loc="clr-namespace:Sakura.App.Localization"
+      Title="Backups">
+
+    <Page.InputBindings>
+        <KeyBinding Key="F5" Command="{Binding RefreshCommand}"/>
+    </Page.InputBindings>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="260" MinWidth="180"/>
+            <ColumnDefinition Width="4"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ── Left: backup list ──────────────────────────────────────────── -->
+        <DockPanel Grid.Column="0">
+
+            <StackPanel DockPanel.Dock="Top" Margin="12,12,12,8">
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                    <Button Content="{Binding [Btn_Refresh], Source={x:Static loc:LocalizationService.Instance}}"
+                            Command="{Binding RefreshCommand}"
+                            Style="{StaticResource Sakura.Button.Secondary}"
+                            Padding="12,5"/>
+                </StackPanel>
+                <Button Command="{Binding UndoLastApplyCommand}"
+                        IsEnabled="{Binding HasLatestBackup}"
+                        HorizontalAlignment="Stretch"
+                        Padding="12,7">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource Sakura.Button.Secondary}">
+                            <Setter Property="Background" Value="{StaticResource Sakura.Brush.Accent}"/>
+                            <Setter Property="Opacity" Value="0.9"/>
+                        </Style>
+                    </Button.Style>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#x21A9; " FontSize="13"/>
+                        <TextBlock Text="{Binding [Backup_Btn_UndoLast], Source={x:Static loc:LocalizationService.Instance}}"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+
+            <ListBox ItemsSource="{Binding Backups}"
+                     SelectedItem="{Binding SelectedBackup}"
+                     Background="Transparent"
+                     BorderThickness="0"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                        <Setter Property="Padding" Value="12,8"/>
+                        <Setter Property="Margin"  Value="4,2"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <Border x:Name="Bd"
+                                            Background="{StaticResource Sakura.Brush.Surface}"
+                                            CornerRadius="8"
+                                            Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="Bd" Property="Background"
+                                                    Value="{StaticResource Sakura.Brush.Accent}"/>
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="Bd" Property="Opacity" Value="0.85"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel>
+                            <TextBlock Text="{Binding Description}"
+                                       Style="{StaticResource Sakura.Text.Body}"
+                                       FontWeight="SemiBold"
+                                       TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding CreatedUtc, StringFormat='{}{0:yyyy-MM-dd  HH:mm}'}"
+                                       Style="{StaticResource Sakura.Text.Caption}"
+                                       Opacity="0.65"
+                                       Margin="0,2,0,0"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </DockPanel>
+
+        <!-- splitter -->
+        <GridSplitter Grid.Column="1" Width="4" HorizontalAlignment="Stretch"
+                      Background="{StaticResource Sakura.Brush.Surface}"/>
+
+        <!-- ── Right: details + actions ──────────────────────────────────── -->
+        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="20,16,20,20">
+
+                <!-- empty state -->
+                <TextBlock Text="{Binding [Backup_NoBackups], Source={x:Static loc:LocalizationService.Instance}}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource Sakura.Text.Body}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                            <Setter Property="Margin" Value="0,60,0,0"/>
+                            <Setter Property="Opacity" Value="0.5"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedBackup}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <!-- details panel -->
+                <StackPanel>
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SelectedBackup}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <!-- title -->
+                    <TextBlock Text="{Binding SelectedBackup.Description}"
+                               Style="{StaticResource Sakura.Text.Title}"
+                               Margin="0,0,0,4"/>
+                    <TextBlock Text="{Binding SelectedBackup.CreatedUtc, StringFormat='{}{0:yyyy-MM-dd  HH:mm:ss} UTC'}"
+                               Style="{StaticResource Sakura.Text.Caption}"
+                               Opacity="0.65"
+                               Margin="0,0,0,20"/>
+
+                    <!-- info card -->
+                    <Border Background="{StaticResource Sakura.Brush.Surface}"
+                            CornerRadius="8" Padding="16" Margin="0,0,0,20">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="140"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="OS Build"
+                                       Style="{StaticResource Sakura.Text.Caption}" Opacity="0.6"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1"
+                                       Text="{Binding SelectedBackup.OsBuild}"
+                                       Style="{StaticResource Sakura.Text.Caption}"/>
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Artifacts"
+                                       Style="{StaticResource Sakura.Text.Caption}"
+                                       Opacity="0.6" Margin="0,6,0,0"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1"
+                                       Text="{Binding SelectedBackup.ArtifactSummary}"
+                                       Style="{StaticResource Sakura.Text.Caption}"
+                                       Margin="0,6,0,0"/>
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="ID"
+                                       Style="{StaticResource Sakura.Text.Caption}"
+                                       Opacity="0.6" Margin="0,6,0,0"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1"
+                                       Text="{Binding SelectedBackup.Id}"
+                                       Style="{StaticResource Sakura.Text.Caption}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Margin="0,6,0,0"/>
+
+                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Location"
+                                       Style="{StaticResource Sakura.Text.Caption}"
+                                       Opacity="0.6" Margin="0,6,0,0"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1"
+                                       Text="{Binding SelectedBackup.Directory}"
+                                       Style="{StaticResource Sakura.Text.Caption}"
+                                       TextTrimming="CharacterEllipsis"
+                                       Margin="0,6,0,0"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- artifact list -->
+                    <TextBlock Text="Artifacts"
+                               Style="{StaticResource Sakura.Text.Body}"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,8"/>
+
+                    <ItemsControl ItemsSource="{Binding SelectedBackup.Manifest.Artifacts}"
+                                  Margin="0,0,0,20">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{StaticResource Sakura.Brush.Surface}"
+                                        CornerRadius="6" Padding="12,8" Margin="0,0,0,4">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="70"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border Grid.Column="0"
+                                                Background="{StaticResource Sakura.Brush.Accent}"
+                                                CornerRadius="4" Padding="6,2"
+                                                HorizontalAlignment="Left">
+                                            <TextBlock Text="{Binding Kind}"
+                                                       Style="{StaticResource Sakura.Text.Caption}"
+                                                       FontSize="10"/>
+                                        </Border>
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding Path}"
+                                                   Style="{StaticResource Sakura.Text.Caption}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   VerticalAlignment="Center"
+                                                   Margin="10,0,0,0"
+                                                   Opacity="0.8"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <!-- actions -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <Button Content="{Binding [Backup_Btn_Restore], Source={x:Static loc:LocalizationService.Instance}}"
+                                Command="{Binding RestoreSelectedCommand}"
+                                IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
+                                Style="{StaticResource Sakura.Button.Primary}"
+                                Padding="18,8" Margin="0,0,10,0"/>
+                        <Button Content="{Binding [Btn_OpenFolder], Source={x:Static loc:LocalizationService.Instance}}"
+                                Command="{Binding OpenFolderCommand}"
+                                Style="{StaticResource Sakura.Button.Secondary}"
+                                Padding="14,8" Margin="0,0,10,0"/>
+                        <Button Content="{Binding [Btn_Delete], Source={x:Static loc:LocalizationService.Instance}}"
+                                Command="{Binding DeleteSelectedCommand}"
+                                Style="{StaticResource Sakura.Button.Secondary}"
+                                Padding="14,8"/>
+                    </StackPanel>
+
+                    <!-- busy indicator -->
+                    <ProgressBar Minimum="0" Maximum="100" IsIndeterminate="True"
+                                 Height="4" Margin="0,0,0,8"
+                                 Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                    <!-- status -->
+                    <TextBlock Text="{Binding StatusMessage}"
+                               TextWrapping="Wrap"
+                               Visibility="{Binding StatusMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource Sakura.Text.Caption}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding StatusSuccess}" Value="True">
+                                        <Setter Property="Foreground"
+                                                Value="{StaticResource Sakura.Brush.Accent}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

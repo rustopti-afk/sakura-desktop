@@ -1,0 +1,60 @@
+<UserControl x:Class="Sakura.App.Views.Controls.NavigationControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Width="{StaticResource Sakura.Size.Sidebar}"
+             Background="{StaticResource Sakura.Brush.BgBase}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="{StaticResource Sakura.Size.TitleBar}"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Brand -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="20,0,0,0" VerticalAlignment="Center">
+            <TextBlock Text="🌸" FontSize="16" VerticalAlignment="Center"/>
+            <TextBlock Margin="10,0,0,0" VerticalAlignment="Center"
+                       FontFamily="{StaticResource Sakura.Font.Ui}"
+                       FontSize="12" FontWeight="SemiBold"
+                       Foreground="{StaticResource Sakura.Brush.FgPrimary}"
+                       Text="SAKURA"/>
+            <TextBlock Margin="6,0,0,0" VerticalAlignment="Center"
+                       FontFamily="{StaticResource Sakura.Font.Ui}"
+                       FontSize="12" FontWeight="Light"
+                       Foreground="{StaticResource Sakura.Brush.AccentGold}"
+                       Text="DESKTOP"/>
+        </StackPanel>
+
+        <!-- Divider -->
+        <Border Grid.Row="1" Height="1" Margin="20,4"
+                Background="{StaticResource Sakura.Brush.StrokeSubtle}"/>
+
+        <!-- Nav list -->
+        <ListBox Grid.Row="2"
+                 x:Name="NavList"
+                 Background="Transparent"
+                 BorderThickness="0"
+                 ItemContainerStyle="{StaticResource Sakura.NavItem}"
+                 ItemsSource="{Binding Items, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                 SelectedItem="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}"
+                 ScrollViewer.HorizontalScrollBarVisibility="Disabled"/>
+
+        <!-- Footer -->
+        <StackPanel Grid.Row="3" Margin="20,0,20,20">
+            <Border Height="1" Margin="0,0,0,12"
+                    Background="{StaticResource Sakura.Brush.StrokeSubtle}"/>
+            <StackPanel Orientation="Horizontal">
+                <Ellipse Width="7" Height="7" VerticalAlignment="Center"
+                         Fill="{StaticResource Sakura.Brush.StateOk}"/>
+                <TextBlock Margin="9,0,0,0" Style="{StaticResource Sakura.Text.Caption}"
+                           Foreground="{StaticResource Sakura.Brush.FgSecondary}"
+                           Text="HELPER ONLINE"/>
+            </StackPanel>
+            <TextBlock Margin="0,8,0,0" Style="{StaticResource Sakura.Text.Mono}"
+                       Foreground="{StaticResource Sakura.Brush.FgMuted}"
+                       Text="v0.1.0  ·  build 22621"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

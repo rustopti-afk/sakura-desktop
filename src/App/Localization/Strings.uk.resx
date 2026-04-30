@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string"/>
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required"/>
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter</value></resheader>
+
+  <!-- Nav -->
+  <data name="Nav_Personalize"><value>Персоналізація</value></data>
+  <data name="Nav_Profiles"><value>Профілі</value></data>
+  <data name="Nav_NewProfile"><value>Новий профіль</value></data>
+  <data name="Nav_Terminal"><value>Термінал</value></data>
+  <data name="Nav_Integrations"><value>Інтеграції</value></data>
+  <data name="Nav_Backups"><value>Резервні копії</value></data>
+  <data name="Nav_Settings"><value>Налаштування</value></data>
+
+  <!-- Common -->
+  <data name="Btn_Save"><value>Зберегти</value></data>
+  <data name="Btn_Cancel"><value>Скасувати</value></data>
+  <data name="Btn_Refresh"><value>Оновити</value></data>
+  <data name="Btn_Apply"><value>Застосувати</value></data>
+  <data name="Btn_Export"><value>Експорт…</value></data>
+  <data name="Btn_Delete"><value>Видалити</value></data>
+  <data name="Btn_OpenFolder"><value>Відкрити папку</value></data>
+  <data name="Btn_Defaults"><value>За замовчуванням</value></data>
+  <data name="Btn_Install"><value>Встановити</value></data>
+  <data name="Btn_RestoreDefaults"><value>Відновити стандартні</value></data>
+
+  <!-- Personalize page -->
+  <data name="Personalize_Title"><value>Персоналізація</value></data>
+  <data name="Personalize_Subtitle"><value>Налаштування композитора, шрифтів та оболонки</value></data>
+  <data name="Personalize_Section_DWM"><value>DWM / Композитор</value></data>
+  <data name="Personalize_Section_Fonts"><value>Шрифти</value></data>
+  <data name="Personalize_Section_Shell"><value>Оболонка</value></data>
+  <data name="Personalize_DarkMode"><value>Темна тема</value></data>
+  <data name="Personalize_Transparency"><value>Прозорість</value></data>
+  <data name="Personalize_Backdrop"><value>Тло вікна</value></data>
+  <data name="Personalize_Corners"><value>Кути</value></data>
+  <data name="Personalize_AccentColor"><value>Акцентний колір</value></data>
+
+  <!-- Profiles page -->
+  <data name="Profiles_Title"><value>Профілі</value></data>
+  <data name="Profiles_Subtitle"><value>Перегляд, завантаження та застосування профілів</value></data>
+  <data name="Profiles_NoProfiles"><value>Профілі не знайдено. Натисніть «Завантажити» або «Сканувати».</value></data>
+  <data name="Profiles_Btn_LoadFile"><value>Завантажити файл…</value></data>
+  <data name="Profiles_Btn_ScanFolder"><value>Сканувати папку…</value></data>
+  <data name="Profiles_Btn_ApplySelected"><value>Застосувати обраний</value></data>
+
+  <!-- Profile Editor page -->
+  <data name="Editor_Title"><value>Редактор профілю</value></data>
+  <data name="Editor_Subtitle"><value>Створіть або відредагуйте профіль і збережіть у JSON</value></data>
+  <data name="Editor_LoadSakuraYoru"><value>Завантажити Sakura Yoru</value></data>
+  <data name="Editor_Section_Info"><value>Інформація про профіль</value></data>
+  <data name="Editor_Section_Compositor"><value>Композитор / DWM</value></data>
+  <data name="Editor_Section_Shell"><value>Оболонка / Панель задач</value></data>
+  <data name="Editor_Section_Terminal"><value>Термінал</value></data>
+  <data name="Editor_Section_WM"><value>Менеджер вікон</value></data>
+  <data name="Editor_Section_Integrations"><value>Інтеграції</value></data>
+  <data name="Editor_Field_Name"><value>Назва</value></data>
+  <data name="Editor_Field_Author"><value>Автор</value></data>
+  <data name="Editor_Field_Description"><value>Опис</value></data>
+  <data name="Editor_Field_Tags"><value>Теги</value></data>
+  <data name="Editor_Field_DarkMode"><value>Темна тема</value></data>
+  <data name="Editor_Field_Transparency"><value>Прозорість</value></data>
+  <data name="Editor_Field_ColorPrevalence"><value>Колір акценту</value></data>
+  <data name="Editor_Field_Animations"><value>Анімації</value></data>
+  <data name="Editor_Field_Backdrop"><value>Тло</value></data>
+  <data name="Editor_Field_Corners"><value>Кути</value></data>
+  <data name="Editor_Field_AccentColor"><value>Акцентний колір</value></data>
+  <data name="Editor_Field_BorderColor"><value>Колір рамки</value></data>
+
+  <!-- Backup page -->
+  <data name="Backup_Title"><value>Резервні копії</value></data>
+  <data name="Backup_Subtitle"><value>Відновлення або видалення збережених знімків реєстру</value></data>
+  <data name="Backup_NoBackups"><value>Резервних копій не знайдено</value></data>
+  <data name="Backup_Btn_UndoLast"><value>Скасувати останнє застосування</value></data>
+  <data name="Backup_Btn_Restore"><value>Відновити обрану</value></data>
+  <data name="Backup_RestoreHint"><value>Перезапустіть Windows для повного застосування змін реєстру</value></data>
+
+  <!-- Integrations page -->
+  <data name="Integrations_Title"><value>Інтеграції</value></data>
+  <data name="Integrations_Subtitle"><value>Статус сторонніх інструментів, які використовують профілі</value></data>
+  <data name="Integrations_Installed"><value>Встановлено</value></data>
+  <data name="Integrations_NotInstalled"><value>Не встановлено</value></data>
+
+  <!-- Terminal page -->
+  <data name="Terminal_Title"><value>Термінал</value></data>
+  <data name="Terminal_Subtitle"><value>Налаштування колірної схеми та Oh My Posh</value></data>
+  <data name="Terminal_Section_ColorScheme"><value>Колірна схема</value></data>
+  <data name="Terminal_Section_OhMyPosh"><value>Oh My Posh</value></data>
+  <data name="Terminal_Btn_Apply"><value>Застосувати до терміналу</value></data>
+  <data name="Terminal_Btn_DeployOmp"><value>Розгорнути тему OMP</value></data>
+
+  <!-- Settings page -->
+  <data name="Settings_Title"><value>Налаштування</value></data>
+  <data name="Settings_Subtitle"><value>Шляхи до файлів та інформація про застосунок</value></data>
+  <data name="Settings_Section_Paths"><value>Шляхи</value></data>
+  <data name="Settings_Section_About"><value>Про програму</value></data>
+  <data name="Settings_BackupRoot"><value>Папка резервних копій</value></data>
+  <data name="Settings_ProfilesDir"><value>Папка профілів</value></data>
+  <data name="Settings_Language"><value>Мова</value></data>
+
+  <!-- Update banner -->
+  <data name="Update_Available"><value> доступна</value></data>
+  <data name="Update_ViewRelease"><value>Переглянути реліз</value></data>
+</root>

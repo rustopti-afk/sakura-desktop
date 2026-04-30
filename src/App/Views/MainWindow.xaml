@@ -1,0 +1,309 @@
+<Window x:Class="Sakura.App.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        xmlns:ctl="clr-namespace:Sakura.App.Views.Controls"
+        xmlns:svc="clr-namespace:Sakura.App.Services"
+        Title="Sakura Desktop"
+        Width="1280" Height="800" MinWidth="1024" MinHeight="640"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource Sakura.Brush.BgBase}"
+        Foreground="{StaticResource Sakura.Brush.FgPrimary}"
+        FontFamily="{StaticResource Sakura.Font.Ui}"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="ClearType"
+        UseLayoutRounding="True" SnapsToDevicePixels="True"
+        WindowStyle="None" AllowsTransparency="False" ResizeMode="CanResize">
+
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="48" ResizeBorderThickness="8"
+                            CornerRadius="0" GlassFrameThickness="0"
+                            UseAeroCaptionButtons="False"/>
+    </shell:WindowChrome.WindowChrome>
+
+    <Window.Resources>
+        <x:Array x:Key="NavItems" Type="{x:Type ctl:NavItem}">
+            <ctl:NavItem Key="personalize" Label="Personalize"    IconGlyph="&#xE790;"/>
+            <ctl:NavItem Key="wm"          Label="Window Manager" IconGlyph="&#xE737;"/>
+            <ctl:NavItem Key="theme"       Label="Theme Engine"   IconGlyph="&#xE771;"/>
+            <ctl:NavItem Key="fonts"       Label="Typography"     IconGlyph="&#xE8D2;"/>
+            <ctl:NavItem Key="icons"       Label="Icons"          IconGlyph="&#xE8B7;"/>
+            <ctl:NavItem Key="wallpaper"   Label="Wallpaper"      IconGlyph="&#xEB9F;"/>
+            <ctl:NavItem Key="widgets"     Label="Widgets"        IconGlyph="&#xE950;"/>
+            <ctl:NavItem Key="terminal"    Label="Terminal"       IconGlyph="&#xE756;"/>
+            <ctl:NavItem Key="apps"        Label="App Overrides"  IconGlyph="&#xECAA;"/>
+            <ctl:NavItem Key="boot"        Label="Boot"           IconGlyph="&#xE7E8;"/>
+            <ctl:NavItem Key="profiles"    Label="Profiles"       IconGlyph="&#xE74E;"/>
+            <ctl:NavItem Key="backups"     Label="Backups"        IconGlyph="&#xE81C;"/>
+            <ctl:NavItem Key="settings"    Label="Settings"       IconGlyph="&#xE713;"/>
+        </x:Array>
+
+        <Storyboard x:Key="PreviewExpand">
+            <DoubleAnimation Storyboard.TargetName="PreviewCol"
+                             Storyboard.TargetProperty="(ColumnDefinition.MaxWidth)"
+                             To="300" Duration="{StaticResource Sakura.Duration.Med}">
+                <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+        <Storyboard x:Key="PreviewCollapse">
+            <DoubleAnimation Storyboard.TargetName="PreviewCol"
+                             Storyboard.TargetProperty="(ColumnDefinition.MaxWidth)"
+                             To="0" Duration="{StaticResource Sakura.Duration.Med}">
+                <DoubleAnimation.EasingFunction><CubicEase EasingMode="EaseOut"/></DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+    </Window.Resources>
+
+    <Border BorderBrush="{StaticResource Sakura.Brush.StrokeStrong}" BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="{StaticResource Sakura.Size.StatusBar}"/>
+            </Grid.RowDefinitions>
+
+            <!-- ── Main 3-pane area ───────────────────────────────────────── -->
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="{StaticResource Sakura.Size.Sidebar}"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition x:Name="PreviewCol" Width="Auto" MaxWidth="300"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Sidebar -->
+                <ctl:NavigationControl Grid.Column="0"
+                                       Items="{StaticResource NavItems}"
+                                       SelectedItem="{Binding SelectedNav, Mode=TwoWay}"/>
+
+                <Border Grid.Column="0" Width="1" HorizontalAlignment="Right"
+                        Background="{StaticResource Sakura.Brush.StrokeSubtle}"/>
+
+                <!-- Content column -->
+                <Grid Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="{StaticResource Sakura.Size.TitleBar}"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Title bar / drag region -->
+                    <Grid Grid.Row="0" Background="Transparent">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Orientation="Horizontal"
+                                    Margin="24,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource Sakura.Text.Title}"
+                                       Text="{Binding SelectedNav.Label, FallbackValue=Personalize}"/>
+                            <Border Margin="12,0,0,0" Padding="8,2"
+                                    Background="{StaticResource Sakura.Brush.BgRaised}"
+                                    CornerRadius="999"
+                                    BorderBrush="{StaticResource Sakura.Brush.StrokeSubtle}"
+                                    BorderThickness="1">
+                                <TextBlock Style="{StaticResource Sakura.Text.Caption}"
+                                           Foreground="{StaticResource Sakura.Brush.AccentGold}"
+                                           Text="{Binding ActiveProfileName, FallbackValue=Default}"/>
+                            </Border>
+                        </StackPanel>
+
+                        <!-- Caption buttons (hit-test visible in chrome) -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center"
+                                    shell:WindowChrome.IsHitTestVisibleInChrome="True">
+
+                            <!-- Preview toggle -->
+                            <ToggleButton x:Name="PreviewToggle" Width="44" Height="32"
+                                          IsChecked="True" Cursor="Hand"
+                                          ToolTip="Toggle live preview">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border x:Name="PBd" Background="Transparent">
+                                            <TextBlock x:Name="PGlyph"
+                                                       FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                                                       FontSize="12" Text="&#xE89F;"
+                                                       Foreground="{StaticResource Sakura.Brush.FgSecondary}"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="PBd" Property="Background" Value="{StaticResource Sakura.Brush.BgOverlay}"/>
+                                                <Setter TargetName="PGlyph" Property="Foreground" Value="{StaticResource Sakura.Brush.AccentPink}"/>
+                                            </Trigger>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Setter TargetName="PGlyph" Property="Foreground" Value="{StaticResource Sakura.Brush.AccentPink}"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                                <ToggleButton.Triggers>
+                                    <EventTrigger RoutedEvent="ToggleButton.Checked">
+                                        <BeginStoryboard Storyboard="{StaticResource PreviewExpand}"/>
+                                    </EventTrigger>
+                                    <EventTrigger RoutedEvent="ToggleButton.Unchecked">
+                                        <BeginStoryboard Storyboard="{StaticResource PreviewCollapse}"/>
+                                    </EventTrigger>
+                                </ToggleButton.Triggers>
+                            </ToggleButton>
+
+                            <Button x:Name="MinBtn" Style="{StaticResource Sakura.CaptionButton}"
+                                    Click="OnMinimize" Content="&#xE921;" ToolTip="Minimize"/>
+                            <Button x:Name="MaxBtn" Style="{StaticResource Sakura.CaptionButton}"
+                                    Click="OnMaximizeRestore" Content="&#xE922;" ToolTip="Maximize"/>
+                            <Button x:Name="CloseBtn" Style="{StaticResource Sakura.CaptionButton.Close}"
+                                    Click="OnClose" Content="&#xE8BB;" ToolTip="Close"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Update banner + page content -->
+                    <Grid Grid.Row="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Update available banner -->
+                        <Border Grid.Row="0"
+                                Background="{StaticResource Sakura.Brush.Accent}"
+                                Padding="16,8"
+                                Visibility="{Binding UpdateAvailable, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0"
+                                           VerticalAlignment="Center">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource Sakura.Text.Caption}">
+                                            <Setter Property="Text" Value=""/>
+                                        </Style>
+                                    </TextBlock.Style>
+                                    <Run Text="&#x2B06; Sakura Desktop "/>
+                                    <Run Text="{Binding UpdateVersion}"/>
+                                    <Run Text=" is available"/>
+                                </TextBlock>
+                                <Button Grid.Column="1"
+                                        Content="View Release"
+                                        Command="{Binding OpenReleasePageCommand}"
+                                        Style="{StaticResource Sakura.Button.Secondary}"
+                                        Padding="10,3" Margin="0,0,6,0"/>
+                                <Button Grid.Column="2"
+                                        Content="✕"
+                                        Command="{Binding DismissUpdateCommand}"
+                                        Style="{StaticResource Sakura.Button.Secondary}"
+                                        Padding="8,3" FontSize="10"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Page content — each page owns its own scroll -->
+                        <ContentControl Grid.Row="1" Content="{Binding CurrentPage}"/>
+                    </Grid>
+                </Grid>
+
+                <!-- Preview panel divider -->
+                <Border Grid.Column="1" Width="1" HorizontalAlignment="Right"
+                        Background="{StaticResource Sakura.Brush.StrokeSubtle}"
+                        Visibility="{Binding IsChecked, ElementName=PreviewToggle,
+                                             Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+                <!-- Preview panel -->
+                <Grid Grid.Column="2" Background="{StaticResource Sakura.Brush.BgBase}"
+                      ClipToBounds="True">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="{StaticResource Sakura.Size.TitleBar}"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Margin="20,0,0,0" VerticalAlignment="Center"
+                               Style="{StaticResource Sakura.Text.Caption}"
+                               Foreground="{StaticResource Sakura.Brush.AccentGold}"
+                               Text="LIVE PREVIEW"/>
+
+                    <ContentControl Grid.Row="1" Margin="16"
+                                    Content="{Binding PreviewView}"/>
+                </Grid>
+            </Grid>
+
+            <!-- ── Status bar ─────────────────────────────────────────────── -->
+            <Border Grid.Row="1"
+                    Background="{StaticResource Sakura.Brush.BgSunken}"
+                    BorderThickness="0,1,0,0"
+                    BorderBrush="{StaticResource Sakura.Brush.StrokeSubtle}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal"
+                                Margin="20,0,0,0" VerticalAlignment="Center">
+                        <Ellipse Width="6" Height="6"
+                                 Fill="{StaticResource Sakura.Brush.StateOk}"
+                                 VerticalAlignment="Center"/>
+                        <TextBlock Margin="10,0,0,0" Style="{StaticResource Sakura.Text.Mono}"
+                                   Foreground="{StaticResource Sakura.Brush.FgSecondary}"
+                                   Text="{Binding StatusText, FallbackValue=Ready}"/>
+                    </StackPanel>
+
+                    <TextBlock Grid.Column="1" Margin="0,0,20,0"
+                               VerticalAlignment="Center"
+                               Style="{StaticResource Sakura.Text.Mono}"
+                               Foreground="{StaticResource Sakura.Brush.FgMuted}"
+                               Text="{Binding LastApplyHash, StringFormat='sha256:{0}', FallbackValue='sha256:—'}"/>
+                </Grid>
+            </Border>
+
+            <!-- ── Toast overlay ─────────────────────────────────────────────── -->
+            <Border x:Name="ToastBorder"
+                    Grid.Row="0" Grid.RowSpan="2"
+                    HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                    Margin="0,0,0,40"
+                    Padding="16,10" CornerRadius="8"
+                    MaxWidth="420" MinWidth="200"
+                    Panel.ZIndex="100"
+                    IsHitTestVisible="True"
+                    Visibility="{Binding IsVisible,
+                        Source={x:Static svc:ToastService.Instance},
+                        Converter={StaticResource BoolToVisibilityConverter}}">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="{StaticResource Sakura.Brush.BgRaised}"/>
+                        <Setter Property="BorderBrush" Value="{StaticResource Sakura.Brush.Accent}"/>
+                        <Setter Property="BorderThickness" Value="1"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Kind,
+                                Source={x:Static svc:ToastService.Instance}}"
+                                Value="Success">
+                                <Setter Property="BorderBrush" Value="{StaticResource Sakura.Brush.StateOk}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Kind,
+                                Source={x:Static svc:ToastService.Instance}}"
+                                Value="Error">
+                                <Setter Property="BorderBrush" Value="{StaticResource Sakura.Brush.StateErr}"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Kind,
+                                Source={x:Static svc:ToastService.Instance}}"
+                                Value="Warning">
+                                <Setter Property="BorderBrush" Value="{StaticResource Sakura.Brush.StateWarn}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Text="{Binding Message, Source={x:Static svc:ToastService.Instance}}"
+                               Style="{StaticResource Sakura.Text.Caption}"
+                               TextWrapping="Wrap" VerticalAlignment="Center"/>
+                    <Button Grid.Column="1" Content="✕"
+                            FontSize="10" Padding="6,2" Margin="10,0,0,0"
+                            Style="{StaticResource Sakura.Button.Secondary}"
+                            Click="OnDismissToast"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

@@ -1,0 +1,99 @@
+{
+  "profile": {
+    "id": "01HXSAKURAYORU000000000000",
+    "name": "Sakura Yoru",
+    "author": "Sakura Desktop Project",
+    "description": "Night-bloom sakura — deep navy base with pink accent, Mica backdrop, rounded corners. The canonical Sakura Desktop rice.",
+    "version": "1.0.0",
+    "createdUtc": "2026-04-30T00:00:00Z",
+    "minOsBuild": 22621,
+    "tags": ["dark", "anime", "sakura", "minimal"]
+  },
+  "compositor": {
+    "darkMode": true,
+    "transparency": true,
+    "colorPrevalence": true,
+    "backdropType": 3,
+    "cornerPref": 1,
+    "accentColor": "#E8A0BF",
+    "captionColor": "#0D1418",
+    "textColor": "#EDE6EE",
+    "borderColor": "#E8A0BF",
+    "animationsEnabled": true,
+    "menuDelay": 0
+  },
+  "shell": {
+    "taskbarAlignment": 1,
+    "showSearch": false,
+    "showTaskView": false,
+    "showWidgets": false,
+    "showChat": false
+  },
+  "theme": {
+    "msstylesPath": null,
+    "themeName": null
+  },
+  "fonts": {
+    "substitutes": {
+      "Segoe UI": "Noto Sans JP",
+      "Microsoft YaHei": "Noto Sans JP",
+      "MS Shell Dlg 2": "Noto Sans JP"
+    }
+  },
+  "icons": {
+    "packName": null,
+    "packPath": null
+  },
+  "wallpaper": {
+    "path": null,
+    "fit": 0,
+    "perMonitor": []
+  },
+  "terminal": {
+    "applyColorScheme": true,
+    "schemeName": "Sakura Yoru",
+    "fontFace": "JetBrainsMono Nerd Font",
+    "fontSize": 12,
+    "opacity": 88,
+    "useAcrylic": true,
+    "applyOhMyPosh": true
+  },
+  "boot": {
+    "applyBootLogo": false,
+    "logoPath": null
+  },
+  "wm": {
+    "engine": "none",
+    "layout": "bsp",
+    "outerGap": 12,
+    "innerGap": 8,
+    "borderEnabled": true,
+    "borderWidth": 2,
+    "borderActive": "#E8A0BF",
+    "borderInactive": "#3E3E5E"
+  },
+  "rainmeter": {
+    "apply": false,
+    "layout": "Sakura Yoru",
+    "skins": []
+  },
+  "windhawk": {
+    "apply": false,
+    "mods": [
+      { "id": "taskbar-clock-customization", "enabled": true },
+      { "id": "taskbar-start-button-customization", "enabled": true },
+      { "id": "windows-11-taskbar-styler", "enabled": true }
+    ]
+  },
+  "lively": {
+    "apply": false,
+    "wallpaperPath": null,
+    "wallpaperType": "video",
+    "monitor": null,
+    "layout": "per-display"
+  },
+  "dependencies": {
+    "required": ["Microsoft.WindowsTerminal", "JanDeDobbeleer.OhMyPosh"],
+    "optional": ["Rainmeter.Rainmeter", "Ramensoftware.Windhawk", "rocksdanister.LivelyWallpaper"]
+  }
+}

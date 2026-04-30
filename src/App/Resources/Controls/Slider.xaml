@@ -1,0 +1,65 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:p="clr-namespace:System.Windows.Controls.Primitives;assembly=PresentationFramework">
+
+    <Style x:Key="Sakura.Slider.Thumb" TargetType="p:Thumb">
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="Width" Value="16"/>
+        <Setter Property="Height" Value="16"/>
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="p:Thumb">
+                    <Grid>
+                        <Ellipse Fill="{StaticResource Sakura.Brush.AccentPink}"
+                                 Effect="{StaticResource Sakura.Shadow.Glow}"/>
+                        <Ellipse Margin="4" Fill="{StaticResource Sakura.Brush.BgBase}"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Sakura.Slider.RepeatButton" TargetType="p:RepeatButton">
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
+        <Setter Property="Focusable" Value="False"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="p:RepeatButton">
+                    <Border Background="Transparent"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Sakura.Slider" TargetType="Slider">
+        <Setter Property="MinHeight" Value="24"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Slider">
+                    <Grid>
+                        <Border Height="4" CornerRadius="999"
+                                Background="{StaticResource Sakura.Brush.StrokeSubtle}"
+                                VerticalAlignment="Center"/>
+                        <Track x:Name="PART_Track">
+                            <Track.DecreaseRepeatButton>
+                                <p:RepeatButton Style="{StaticResource Sakura.Slider.RepeatButton}"
+                                               Command="Slider.DecreaseLarge"/>
+                            </Track.DecreaseRepeatButton>
+                            <Track.IncreaseRepeatButton>
+                                <p:RepeatButton Style="{StaticResource Sakura.Slider.RepeatButton}"
+                                               Command="Slider.IncreaseLarge"/>
+                            </Track.IncreaseRepeatButton>
+                            <Track.Thumb>
+                                <p:Thumb Style="{StaticResource Sakura.Slider.Thumb}"/>
+                            </Track.Thumb>
+                        </Track>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="Slider" BasedOn="{StaticResource Sakura.Slider}"/>
+
+</ResourceDictionary>

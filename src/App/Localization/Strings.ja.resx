@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string"/>
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required"/>
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter</value></resheader>
+
+  <!-- Nav -->
+  <data name="Nav_Personalize"><value>パーソナライズ</value></data>
+  <data name="Nav_Profiles"><value>プロファイル</value></data>
+  <data name="Nav_NewProfile"><value>新しいプロファイル</value></data>
+  <data name="Nav_Terminal"><value>ターミナル</value></data>
+  <data name="Nav_Integrations"><value>統合</value></data>
+  <data name="Nav_Backups"><value>バックアップ</value></data>
+  <data name="Nav_Settings"><value>設定</value></data>
+
+  <!-- Common -->
+  <data name="Btn_Save"><value>保存</value></data>
+  <data name="Btn_Cancel"><value>キャンセル</value></data>
+  <data name="Btn_Refresh"><value>更新</value></data>
+  <data name="Btn_Apply"><value>適用</value></data>
+  <data name="Btn_Export"><value>エクスポート…</value></data>
+  <data name="Btn_Delete"><value>削除</value></data>
+  <data name="Btn_OpenFolder"><value>フォルダを開く</value></data>
+  <data name="Btn_Defaults"><value>既定値</value></data>
+  <data name="Btn_Install"><value>インストール</value></data>
+  <data name="Btn_RestoreDefaults"><value>既定値に戻す</value></data>
+
+  <!-- Personalize page -->
+  <data name="Personalize_Title"><value>パーソナライズ</value></data>
+  <data name="Personalize_Subtitle"><value>コンポジター・フォント・シェルの設定</value></data>
+  <data name="Personalize_Section_DWM"><value>DWM / コンポジター</value></data>
+  <data name="Personalize_Section_Fonts"><value>フォント</value></data>
+  <data name="Personalize_Section_Shell"><value>シェル</value></data>
+  <data name="Personalize_DarkMode"><value>ダークモード</value></data>
+  <data name="Personalize_Transparency"><value>透過</value></data>
+  <data name="Personalize_Backdrop"><value>バックドロップ</value></data>
+  <data name="Personalize_Corners"><value>角丸</value></data>
+  <data name="Personalize_AccentColor"><value>アクセントカラー</value></data>
+
+  <!-- Profiles page -->
+  <data name="Profiles_Title"><value>プロファイル</value></data>
+  <data name="Profiles_Subtitle"><value>ライスプロファイルの参照・読み込み・適用</value></data>
+  <data name="Profiles_NoProfiles"><value>プロファイルが見つかりません。読み込みかスキャンを実行してください。</value></data>
+  <data name="Profiles_Btn_LoadFile"><value>ファイルを読み込む…</value></data>
+  <data name="Profiles_Btn_ScanFolder"><value>フォルダをスキャン…</value></data>
+  <data name="Profiles_Btn_ApplySelected"><value>選択したプロファイルを適用</value></data>
+
+  <!-- Profile Editor page -->
+  <data name="Editor_Title"><value>プロファイルエディター</value></data>
+  <data name="Editor_Subtitle"><value>ライスプロファイルを作成・編集してJSONに保存</value></data>
+  <data name="Editor_LoadSakuraYoru"><value>Sakura Yoruを読み込む</value></data>
+  <data name="Editor_Section_Info"><value>プロファイル情報</value></data>
+  <data name="Editor_Section_Compositor"><value>コンポジター / DWM</value></data>
+  <data name="Editor_Section_Shell"><value>シェル / タスクバー</value></data>
+  <data name="Editor_Section_Terminal"><value>ターミナル</value></data>
+  <data name="Editor_Section_WM"><value>ウィンドウマネージャー</value></data>
+  <data name="Editor_Section_Integrations"><value>統合</value></data>
+  <data name="Editor_Field_Name"><value>名前</value></data>
+  <data name="Editor_Field_Author"><value>作者</value></data>
+  <data name="Editor_Field_Description"><value>説明</value></data>
+  <data name="Editor_Field_Tags"><value>タグ</value></data>
+  <data name="Editor_Field_DarkMode"><value>ダークモード</value></data>
+  <data name="Editor_Field_Transparency"><value>透過</value></data>
+  <data name="Editor_Field_ColorPrevalence"><value>カラー優先</value></data>
+  <data name="Editor_Field_Animations"><value>アニメーション</value></data>
+  <data name="Editor_Field_Backdrop"><value>バックドロップ</value></data>
+  <data name="Editor_Field_Corners"><value>角丸</value></data>
+  <data name="Editor_Field_AccentColor"><value>アクセントカラー</value></data>
+  <data name="Editor_Field_BorderColor"><value>ボーダーカラー</value></data>
+
+  <!-- Backup page -->
+  <data name="Backup_Title"><value>バックアップ</value></data>
+  <data name="Backup_Subtitle"><value>レジストリスナップショットの復元・削除</value></data>
+  <data name="Backup_NoBackups"><value>バックアップが見つかりません</value></data>
+  <data name="Backup_Btn_UndoLast"><value>最後の適用を元に戻す</value></data>
+  <data name="Backup_Btn_Restore"><value>選択したものを復元</value></data>
+  <data name="Backup_RestoreHint"><value>レジストリ変更を完全に反映するにはWindowsを再起動してください</value></data>
+
+  <!-- Integrations page -->
+  <data name="Integrations_Title"><value>統合</value></data>
+  <data name="Integrations_Subtitle"><value>プロファイルが使用するサードパーティツールのステータス</value></data>
+  <data name="Integrations_Installed"><value>インストール済み</value></data>
+  <data name="Integrations_NotInstalled"><value>未インストール</value></data>
+
+  <!-- Terminal page -->
+  <data name="Terminal_Title"><value>ターミナル</value></data>
+  <data name="Terminal_Subtitle"><value>Windowsターミナルのカラースキームとシェルプロンプトを設定</value></data>
+  <data name="Terminal_Section_ColorScheme"><value>カラースキーム</value></data>
+  <data name="Terminal_Section_OhMyPosh"><value>Oh My Posh</value></data>
+  <data name="Terminal_Btn_Apply"><value>ターミナルに適用</value></data>
+  <data name="Terminal_Btn_DeployOmp"><value>OMPテーマを展開</value></data>
+
+  <!-- Settings page -->
+  <data name="Settings_Title"><value>設定</value></data>
+  <data name="Settings_Subtitle"><value>アプリケーションのパスと情報</value></data>
+  <data name="Settings_Section_Paths"><value>パス</value></data>
+  <data name="Settings_Section_About"><value>このアプリについて</value></data>
+  <data name="Settings_BackupRoot"><value>バックアップフォルダ</value></data>
+  <data name="Settings_ProfilesDir"><value>プロファイルフォルダ</value></data>
+  <data name="Settings_Language"><value>言語</value></data>
+
+  <!-- Update banner -->
+  <data name="Update_Available"><value> が利用可能です</value></data>
+  <data name="Update_ViewRelease"><value>リリースを見る</value></data>
+</root>

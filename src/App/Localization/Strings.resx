@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string"/>
+              <xsd:attribute name="type" type="xsd:string"/>
+              <xsd:attribute name="mimetype" type="xsd:string"/>
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required"/>
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter</value></resheader>
+
+  <!-- Nav -->
+  <data name="Nav_Personalize"><value>Personalize</value></data>
+  <data name="Nav_Profiles"><value>Profiles</value></data>
+  <data name="Nav_NewProfile"><value>New Profile</value></data>
+  <data name="Nav_Terminal"><value>Terminal</value></data>
+  <data name="Nav_Integrations"><value>Integrations</value></data>
+  <data name="Nav_Backups"><value>Backups</value></data>
+  <data name="Nav_Settings"><value>Settings</value></data>
+
+  <!-- Common -->
+  <data name="Btn_Save"><value>Save</value></data>
+  <data name="Btn_Cancel"><value>Cancel</value></data>
+  <data name="Btn_Refresh"><value>Refresh</value></data>
+  <data name="Btn_Apply"><value>Apply</value></data>
+  <data name="Btn_Export"><value>Export…</value></data>
+  <data name="Btn_Delete"><value>Delete</value></data>
+  <data name="Btn_OpenFolder"><value>Open Folder</value></data>
+  <data name="Btn_Defaults"><value>Defaults</value></data>
+  <data name="Btn_Install"><value>Install</value></data>
+  <data name="Btn_RestoreDefaults"><value>Restore Defaults</value></data>
+
+  <!-- Personalize page -->
+  <data name="Personalize_Title"><value>Personalize</value></data>
+  <data name="Personalize_Subtitle"><value>Tweak compositor, fonts and shell settings</value></data>
+  <data name="Personalize_Section_DWM"><value>DWM / Compositor</value></data>
+  <data name="Personalize_Section_Fonts"><value>Fonts</value></data>
+  <data name="Personalize_Section_Shell"><value>Shell</value></data>
+  <data name="Personalize_DarkMode"><value>Dark mode</value></data>
+  <data name="Personalize_Transparency"><value>Transparency</value></data>
+  <data name="Personalize_Backdrop"><value>Backdrop</value></data>
+  <data name="Personalize_Corners"><value>Corners</value></data>
+  <data name="Personalize_AccentColor"><value>Accent color</value></data>
+
+  <!-- Profiles page -->
+  <data name="Profiles_Title"><value>Profiles</value></data>
+  <data name="Profiles_Subtitle"><value>Browse, load and apply rice profiles</value></data>
+  <data name="Profiles_NoProfiles"><value>No profiles found. Click Load or Scan.</value></data>
+  <data name="Profiles_Btn_LoadFile"><value>Load File…</value></data>
+  <data name="Profiles_Btn_ScanFolder"><value>Scan Folder…</value></data>
+  <data name="Profiles_Btn_ApplySelected"><value>Apply Selected</value></data>
+
+  <!-- Profile Editor page -->
+  <data name="Editor_Title"><value>Profile Editor</value></data>
+  <data name="Editor_Subtitle"><value>Create or edit a rice profile and save it to JSON</value></data>
+  <data name="Editor_LoadSakuraYoru"><value>Load Sakura Yoru</value></data>
+  <data name="Editor_Section_Info"><value>Profile Info</value></data>
+  <data name="Editor_Section_Compositor"><value>Compositor / DWM</value></data>
+  <data name="Editor_Section_Shell"><value>Shell / Taskbar</value></data>
+  <data name="Editor_Section_Terminal"><value>Terminal</value></data>
+  <data name="Editor_Section_WM"><value>Window Manager</value></data>
+  <data name="Editor_Section_Integrations"><value>Integrations</value></data>
+  <data name="Editor_Field_Name"><value>Name</value></data>
+  <data name="Editor_Field_Author"><value>Author</value></data>
+  <data name="Editor_Field_Description"><value>Description</value></data>
+  <data name="Editor_Field_Tags"><value>Tags</value></data>
+  <data name="Editor_Field_DarkMode"><value>Dark Mode</value></data>
+  <data name="Editor_Field_Transparency"><value>Transparency</value></data>
+  <data name="Editor_Field_ColorPrevalence"><value>Color Prevalence</value></data>
+  <data name="Editor_Field_Animations"><value>Animations</value></data>
+  <data name="Editor_Field_Backdrop"><value>Backdrop</value></data>
+  <data name="Editor_Field_Corners"><value>Corners</value></data>
+  <data name="Editor_Field_AccentColor"><value>Accent Color</value></data>
+  <data name="Editor_Field_BorderColor"><value>Border Color</value></data>
+
+  <!-- Backup page -->
+  <data name="Backup_Title"><value>Backups</value></data>
+  <data name="Backup_Subtitle"><value>Restore or delete saved registry snapshots</value></data>
+  <data name="Backup_NoBackups"><value>No backups found</value></data>
+  <data name="Backup_Btn_UndoLast"><value>Undo Last Apply</value></data>
+  <data name="Backup_Btn_Restore"><value>Restore Selected</value></data>
+  <data name="Backup_RestoreHint"><value>Restart Windows to fully apply registry changes</value></data>
+
+  <!-- Integrations page -->
+  <data name="Integrations_Title"><value>Integrations</value></data>
+  <data name="Integrations_Subtitle"><value>Status of optional third-party tools used by profiles</value></data>
+  <data name="Integrations_Installed"><value>Installed</value></data>
+  <data name="Integrations_NotInstalled"><value>Not installed</value></data>
+
+  <!-- Terminal page -->
+  <data name="Terminal_Title"><value>Terminal</value></data>
+  <data name="Terminal_Subtitle"><value>Configure Windows Terminal color scheme and Oh My Posh</value></data>
+  <data name="Terminal_Section_ColorScheme"><value>Color Scheme</value></data>
+  <data name="Terminal_Section_OhMyPosh"><value>Oh My Posh</value></data>
+  <data name="Terminal_Btn_Apply"><value>Apply to Terminal</value></data>
+  <data name="Terminal_Btn_DeployOmp"><value>Deploy OMP Theme</value></data>
+
+  <!-- Settings page -->
+  <data name="Settings_Title"><value>Settings</value></data>
+  <data name="Settings_Subtitle"><value>Application paths and about information</value></data>
+  <data name="Settings_Section_Paths"><value>Paths</value></data>
+  <data name="Settings_Section_About"><value>About</value></data>
+  <data name="Settings_BackupRoot"><value>Backup root</value></data>
+  <data name="Settings_ProfilesDir"><value>Profiles directory</value></data>
+  <data name="Settings_Language"><value>Language</value></data>
+
+  <!-- Update banner -->
+  <data name="Update_Available"><value> is available</value></data>
+  <data name="Update_ViewRelease"><value>View Release</value></data>
+</root>

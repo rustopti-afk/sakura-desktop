@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Sakura Desktop — WiX v4 MSI Package
+  Installs all 4 components into ProgramFiles\Sakura Desktop\
+  Registers Helper and Helper.TI as Windows Services.
+  Creates Start Menu shortcut and Desktop shortcut (optional).
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+
+  <Package Name="Sakura Desktop"
+           Version="0.2.0"
+           Manufacturer="Sakura Desktop Project"
+           ProductCode="*"
+           UpgradeCode="B2C3D4E5-F6A7-8901-BCDE-F12345678901"
+           Language="1033"
+           Codepage="1252"
+           InstallerVersion="500"
+           Compressed="yes"
+           Scope="perMachine">
+
+    <!-- Allow upgrades, block downgrades -->
+    <MajorUpgrade
+      DowngradeErrorMessage="A newer version of Sakura Desktop is already installed."
+      Schedule="afterInstallInitialize"/>
+
+    <!-- Media / cabinet -->
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high"/>
+
+    <!-- ── Properties ──────────────────────────────────────────────────── -->
+    <Property Id="ARPPRODUCTICON" Value="SakuraIcon"/>
+    <Property Id="ARPHELPLINK"    Value="https://github.com/sakura-desktop/issues"/>
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/sakura-desktop"/>
+    <Property Id="ARPNOREPAIR"   Value="1"/>
+    <Icon Id="SakuraIcon" SourceFile="..\src\App\Resources\sakura.ico"/>
+
+    <!-- ── WiX Standard UI ────────────────────────────────────────────── -->
+    <UIRef Id="WixUI_InstallDir"/>
+    <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER"/>
+    <WixVariable Id="WixUILicenseRtf" Value="License.rtf"/>
+
+    <!-- ── Directory structure ────────────────────────────────────────── -->
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="Sakura Desktop">
+        <Directory Id="BinFolder"  Name="bin"/>
+        <Directory Id="DataFolder" Name="data">
+          <Directory Id="ProfilesFolder" Name="profiles"/>
+        </Directory>
+      </Directory>
+    </StandardDirectory>
+
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="SakuraMenuFolder" Name="Sakura Desktop"/>
+    </StandardDirectory>
+
+    <!-- ── Components ─────────────────────────────────────────────────── -->
+
+    <!-- Main WPF application -->
+    <Component Id="Comp_App" Directory="BinFolder" Guid="C1000001-0000-0000-0000-000000000001">
+      <File Id="File_App_Exe"
+            Source="..\publish\app\Sakura.App.exe"
+            KeyPath="yes"/>
+      <File Id="File_App_Dll"
+            Source="..\publish\app\Sakura.App.dll"/>
+      <File Id="File_Core_Dll"
+            Source="..\publish\app\Sakura.Core.dll"/>
+    </Component>
+
+    <!-- Helper.Admin Windows Service -->
+    <Component Id="Comp_Helper" Directory="BinFolder" Guid="C1000002-0000-0000-0000-000000000002">
+      <File Id="File_Helper_Exe"
+            Source="..\publish\helper\Sakura.Helper.exe"
+            KeyPath="yes"/>
+      <ServiceInstall Id="SvcHelper"
+                      Name="SakuraHelper"
+                      DisplayName="Sakura Desktop Helper"
+                      Description="Provides elevated operations for Sakura Desktop (registry writes, theme patching)."
+                      Type="ownProcess"
+                      Start="demand"
+                      Account="LocalSystem"
+                      ErrorControl="normal"
+                      Interactive="no"/>
+      <ServiceControl Id="SvcHelperStop"
+                      Name="SakuraHelper"
+                      Stop="both"
+                      Remove="uninstall"
+                      Wait="yes"/>
+    </Component>
+
+    <!-- Helper.TI Windows Service -->
+    <Component Id="Comp_HelperTI" Directory="BinFolder" Guid="C1000003-0000-0000-0000-000000000003">
+      <File Id="File_HelperTI_Exe"
+            Source="..\publish\helper-ti\Sakura.Helper.TI.exe"
+            KeyPath="yes"/>
+      <ServiceInstall Id="SvcHelperTI"
+                      Name="SakuraHelperTI"
+                      DisplayName="Sakura Desktop TrustedInstaller Helper"
+                      Description="Provides TrustedInstaller-level operations for Sakura Desktop (system file patching)."
+                      Type="ownProcess"
+                      Start="demand"
+                      Account="LocalSystem"
+                      ErrorControl="normal"
+                      Interactive="no"/>
+      <ServiceControl Id="SvcHelperTIStop"
+                      Name="SakuraHelperTI"
+                      Stop="both"
+                      Remove="uninstall"
+                      Wait="yes"/>
+    </Component>
+
+    <!-- Watchdog Windows Service -->
+    <Component Id="Comp_Watchdog" Directory="BinFolder" Guid="C1000004-0000-0000-0000-000000000004">
+      <File Id="File_Watchdog_Exe"
+            Source="..\publish\watchdog\Sakura.Watchdog.exe"
+            KeyPath="yes"/>
+      <ServiceInstall Id="SvcWatchdog"
+                      Name="SakuraWatchdog"
+                      DisplayName="Sakura Desktop Watchdog"
+                      Description="Monitors and auto-restarts Sakura Desktop helper services."
+                      Type="ownProcess"
+                      Start="auto"
+                      Account="LocalSystem"
+                      ErrorControl="normal"
+                      Interactive="no"/>
+      <ServiceControl Id="SvcWatchdogStop"
+                      Name="SakuraWatchdog"
+                      Stop="both"
+                      Remove="uninstall"
+                      Wait="yes"/>
+      <!-- Start watchdog immediately after install -->
+      <ServiceControl Id="SvcWatchdogStart"
+                      Name="SakuraWatchdog"
+                      Start="install"
+                      Wait="no"/>
+    </Component>
+
+    <!-- Bundled Sakura Yoru default profile -->
+    <Component Id="Comp_Profiles" Directory="ProfilesFolder" Guid="C1000005-0000-0000-0000-000000000005">
+      <File Id="File_SakuraYoru"
+            Source="..\profiles\sakura-yoru.json"
+            KeyPath="yes"/>
+    </Component>
+
+    <!-- Start Menu shortcut -->
+    <Component Id="Comp_StartMenu" Directory="SakuraMenuFolder" Guid="C1000006-0000-0000-0000-000000000006">
+      <Shortcut Id="SC_StartMenu"
+                Name="Sakura Desktop"
+                Description="Windows 11 ricing and customization tool"
+                Target="[BinFolder]Sakura.App.exe"
+                WorkingDirectory="BinFolder"
+                Icon="SakuraIcon"/>
+      <RemoveFolder Id="RemoveSakuraMenuFolder" Directory="SakuraMenuFolder" On="uninstall"/>
+      <RegistryValue Root="HKCU"
+                     Key="SOFTWARE\SakuraDesktop"
+                     Name="Installed"
+                     Type="integer" Value="1"
+                     KeyPath="yes"/>
+    </Component>
+
+    <!-- Uninstall registry info -->
+    <Component Id="Comp_RegInfo" Directory="INSTALLFOLDER" Guid="C1000007-0000-0000-0000-000000000007">
+      <RegistryKey Root="HKLM" Key="SOFTWARE\SakuraDesktop">
+        <RegistryValue Name="InstallDir"  Type="string"  Value="[INSTALLFOLDER]"/>
+        <RegistryValue Name="Version"     Type="string"  Value="0.2.0"/>
+        <RegistryValue Name="BinDir"      Type="string"  Value="[BinFolder]"    KeyPath="yes"/>
+      </RegistryKey>
+    </Component>
+
+    <!-- ── Feature ────────────────────────────────────────────────────── -->
+    <Feature Id="ProductFeature"
+             Title="Sakura Desktop"
+             Description="Installs Sakura Desktop and all required components."
+             Level="1"
+             ConfigurableDirectory="INSTALLFOLDER">
+      <ComponentRef Id="Comp_App"/>
+      <ComponentRef Id="Comp_Helper"/>
+      <ComponentRef Id="Comp_HelperTI"/>
+      <ComponentRef Id="Comp_Watchdog"/>
+      <ComponentRef Id="Comp_Profiles"/>
+      <ComponentRef Id="Comp_StartMenu"/>
+      <ComponentRef Id="Comp_RegInfo"/>
+    </Feature>
+
+    <!-- ── Custom Actions ─────────────────────────────────────────────── -->
+
+    <!-- Set INSTALLFOLDER to default if user hasn't changed it -->
+    <SetProperty Id="INSTALLFOLDER"
+                 Value="[ProgramFiles64Folder]Sakura Desktop\"
+                 Sequence="execute"
+                 Before="CostFinalize"
+                 Condition="INSTALLFOLDER = &quot;&quot;"/>
+
+    <!-- Firewall rule for named pipe server (localhost only, TCP not needed — but good practice) -->
+    <util:FirewallException Id="FW_Helper"
+                            Name="Sakura Desktop Helper"
+                            Program="[BinFolder]Sakura.Helper.exe"
+                            Scope="localSubnet"
+                            Protocol="tcp"
+                            Profile="all"/>
+
+  </Package>
+</Wix>

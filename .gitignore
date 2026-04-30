@@ -1,0 +1,12 @@
+bin/
+obj/
+publish/
+*.user
+.vs/
+.vscode/
+*.suo
+*.swp
+*.log
+*.dmp
+backup/
+*.sakuraprof

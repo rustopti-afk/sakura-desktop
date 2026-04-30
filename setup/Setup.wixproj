@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  WiX v4 project file.
+  Build with: dotnet build setup/Setup.wixproj -c Release
+  Or via build-installer.ps1 for the full pipeline.
+-->
+<Project Sdk="WixToolset.Sdk/4.0.5">
+
+  <PropertyGroup>
+    <OutputType>Package</OutputType>
+    <OutputName>Sakura</OutputName>
+    <InstallerPlatform>x64</InstallerPlatform>
+    <SuppressIces>ICE61;ICE91</SuppressIces>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Product.wxs"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <WixExtension Include="WixToolset.UI.wixext"/>
+    <WixExtension Include="WixToolset.Util.wixext"/>
+    <WixExtension Include="WixToolset.Firewall.wixext"/>
+  </ItemGroup>
+
+  <!--
+    Publish paths — populated by build-installer.ps1 before wix build.
+    These paths must exist at build time.
+  -->
+  <ItemGroup>
+    <BindPath Include="..\publish\app"/>
+    <BindPath Include="..\publish\helper"/>
+    <BindPath Include="..\publish\helper-ti"/>
+    <BindPath Include="..\publish\watchdog"/>
+    <BindPath Include="..\profiles"/>
+    <BindPath Include="..\src\App\Resources"/>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,524 @@
+<Page x:Class="Sakura.App.Views.Pages.PersonalizePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:loc="clr-namespace:Sakura.App.Localization"
+      Background="Transparent">
+
+    <ScrollViewer Style="{StaticResource Sakura.ScrollViewer}" Padding="24,20">
+        <StackPanel>
+
+            <!-- ══ Header ══════════════════════════════════════════════════════ -->
+            <TextBlock Text="{Binding [Personalize_Title], Source={x:Static loc:LocalizationService.Instance}}" Style="{StaticResource Sakura.Text.Title}"
+                       FontSize="22" Margin="0,0,0,4"/>
+            <TextBlock Text="{Binding [Personalize_Subtitle], Source={x:Static loc:LocalizationService.Instance}}"
+                       Style="{StaticResource Sakura.Text.Caption}" Margin="0,0,0,20"/>
+
+            <!-- ══ Card 1 — Compositor ════════════════════════════════════════ -->
+            <Border Style="{StaticResource Sakura.Card}" Margin="0,0,0,12">
+                <StackPanel>
+
+                    <TextBlock Text="{Binding [Personalize_Section_DWM], Source={x:Static loc:LocalizationService.Instance}}" FontSize="13" FontWeight="SemiBold"
+                               Foreground="{StaticResource Sakura.Brush.AccentPink}" Margin="0,0,0,14"/>
+
+                    <!-- Dark mode -->
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Dark Mode" FontSize="13"
+                                       Foreground="{StaticResource Sakura.Brush.FgPrimary}"/>
+                            <TextBlock Text="Sets HKCU Personalization DarkMode + ImmersiveDarkMode"
+                                       FontSize="11" Foreground="{StaticResource Sakura.Brush.FgMuted}"/>
+                        </StackPanel>
+                        <ToggleButton Grid.Column="1" Style="{StaticResource Sakura.Toggle}"
+                                      IsChecked="{Binding DarkMode, Mode=TwoWay}" VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <!-- Transparency -->
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Transparency Effects" FontSize="13"
+                                       Foreground="{StaticResource Sakura.Brush.FgPrimary}"/>
+                            <TextBlock Text="EnableTransparency registry key"
+                                       FontSize="11" Foreground="{StaticResource Sakura.Brush.FgMuted}"/>
+                        </StackPanel>
+                        <ToggleButton Grid.Column="1" Style="{StaticResource Sakura.Toggle}"
+                                      IsChecked="{Binding Transparency, Mode=TwoWay}" VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <!-- Color prevalence -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Accent on Taskbar &amp; Start" FontSize="13"
+                                       Foreground="{StaticResource Sakura.Brush.FgPrimary}"/>
+                            <TextBlock Text="ColorPrevalence DWM key"
+                                       FontSize="11" Foreground="{StaticResource Sakura.Brush.FgMuted}"/>
+                        </StackPanel>
+                        <ToggleButton Grid.Column="1" Style="{StaticResource Sakura.Toggle}"
+                                      IsChecked="{Binding ColorPrevalence, Mode=TwoWay}" VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <Separator Background="{StaticResource Sakura.Brush.StrokeSubtle}" Margin="0,0,0,14"/>
+
+                    <!-- Backdrop type -->
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="160"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Window Backdrop" FontSize="13"
+                                       Foreground="{StaticResource Sakura.Brush.FgPrimary}"/>
+                            <TextBlock Text="DWMWA_SYSTEMBACKDROP_TYPE"
+                                       FontSize="11" Foreground="{StaticResource Sakura.Brush.FgMuted}"/>
+                        </StackPanel>
+                        <ComboBox Grid.Column="1" Style="{StaticResource Sakura.ComboBox}"
+                                  ItemsSource="{Binding BackdropOptions}"
+                                  SelectedValuePath="Value"
+                                  DisplayMemberPath="Label"
+                                  SelectedValue="{Binding BackdropType, Mode=TwoWay}"
+                                  VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <!-- Corner preference -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="160"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Window Corners" FontSize="13"
+                                       Foreground="{StaticResource Sakura.Brush.FgPrimary}"/>
+                            <TextBlock Text="DWMWA_WINDOW_CORNER_PREFERENCE"
+                                       FontSize="11" Foreground="{StaticResource Sakura.Brush.FgMuted}"/>
+                        </StackPanel>
+                        <ComboBox Grid.Column="1" Style="{StaticResource Sakura.ComboBox}"
+                                  ItemsSource="{Binding CornerOptions}"
+                                  SelectedValuePath="Value"
+                                  DisplayMemberPath="Label"
+                                  SelectedValue="{Binding CornerPref, Mode=TwoWay}"
+                                  VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <Separator Background="{StaticResource Sakura.Brush.StrokeSubtle}" Margin="0,0,0,14"/>
+
+                    <!-- Color pickers row -->
+                    <TextBlock Text="Title Bar Colors" FontSize="12"
+                               Foreground="{StaticResource Sakura.Brush.FgMuted}" Margin="0,0,0,10"/>
+
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Accent -->
+                        <StackPanel Margin="0,0,8,0">
+                            <TextBlock Text="Accent" FontSize="11"
+                                       Foreground="{StaticResource Sakura.Brush.FgMuted}" Margin="0,0,0,4"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Width="28" Height="28" CornerRadius="4" Margin="0,0,6,0"
+                                        BorderThickness="1" BorderBrush="{StaticResource Sakura.Brush.StrokeSubtle}">
+                                    <Border.Background>
+                                        <SolidColorBrush Color="{Binding AccentHex,
+                                            Converter={StaticResource HexToColorConverter}}"/>
+                                    </Border.Background>
+                                </Border>
+                                <TextBox Grid.Column="1" Style="{StaticResource Sakura.TextBox}"
+                                         Text="{Binding AccentHex, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                         VerticalAlignment="Center"
+                                         FontFamily="{StaticResource Sakura.Font.Mono}" FontSize="12"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Caption bg -->
+                        <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                            <TextBlock Text="Caption bg" FontSize="11"
+                                       Foreground="{StaticResource Sakura.Brush.FgMuted}" Margin="0,0,0,4"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Width="28" Height="28" CornerRadius="4" Margin="0,0,6,0"
+                                        BorderThickness="1" BorderBrush="{StaticResource Sakura.Brush.StrokeSubtle}">
+                                    <Border.Background>
+                                        <SolidColorBrush Color="{Binding CaptionHex,
+                                            Converter={StaticResource HexToColorConverter}}"/>
+                                    </Border.Background>
+                                </Border>
+                                <TextBox Grid.Column="1" Style="{StaticResource Sakura.TextBox}"
+                                         Text="{Binding CaptionHex, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                         VerticalAlignment="Center"
+                                         FontFamily="{StaticResource Sakura.Font.Mono}" FontSize="12"/>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Caption text -->
+                        <StackPanel Margin="0,0,8,0">
+                            <TextBlock Text="Caption text" FontSize="11"
+                                       Foreground="{StaticResource Sakura.Brush.FgMuted}" Margin="0,0,0,4"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Width="28" Height="28" CornerRadius="4" Margin="0,0,6,0"
+                                        BorderThickness="1" BorderBrush="{StaticResource Sakura.Brush.StrokeSubtle}">
+                                    <Border.Background>
+                                        <SolidColorBrush Color="{Binding TextHex,
+                                            Converter={StaticResource HexToColorConverter}}"/>
+                                    </Border.Background>
+                                </Border>
+                                <TextBox Grid.Column="1" Style="{StaticResource Sakura.TextBox}"
+                                         Text="{Binding TextHex, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                         VerticalAlignment="Center"
+                                         FontFamily="{StaticResource Sakura.Font.Mono}" FontSize="12"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Border -->
+                        <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                            <TextBlock Text="Border" FontSize="11"
+                                       Foreground="{StaticResource Sakura.Brush.FgMuted}" Margin="0,0,0,4"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Width="28" Height="28" CornerRadius="4" Margin="0,0,6,0"
+                                        BorderThickness="1" BorderBrush="{StaticResource Sakura.Brush.StrokeSubtle}">
+                                    <Border.Background>
+                                        <SolidColorBrush Color="{Binding BorderHex,
+                                            Converter={StaticResource HexToColorConverter}}"/>
+                                    </Border.Background>
+                                </Border>
+                                <TextBox Grid.Column="1" Style="{StaticResource Sakura.TextBox}"
+                                         Text="{Binding BorderHex, Mode=TwoWay, UpdateSourceTrigger=LostFocus}"
+                                         VerticalAlignment="Center"
+                                         FontFamily="{StaticResource Sakura.Font.Mono}" FontSize="12"/>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+
+                    <Button Style="{StaticResource Sakura.Button}"
+                            Content="Preview in Notepad"
+                            Command="{Binding PreviewDwmCommand}"
+                            HorizontalAlignment="Left"/>
+
+                </StackPanel>
+            </Border>
+
+            <!-- ══ Card 2 — Taskbar ═══════════════════════════════════════════ -->
+            <Border Style="{StaticResource Sakura.Card}" Margin="0,0,0,12">
+                <StackPanel>
+
+                    <TextBlock Text="Taskbar" FontSize="13" FontWeight="SemiBold"
+                               Foreground="{StaticResource Sakura.Brush.AccentPink}" Margin="0,0,0,14"/>
+
+                    <!-- Alignment -->
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Icon Alignment" FontSize="13"
+                                       Foreground="{StaticResource Sakura.Brush.FgPrimary}"/>
+                            <TextBlock Text="TaskbarAl: 0 = Left, 1 = Center"
+                                       FontSize="11" Foreground="{StaticResource Sakura.Brush.FgMuted}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <RadioButton Content="Left" GroupName="alignment"
+                                         IsChecked="{Binding TaskbarAlignment,
+                                             Converter={StaticResource IntEqualConverter},
+                                             ConverterParameter=0, Mode=TwoWay}"
+                                         Foreground="{StaticResource Sakura.Brush.FgPrimary}" Margin="0,0,12,0"/>
+                            <RadioButton Content="Center" GroupName="alignment"
+                                         IsChecked="{Binding TaskbarAlignment,
+                                             Converter={StaticResource IntEqualConverter},
+                                             ConverterParameter=1, Mode=TwoWay}"
+                                         Foreground="{StaticResource Sakura.Brush.FgPrimary}"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Show Search -->
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="Show Search" FontSize="13"
+                                   Foreground="{StaticResource Sakura.Brush.FgPrimary}" VerticalAlignment="Center"/>
+                        <ToggleButton Grid.Column="1" Style="{StaticResource Sakura.Toggle}"
+                                      IsChecked="{Binding ShowSearch, Mode=TwoWay}"/>
+                    </Grid>
+
+                    <!-- Show Task View -->
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="Show Task View Button" FontSize="13"
+                                   Foreground="{StaticResource Sakura.Brush.FgPrimary}" VerticalAlignment="Center"/>
+                        <ToggleButton Grid.Column="1" Style="{StaticResource Sakura.Toggle}"
+                                      IsChecked="{Binding ShowTaskView, Mode=TwoWay}"/>
+                    </Grid>
+
+                    <!-- Show Widgets -->
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="Show Widgets" FontSize="13"
+                                   Foreground="{StaticResource Sakura.Brush.FgPrimary}" VerticalAlignment="Center"/>
+                        <ToggleButton Grid.Column="1" Style="{StaticResource Sakura.Toggle}"
+                                      IsChecked="{Binding ShowWidgets, Mode=TwoWay}"/>
+                    </Grid>
+
+                    <!-- Show Chat -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <TextBlock Text="Show Chat (Teams)" FontSize="13"
+                                   Foreground="{StaticResource Sakura.Brush.FgPrimary}" VerticalAlignment="Center"/>
+                        <ToggleButton Grid.Column="1" Style="{StaticResource Sakura.Toggle}"
+                                      IsChecked="{Binding ShowChat, Mode=TwoWay}"/>
+                    </Grid>
+
+                    <Button Style="{StaticResource Sakura.Button}"
+                            Content="Apply Taskbar"
+                            Command="{Binding QuickApplyTaskbarCommand}"
+                            HorizontalAlignment="Left"/>
+
+                </StackPanel>
+            </Border>
+
+            <!-- ══ Card 3 — Animations ════════════════════════════════════════ -->
+            <Border Style="{StaticResource Sakura.Card}" Margin="0,0,0,12">
+                <StackPanel>
+
+                    <TextBlock Text="Animations" FontSize="13" FontWeight="SemiBold"
+                               Foreground="{StaticResource Sakura.Brush.AccentPink}" Margin="0,0,0,14"/>
+
+                    <!-- Enabled toggle -->
+                    <Grid Margin="0,0,0,10">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Window Animations" FontSize="13"
+                                       Foreground="{StaticResource Sakura.Brush.FgPrimary}"/>
+                            <TextBlock Text="VisualEffects MinAnimate registry"
+                                       FontSize="11" Foreground="{StaticResource Sakura.Brush.FgMuted}"/>
+                        </StackPanel>
+                        <ToggleButton Grid.Column="1" Style="{StaticResource Sakura.Toggle}"
+                                      IsChecked="{Binding AnimationsEnabled, Mode=TwoWay}" VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <!-- Menu delay slider -->
+                    <StackPanel Margin="0,0,0,16">
+                        <Grid Margin="0,0,0,6">
+                            <TextBlock Text="Menu Show Delay" FontSize="13"
+                                       Foreground="{StaticResource Sakura.Brush.FgPrimary}"/>
+                            <TextBlock HorizontalAlignment="Right" FontSize="13"
+                                       Foreground="{StaticResource Sakura.Brush.AccentPink}">
+                                <Run Text="{Binding MenuDelay, Mode=OneWay}"/>
+                                <Run Text=" ms"/>
+                            </TextBlock>
+                        </Grid>
+                        <Slider Style="{StaticResource Sakura.Slider}"
+                                Minimum="0" Maximum="400" TickFrequency="50"
+                                IsSnapToTickEnabled="True"
+                                Value="{Binding MenuDelay, Mode=TwoWay}"/>
+                        <Grid Margin="0,2,0,0">
+                            <TextBlock Text="0" FontSize="10"
+                                       Foreground="{StaticResource Sakura.Brush.FgMuted}"/>
+                            <TextBlock Text="400 ms" HorizontalAlignment="Right" FontSize="10"
+                                       Foreground="{StaticResource Sakura.Brush.FgMuted}"/>
+                        </Grid>
+                    </StackPanel>
+
+                    <Button Style="{StaticResource Sakura.Button}"
+                            Content="Apply Animations"
+                            Command="{Binding QuickApplyAnimationsCommand}"
+                            HorizontalAlignment="Left"/>
+
+                </StackPanel>
+            </Border>
+
+            <!-- ══ Card 4 — Fonts ════════════════════════════════════════════ -->
+            <Border Style="{StaticResource Sakura.Card}" Margin="0,0,0,12">
+                <StackPanel>
+
+                    <TextBlock Text="{Binding [Personalize_Section_Fonts], Source={x:Static loc:LocalizationService.Instance}}"
+                               FontSize="13" FontWeight="SemiBold"
+                               Foreground="{StaticResource Sakura.Brush.AccentPink}" Margin="0,0,0,14"/>
+
+                    <!-- UI font (caption / menu / messages) -->
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="180"/>
+                            <ColumnDefinition Width="56"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="UI Font" FontSize="13"
+                                       Foreground="{StaticResource Sakura.Brush.FgPrimary}"/>
+                            <TextBlock Text="Caption · menu · dialogs (NonClientMetrics)"
+                                       FontSize="11" Foreground="{StaticResource Sakura.Brush.FgMuted}"/>
+                        </StackPanel>
+                        <ComboBox Grid.Column="1" Style="{StaticResource Sakura.ComboBox}"
+                                  ItemsSource="{Binding SystemFonts}"
+                                  SelectedItem="{Binding SelectedUiFont, Mode=TwoWay}"
+                                  VerticalAlignment="Center" Margin="8,0,4,0">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}"
+                                               FontFamily="{Binding}"
+                                               FontSize="13"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <TextBox Grid.Column="2" Style="{StaticResource Sakura.TextBox}"
+                                 Text="{Binding UiFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 VerticalAlignment="Center" TextAlignment="Center"
+                                 ToolTip="Size in points"/>
+                    </Grid>
+
+                    <!-- Icon font -->
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="180"/>
+                            <ColumnDefinition Width="56"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Icon Font" FontSize="13"
+                                       Foreground="{StaticResource Sakura.Brush.FgPrimary}"/>
+                            <TextBlock Text="Desktop icon labels (IconMetrics)"
+                                       FontSize="11" Foreground="{StaticResource Sakura.Brush.FgMuted}"/>
+                        </StackPanel>
+                        <ComboBox Grid.Column="1" Style="{StaticResource Sakura.ComboBox}"
+                                  ItemsSource="{Binding SystemFonts}"
+                                  SelectedItem="{Binding SelectedIconFont, Mode=TwoWay}"
+                                  VerticalAlignment="Center" Margin="8,0,4,0">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}"
+                                               FontFamily="{Binding}"
+                                               FontSize="13"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <TextBox Grid.Column="2" Style="{StaticResource Sakura.TextBox}"
+                                 Text="{Binding IconFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 VerticalAlignment="Center" TextAlignment="Center"
+                                 ToolTip="Size in points"/>
+                    </Grid>
+
+                    <!-- Preview sample -->
+                    <Border Background="{StaticResource Sakura.Brush.BgSunken}"
+                            CornerRadius="6" Padding="12,8" Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock Text="Aa Bb Cc — 桜の花 — Sample Text"
+                                       FontFamily="{Binding SelectedUiFont}"
+                                       FontSize="{Binding UiFontSize}"
+                                       Foreground="{StaticResource Sakura.Brush.FgPrimary}"/>
+                            <TextBlock Margin="0,4,0,0"
+                                       FontFamily="{Binding SelectedUiFont}"
+                                       FontSize="11"
+                                       Foreground="{StaticResource Sakura.Brush.FgMuted}">
+                                <Run Text="{Binding SelectedUiFont, Mode=OneWay}"/>
+                                <Run Text=" · "/>
+                                <Run Text="{Binding UiFontSize, Mode=OneWay}"/>
+                                <Run Text="pt"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+
+                    <Button Style="{StaticResource Sakura.Button}"
+                            Content="Apply Fonts"
+                            Command="{Binding QuickApplyFontsCommand}"
+                            HorizontalAlignment="Left"/>
+
+                </StackPanel>
+            </Border>
+
+            <!-- ══ Card 5 (was 4) — Full Apply ══════════════════════════════════ -->
+            <Border Style="{StaticResource Sakura.Card}" Margin="0,0,0,24">
+                <StackPanel>
+
+                    <TextBlock Text="Full Profile Apply" FontSize="13" FontWeight="SemiBold"
+                               Foreground="{StaticResource Sakura.Brush.AccentPink}" Margin="0,0,0,8"/>
+                    <TextBlock FontSize="12" TextWrapping="Wrap" Margin="0,0,0,14"
+                               Foreground="{StaticResource Sakura.Brush.FgSecondary}">
+                        Applies all settings above in one transaction with registry backup.
+                        A restore point is created before any changes are written.
+                    </TextBlock>
+
+                    <!-- Progress bar (visible while busy) -->
+                    <Grid Margin="0,0,0,10"
+                          Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <ProgressBar Height="4" Minimum="0" Maximum="100"
+                                     Value="{Binding ApplyProgress, Mode=OneWay}"
+                                     Background="{StaticResource Sakura.Brush.BgSunken}"
+                                     Foreground="{StaticResource Sakura.Brush.AccentPink}"
+                                     BorderThickness="0"/>
+                    </Grid>
+
+                    <!-- Status message -->
+                    <TextBlock Text="{Binding StatusMessage}" FontSize="12"
+                               Foreground="{StaticResource Sakura.Brush.FgSecondary}"
+                               Margin="0,0,0,10" TextWrapping="Wrap"
+                               Visibility="{Binding StatusMessage,
+                                   Converter={StaticResource StringNotEmptyToVisibilityConverter}}"/>
+
+                    <!-- Success indicator -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12"
+                                Visibility="{Binding ApplySuccess,
+                                    Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Ellipse Width="8" Height="8"
+                                 Fill="{StaticResource Sakura.Brush.StateOk}"
+                                 VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBlock FontSize="12"
+                                   Foreground="{StaticResource Sakura.Brush.StateOk}"
+                                   VerticalAlignment="Center">
+                            <Run Text="Backup: "/>
+                            <Run Text="{Binding LastBackupDir, Mode=OneWay}"
+                                 FontFamily="{StaticResource Sakura.Font.Mono}"/>
+                        </TextBlock>
+                    </StackPanel>
+
+                    <!-- Action buttons -->
+                    <StackPanel Orientation="Horizontal">
+                        <Button Style="{StaticResource Sakura.Button.Primary}"
+                                Content="Apply All"
+                                Command="{Binding ApplyCommand}"
+                                IsEnabled="{Binding IsBusy,
+                                    Converter={StaticResource InverseBoolConverter}}"
+                                Margin="0,0,10,0"/>
+                        <Button Style="{StaticResource Sakura.Button}"
+                                Content="Quick DWM"
+                                Command="{Binding QuickApplyDwmCommand}"
+                                IsEnabled="{Binding IsBusy,
+                                    Converter={StaticResource InverseBoolConverter}}"/>
+                    </StackPanel>
+
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

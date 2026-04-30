@@ -1,0 +1,84 @@
+<UserControl x:Class="Sakura.App.Views.Controls.ProfilePreviewControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="0,4,0,0">
+
+            <!-- Profile name & author -->
+            <TextBlock Text="{Binding ProfileName}"
+                       Style="{StaticResource Sakura.Text.Body}"
+                       FontWeight="SemiBold"
+                       TextTrimming="CharacterEllipsis"
+                       Margin="0,0,0,2"/>
+            <TextBlock Text="{Binding ProfileAuthor}"
+                       Style="{StaticResource Sakura.Text.Caption}"
+                       Foreground="{StaticResource Sakura.Brush.FgMuted}"
+                       TextTrimming="CharacterEllipsis"
+                       Margin="0,0,0,16"/>
+
+            <!-- Dark/light badge -->
+            <Border CornerRadius="4" Padding="8,3" HorizontalAlignment="Left" Margin="0,0,0,16">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="{StaticResource Sakura.Brush.BgRaised}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding DarkMode}" Value="True">
+                                <Setter Property="Background" Value="#1A1A2E"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <TextBlock FontSize="11" FontWeight="SemiBold">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource Sakura.Text.Caption}">
+                            <Setter Property="Text" Value="☀ Light"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding DarkMode}" Value="True">
+                                    <Setter Property="Text" Value="🌙 Dark"/>
+                                    <Setter Property="Foreground" Value="#C8B8FF"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Border>
+
+            <!-- Color palette label -->
+            <TextBlock Text="COLOR PALETTE"
+                       Style="{StaticResource Sakura.Text.Caption}"
+                       Foreground="{StaticResource Sakura.Brush.FgMuted}"
+                       FontSize="10" FontWeight="SemiBold"
+                       Margin="0,0,0,8"/>
+
+            <!-- Swatches -->
+            <ItemsControl ItemsSource="{Binding Swatches}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="28"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Width="22" Height="22"
+                                    CornerRadius="4"
+                                    Background="{Binding Brush}"
+                                    BorderBrush="{StaticResource Sakura.Brush.StrokeSubtle}"
+                                    BorderThickness="1"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Label}"
+                                           Style="{StaticResource Sakura.Text.Caption}"
+                                           FontSize="11"/>
+                                <TextBlock Text="{Binding Hex}"
+                                           Style="{StaticResource Sakura.Text.Mono}"
+                                           FontSize="10"
+                                           Foreground="{StaticResource Sakura.Brush.FgMuted}"/>
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
