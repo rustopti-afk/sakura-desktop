@@ -28,4 +28,9 @@ public partial class NavigationControl : UserControl
     public NavigationControl() => InitializeComponent();
 }
 
-public sealed record NavItem(string Key, string Label, string IconGlyph);
+public sealed class NavItem
+{
+    public string Key { get; set; } = string.Empty;
+    public string Label { get; set; } = string.Empty;
+    public string IconGlyph { get; set; } = string.Empty;
+}

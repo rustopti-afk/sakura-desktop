@@ -27,13 +27,13 @@ public sealed partial class MainViewModel : ObservableObject
 
     public ObservableCollection<NavItem> NavItems { get; } =
     [
-        new("personalize",  "Personalize",    ""),
-        new("profiles",     "Profiles",       ""),
-        new("editor",       "New Profile",    "✏"),
-        new("terminal",     "Terminal",       ""),
-        new("integrations", "Integrations",   ""),
-        new("backup",       "Backups",        ""),
-        new("settings",     "Settings",       ""),
+        new() { Key = "personalize",  Label = "Personalize",    IconGlyph = "" },
+        new() { Key = "profiles",     Label = "Profiles",       IconGlyph = "" },
+        new() { Key = "editor",       Label = "New Profile",    IconGlyph = "✏" },
+        new() { Key = "terminal",     Label = "Terminal",       IconGlyph = "" },
+        new() { Key = "integrations", Label = "Integrations",   IconGlyph = "" },
+        new() { Key = "backup",       Label = "Backups",        IconGlyph = "" },
+        new() { Key = "settings",     Label = "Settings",       IconGlyph = "" },
     ];
 
     public MainViewModel(IServiceProvider services)
