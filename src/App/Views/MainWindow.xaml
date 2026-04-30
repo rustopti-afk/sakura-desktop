@@ -58,13 +58,13 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="{StaticResource Sakura.Size.StatusBar}"/>
+                <RowDefinition Height="28"/>
             </Grid.RowDefinitions>
 
             <!-- ── Main 3-pane area ───────────────────────────────────────── -->
             <Grid Grid.Row="0">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="{StaticResource Sakura.Size.Sidebar}"/>
+                    <ColumnDefinition Width="220"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition x:Name="PreviewCol" Width="Auto" MaxWidth="300"/>
                 </Grid.ColumnDefinitions>
@@ -80,7 +80,7 @@
                 <!-- Content column -->
                 <Grid Grid.Column="1">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="{StaticResource Sakura.Size.TitleBar}"/>
+                        <RowDefinition Height="48"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
@@ -210,7 +210,7 @@
                 <Grid Grid.Column="2" Background="{StaticResource Sakura.Brush.BgBase}"
                       ClipToBounds="True">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="{StaticResource Sakura.Size.TitleBar}"/>
+                        <RowDefinition Height="48"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
