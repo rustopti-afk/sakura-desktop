@@ -73,7 +73,7 @@ const PRODUCT_NAMES = [
 ];
 
 // Verified seeds that are already rendered in RustMaps (used for instant thumbnails on wipe)
-const RUSTMAPS_SEEDS_4000 = [12345, 55555, 77777, 100000, 1234567, 7654321];
+const RUSTMAPS_SEEDS_3800 = [12345, 55555, 77777, 100000, 1234567, 7654321];
 const RUSTMAPS_SEEDS_3500 = [12345, 55555, 77777, 100000, 1234567];
 
 // RCON — Rust WebRCON

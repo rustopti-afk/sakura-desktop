@@ -167,10 +167,10 @@ function http_get(string $url, array $headers = []): string|false {
 
 // Generates 3 random maps from pre-verified RustMaps seeds (images available instantly)
 function generate_wipe_maps(string $server, int $count = 3): void {
-    $size   = $server === 'monday' ? 3500 : 4000;
+    $size   = $server === 'monday' ? 3500 : 3800;
     $names  = ['Карта Alpha', 'Карта Beta', 'Карта Gamma'];
     $apiKey = RUSTMAPS_API_KEY;
-    $pool   = $size === 3500 ? RUSTMAPS_SEEDS_3500 : RUSTMAPS_SEEDS_4000;
+    $pool   = $size === 3500 ? RUSTMAPS_SEEDS_3500 : RUSTMAPS_SEEDS_3800;
 
     // Pick $count unique random seeds from verified pool
     shuffle($pool);
@@ -466,6 +466,29 @@ if ($method === 'GET' && $uri === '/auth/steam/callback') {
 }
 
 // ═════════════════════════════════════════════════════════════
+// SERVER STATUS  (replaces BattleMetrics on frontend)
+// ═════════════════════════════════════════════════════════════
+
+if ($method === 'GET' && $uri === '/server-status') {
+    header('Cache-Control: no-store');
+    $result = ['servers' => [], 'totalPlayers' => 0, 'activeServers' => 0];
+    foreach (array_keys(RCON_SERVERS) as $key) {
+        $rcon = rcon_send($key, 'status');
+        if ($rcon['ok'] && !empty($rcon['response'])) {
+            preg_match('/players\s*:\s*(\d+)\s*\((\d+)\s*max\)/i', $rcon['response'], $m);
+            $players    = isset($m[1]) ? (int)$m[1] : 0;
+            $maxPlayers = isset($m[2]) ? (int)$m[2] : 100;
+            $result['servers'][$key]  = ['online' => true, 'players' => $players, 'maxPlayers' => $maxPlayers];
+            $result['totalPlayers']  += $players;
+            $result['activeServers'] += 1;
+        } else {
+            $result['servers'][$key] = ['online' => false, 'players' => 0, 'maxPlayers' => 100];
+        }
+    }
+    out($result);
+}
+
+// ═════════════════════════════════════════════════════════════
 // AZLINK  (Rust plugin polls every 15s)
 // ═════════════════════════════════════════════════════════════
 
@@ -606,29 +629,41 @@ if ($method === 'POST' && $uri === '/vote') {
 
 if ($method === 'GET' && $uri === '/stats') {
     $server  = in_array($_GET['server'] ?? '', ['main', 'monday']) ? $_GET['server'] : 'main';
-    $limit   = min((int)($_GET['limit'] ?? 50), 200);
+    $limit   = min((int)($_GET['limit'] ?? 25), 200);
     $page    = max(1, (int)($_GET['page'] ?? 1));
     $offset  = ($page - 1) * $limit;
-    $sortMap = ['kills'=>'kills','deaths'=>'deaths','raids'=>'raids','playtime'=>'playtime','gathered'=>'gathered'];
+    $sortMap = ['kills'=>'kills','deaths'=>'deaths','kd'=>'kills','raids'=>'raids',
+                'playtime'=>'playtime','gathered'=>'gathered'];
     $sort    = $sortMap[$_GET['sort'] ?? ''] ?? 'kills';
-    $totalRegistered = (int)DB::q("SELECT COUNT(*) as c FROM players")[0]['c'];
-    $totalOnServer   = (int)DB::q("SELECT COUNT(*) as c FROM players WHERE server=?", [$server])[0]['c'];
-    $players = DB::q("SELECT * FROM players WHERE server=? ORDER BY `$sort` DESC LIMIT $limit OFFSET $offset", [$server]);
-    // add computed kd and rank
+    $dir     = ($_GET['dir'] ?? 'desc') === 'asc' ? 'ASC' : 'DESC';
+    $search  = trim($_GET['search'] ?? '');
+
+    $where  = 'WHERE server=?';
+    $params = [$server];
+    if ($search !== '') {
+        $where   .= ' AND name LIKE ?';
+        $params[] = '%' . $search . '%';
+    }
+
+    $total   = (int)DB::q("SELECT COUNT(*) as c FROM players $where", $params)[0]['c'];
+    $players = DB::q("SELECT * FROM players $where ORDER BY `$sort` $dir LIMIT $limit OFFSET $offset",
+                     array_merge($params, []));
+
     $rank = $offset + 1;
     foreach ($players as &$p) {
         $p['kd']   = $p['deaths'] > 0 ? round($p['kills'] / $p['deaths'], 2) : (float)$p['kills'];
         $p['rank'] = $rank++;
     }
     unset($p);
-    $agg     = DB::q("SELECT COALESCE(SUM(kills),0) as totalKills, COALESCE(SUM(raids),0) as totalRaids FROM players WHERE server=?", [$server])[0];
+
+    $agg = DB::q("SELECT COALESCE(SUM(kills),0) tk, COALESCE(SUM(raids),0) tr FROM players WHERE server=?", [$server])[0];
     out([
-        'players'    => $players,
-        'total'      => $totalRegistered,
-        'totalOnServer' => $totalOnServer,
-        'pages'      => max(1, (int)ceil($totalOnServer / $limit)),
-        'totalKills' => (int)$agg['totalKills'],
-        'totalRaids' => (int)$agg['totalRaids'],
+        'players'       => $players,
+        'total'         => $total,
+        'totalOnServer' => $total,
+        'pages'         => max(1, (int)ceil($total / $limit)),
+        'totalKills'    => (int)$agg['tk'],
+        'totalRaids'    => (int)$agg['tr'],
     ]);
 }
 
@@ -827,7 +862,7 @@ if ($uri === '/admin/maps') {
             "INSERT INTO maps (id,name,seed,size,type,imgUrl,mapUrl,monuments,`desc`,active,server)
              VALUES (?,?,?,?,?,?,?,?,?,?,?)",
             [
-                $id, $b['name'] ?? 'Map', $b['seed'] ?? '', (int)($b['size'] ?? 4000),
+                $id, $b['name'] ?? 'Map', $b['seed'] ?? '', (int)($b['size'] ?? 3800),
                 $b['type'] ?? 'Procedural_Map', $b['imgUrl'] ?? '', $b['mapUrl'] ?? '',
                 (int)($b['monuments'] ?? 0), $b['desc'] ?? '',
                 isset($b['active']) ? (int)(bool)$b['active'] : 1,
@@ -845,7 +880,7 @@ if ($p = route('/admin/maps/:id', $uri)) {
         DB::run(
             "UPDATE maps SET name=?,seed=?,size=?,type=?,imgUrl=?,mapUrl=?,monuments=?,`desc`=?,active=?,server=? WHERE id=?",
             [
-                $b['name'] ?? 'Map', $b['seed'] ?? '', (int)($b['size'] ?? 4000),
+                $b['name'] ?? 'Map', $b['seed'] ?? '', (int)($b['size'] ?? 3800),
                 $b['type'] ?? 'Procedural_Map', $b['imgUrl'] ?? '', $b['mapUrl'] ?? '',
                 (int)($b['monuments'] ?? 0), $b['desc'] ?? '',
                 isset($b['active']) ? (int)(bool)$b['active'] : 1,
