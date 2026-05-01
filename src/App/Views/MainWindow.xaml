@@ -23,19 +23,13 @@
 
     <Window.Resources>
         <x:Array x:Key="NavItems" Type="{x:Type ctl:NavItem}">
-            <ctl:NavItem Key="personalize" Label="Personalize"    IconGlyph="&#xE790;"/>
-            <ctl:NavItem Key="wm"          Label="Window Manager" IconGlyph="&#xE737;"/>
-            <ctl:NavItem Key="theme"       Label="Theme Engine"   IconGlyph="&#xE771;"/>
-            <ctl:NavItem Key="fonts"       Label="Typography"     IconGlyph="&#xE8D2;"/>
-            <ctl:NavItem Key="icons"       Label="Icons"          IconGlyph="&#xE8B7;"/>
-            <ctl:NavItem Key="wallpaper"   Label="Wallpaper"      IconGlyph="&#xEB9F;"/>
-            <ctl:NavItem Key="widgets"     Label="Widgets"        IconGlyph="&#xE950;"/>
-            <ctl:NavItem Key="terminal"    Label="Terminal"       IconGlyph="&#xE756;"/>
-            <ctl:NavItem Key="apps"        Label="App Overrides"  IconGlyph="&#xECAA;"/>
-            <ctl:NavItem Key="boot"        Label="Boot"           IconGlyph="&#xE7E8;"/>
-            <ctl:NavItem Key="profiles"    Label="Profiles"       IconGlyph="&#xE74E;"/>
-            <ctl:NavItem Key="backups"     Label="Backups"        IconGlyph="&#xE81C;"/>
-            <ctl:NavItem Key="settings"    Label="Settings"       IconGlyph="&#xE713;"/>
+            <ctl:NavItem Key="personalize"  Label="Personalize"   IconGlyph="&#xE790;"/>
+            <ctl:NavItem Key="profiles"     Label="Profiles"      IconGlyph="&#xE74E;"/>
+            <ctl:NavItem Key="editor"       Label="New Profile"   IconGlyph="&#xE70F;"/>
+            <ctl:NavItem Key="terminal"     Label="Terminal"      IconGlyph="&#xE756;"/>
+            <ctl:NavItem Key="integrations" Label="Integrations"  IconGlyph="&#xE737;"/>
+            <ctl:NavItem Key="backup"       Label="Backups"       IconGlyph="&#xE81C;"/>
+            <ctl:NavItem Key="settings"     Label="Settings"      IconGlyph="&#xE713;"/>
         </x:Array>
 
         <Storyboard x:Key="PreviewExpand">
