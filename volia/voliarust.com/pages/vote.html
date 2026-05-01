@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="uk" data-lang="uk">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Вибір карти — Воля Rust</title>
+  <link rel="icon" href="../assets/logo.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    /* ── Page wrapper ── */
+    .vote-wrapper {
+      min-height: 100vh;
+      background:
+        linear-gradient(to bottom, rgba(12,12,24,0.7) 0%, rgba(12,12,24,0.85) 40%, var(--bg) 100%),
+        url('../assets/hero-bg.webp') center/cover no-repeat fixed;
+      padding-top: 80px;
+    }
+
+    /* ── Server tabs ── */
+    .srv-tabs {
+      display: flex; gap: 10px; justify-content: center;
+      padding: 28px 0 0;
+    }
+    .srv-tab {
+      padding: 9px 28px; border-radius: 30px; cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.55);
+      font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; font-weight: 600;
+      letter-spacing: 0.04em; transition: all .2s;
+    }
+    .srv-tab:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .srv-tab.active {
+      background: var(--purple); border-color: var(--purple);
+      color: #fff; box-shadow: 0 4px 20px rgba(124,92,252,0.4);
+    }
+    .srv-tab.monday.active { background: #3b82f6; border-color: #3b82f6; box-shadow: 0 4px 20px rgba(59,130,246,0.4); }
+
+    /* ── Summary panel ── */
+    .vote-panel {
+      max-width: 560px; margin: 28px auto 0;
+      background: rgba(15,12,35,0.82);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px; padding: 24px 28px;
+    }
+    .vote-total {
+      text-align: center; margin-bottom: 20px;
+    }
+    .vote-total-num {
+      font-family: 'Rajdhani', sans-serif; font-size: 2.4rem; font-weight: 700;
+      line-height: 1; color: #fff;
+    }
+    .vote-total-label {
+      font-size: 0.8rem; color: rgba(255,255,255,0.45); margin-top: 2px;
+      text-transform: uppercase; letter-spacing: 0.08em;
+    }
+    .vote-wipe-row {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      font-size: 0.8rem; color: rgba(255,255,255,0.4);
+      margin-bottom: 20px; padding-bottom: 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .vote-wipe-row strong { color: rgba(255,255,255,0.75); }
+    .vote-wipe-countdown { font-family: 'Rajdhani', sans-serif; font-weight: 700; color: var(--purple); font-size: 1rem; }
+
+    /* ── Map rows in panel ── */
+    .map-row { margin-bottom: 14px; }
+    .map-row:last-child { margin-bottom: 0; }
+    .map-row-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 6px;
+    }
+    .map-row-name {
+      font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; font-weight: 600;
+      color: rgba(255,255,255,0.85); letter-spacing: 0.03em;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .map-voted-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: #4ade80;
+      box-shadow: 0 0 6px #4ade80; display: none;
+    }
+    .map-row.is-my-vote .map-voted-dot { display: block; }
+    .map-row-stats {
+      font-size: 0.8rem; color: rgba(255,255,255,0.4);
+    }
+    .map-row-stats strong { color: rgba(255,255,255,0.7); }
+    .map-bar-bg {
+      height: 8px; background: rgba(255,255,255,0.08); border-radius: 6px; overflow: hidden;
+    }
+    .map-bar-fill {
+      height: 100%; border-radius: 6px;
+      transition: width .8s cubic-bezier(.4,0,.2,1);
+    }
+    /* Bar colors per rank */
+    .bar-0 { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    .bar-1 { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+    .bar-2 { background: linear-gradient(90deg, #10b981, #34d399); }
+    .bar-3 { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+    .bar-4 { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+    /* ── Map cards ── */
+    .maps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px; max-width: 1100px; margin: 36px auto 60px;
+      padding: 0 20px;
+    }
+    .map-card {
+      background: rgba(15,12,35,0.75);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 18px; overflow: hidden;
+      transition: border-color .2s, transform .2s, box-shadow .2s;
+      backdrop-filter: blur(12px);
+    }
+    .map-card:hover {
+      border-color: rgba(124,92,252,0.5);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+    }
+    .map-card.is-voted {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 1px var(--purple), 0 16px 40px rgba(124,92,252,0.25);
+    }
+    .map-card.is-winner { border-color: #f59e0b; }
+
+    /* Map image area */
+    .map-img-wrap {
+      position: relative; height: 190px; overflow: hidden;
+    }
+    .map-img-wrap img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform .4s; display: block;
+    }
+    .map-card:hover .map-img-wrap img { transform: scale(1.05); }
+
+    /* CSS map placeholder — grid pattern */
+    .map-placeholder {
+      width: 100%; height: 100%;
+      background:
+        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px),
+        radial-gradient(ellipse at 30% 60%, rgba(34,85,42,0.25) 0%, transparent 55%),
+        radial-gradient(ellipse at 70% 30%, rgba(20,50,80,0.3) 0%, transparent 50%),
+        linear-gradient(160deg, #0a1628 0%, #0e1f38 40%, #091525 100%);
+      background-size: 36px 36px, 36px 36px, 100% 100%, 100% 100%, 100% 100%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+      position: relative;
+    }
+    .map-placeholder::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(124,92,252,0.06) 0%, transparent 70%);
+    }
+    .map-placeholder-type {
+      font-family: 'Rajdhani', sans-serif; font-size: 0.75rem; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: rgba(255,255,255,0.2); position: relative; z-index: 1;
+    }
+    .map-placeholder-seed {
+      font-family: monospace; font-size: 0.7rem;
+      color: rgba(255,255,255,0.1); position: relative; z-index: 1;
+    }
+
+    /* Rank ribbon */
+    .map-rank-badge {
+      position: absolute; top: 12px; left: 12px;
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Rajdhani', sans-serif; font-size: 1rem; font-weight: 800;
+    }
+    .rank-1 { background: rgba(245,158,11,0.9); color: #000; }
+    .rank-2 { background: rgba(59,130,246,0.9); color: #fff; }
+    .rank-3 { background: rgba(16,185,129,0.9); color: #000; }
+    .rank-n { background: rgba(0,0,0,0.6); color: rgba(255,255,255,0.6); }
+
+    /* Winner crown */
+    .map-crown {
+      position: absolute; top: 12px; right: 12px;
+      background: rgba(245,158,11,0.9);
+      border-radius: 8px; padding: 3px 8px;
+      font-size: 0.72rem; font-weight: 700; color: #000;
+      display: none;
+    }
+    .map-card.is-winner .map-crown { display: block; }
+
+    /* My vote badge */
+    .map-my-vote {
+      position: absolute; bottom: 12px; right: 12px;
+      background: rgba(74,222,128,0.9); color: #000;
+      border-radius: 8px; padding: 3px 8px;
+      font-size: 0.72rem; font-weight: 700;
+      display: none; align-items: center; gap: 4px;
+    }
+    .map-card.is-voted .map-my-vote { display: flex; }
+
+    /* Percent overlay */
+    .map-pct-overlay {
+      position: absolute; bottom: 12px; left: 12px;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+      border-radius: 8px; padding: 4px 10px;
+      font-family: 'Rajdhani', sans-serif; font-size: 1rem; font-weight: 700;
+      color: #fff;
+    }
+
+    /* Card body */
+    .map-body { padding: 14px 16px 13px; }
+    .map-name {
+      font-family: 'Rajdhani', sans-serif; font-size: 1.05rem; font-weight: 700;
+      color: #fff; margin-bottom: 8px; letter-spacing: 0.02em;
+    }
+    .map-stats {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;
+    }
+    .map-stat {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 6px; padding: 3px 8px;
+      font-size: 0.75rem; color: rgba(255,255,255,0.55);
+      font-family: 'Rajdhani', sans-serif; font-weight: 600;
+    }
+    .map-stat i { font-size: 0.65rem; opacity: 0.7; }
+    .map-stat-votes {
+      margin-left: auto; background: rgba(124,92,252,0.1);
+      border-color: rgba(124,92,252,0.2); color: var(--purple);
+    }
+
+    /* Mini bar in card */
+    .card-bar-bg { height: 5px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; margin-bottom: 14px; }
+    .card-bar-fill { height: 100%; border-radius: 4px; transition: width .8s; }
+
+    /* Buttons */
+    .card-btns { display: flex; gap: 8px; }
+    .vote-btn {
+      flex: 1; padding: 10px; border-radius: 10px; cursor: pointer;
+      font-family: 'Rajdhani', sans-serif; font-size: 0.95rem; font-weight: 700;
+      border: 1px solid rgba(124,92,252,0.3);
+      background: rgba(124,92,252,0.12); color: var(--purple);
+      transition: all .15s; display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .vote-btn:hover:not(.is-voted) { background: var(--purple); color: #fff; border-color: var(--purple); }
+    .vote-btn.is-voted { background: rgba(74,222,128,0.12); border-color: #4ade80; color: #4ade80; cursor: default; }
+    .rustmaps-btn {
+      padding: 10px 16px; border-radius: 10px; cursor: pointer;
+      font-family: 'Rajdhani', sans-serif; font-size: 0.9rem; font-weight: 700;
+      border: 1px solid rgba(205,65,42,0.5); background: rgba(205,65,42,0.12);
+      color: #e8684a; transition: all .15s; text-decoration: none;
+      display: flex; align-items: center; gap: 6px; white-space: nowrap;
+      letter-spacing: 0.03em;
+    }
+    .rustmaps-btn:hover { background: rgba(205,65,42,0.25); color: #ff8060; border-color: rgba(205,65,42,0.8); box-shadow: 0 4px 14px rgba(205,65,42,0.25); }
+
+    /* Loading / empty */
+    .vote-loading { text-align: center; padding: 60px; color: rgba(255,255,255,0.35); font-size: 0.9rem; }
+    .vote-loading i { font-size: 2rem; display: block; margin-bottom: 12px; }
+
+    /* Steam auth bar */
+    .steam-auth-bar {
+      max-width: 560px; margin: 16px auto 0;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px; padding: 12px 18px;
+    }
+    .steam-user-info { display: flex; align-items: center; gap: 10px; }
+    .steam-user-avatar {
+      width: 32px; height: 32px; border-radius: 6px; object-fit: cover;
+    }
+    .steam-user-name { font-family: 'Rajdhani',sans-serif; font-weight: 600; color: #fff; font-size: 0.95rem; }
+    .steam-login-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #1b2838; border: 1px solid #4a90d9; color: #c7d5e0;
+      border-radius: 10px; padding: 8px 16px; text-decoration: none;
+      font-family: 'Rajdhani',sans-serif; font-size: 0.9rem; font-weight: 600;
+      transition: all .2s; white-space: nowrap;
+    }
+    .steam-login-link:hover { background: #2a475e; color: #fff; }
+    .logout-link {
+      font-size: 0.78rem; color: rgba(255,255,255,0.35); cursor: pointer;
+      background: none; border: none; padding: 4px 10px;
+      border-radius: 6px; transition: all .15s; white-space: nowrap;
+    }
+    .logout-link:hover { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.06); }
+
+    /* Toast */
+    .vote-toast {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+      background: rgba(15,12,35,0.95); border: 1px solid var(--purple);
+      color: #fff; padding: 12px 22px; border-radius: 12px;
+      font-size: 0.88rem; font-weight: 500; z-index: 9999;
+      opacity: 0; transition: opacity .25s; pointer-events: none;
+      display: flex; align-items: center; gap: 9px; white-space: nowrap;
+      backdrop-filter: blur(12px);
+    }
+    .vote-toast.show { opacity: 1; }
+    .vote-toast i { color: #4ade80; }
+
+    @media (max-width: 640px) {
+      .maps-grid { grid-template-columns: 1fr; }
+      .vote-panel { margin: 20px 16px 0; }
+    }
+  </style>
+</head>
+<body style="background: var(--bg);">
+
+  <nav class="navbar" id="navbar">
+    <div class="container nav-inner">
+      <a href="/" class="nav-logo">
+        <img src="../assets/logo.png" alt="Воля Rust" />
+        <div class="nav-logo-text">
+          <span class="nav-logo-name">Воля <span class="accent">Rust</span></span>
+          <span class="nav-logo-sub">Ukraine Rust Community</span>
+        </div>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="shop.html"><i class="fas fa-store"></i> <span data-i18n="nav.shop">Магазин</span></a></li>
+        <li><a href="news.html"><i class="fas fa-newspaper"></i> <span data-i18n="nav.news">Новини</span></a></li>
+        <li><a href="vote.html" class="active"><i class="fas fa-map"></i> <span data-i18n="nav.vote">Голосування</span></a></li>
+        <li><a href="statistics.html"><i class="fas fa-chart-bar"></i> <span data-i18n="nav.stats">Статистика</span></a></li>
+        <li><a href="support.html"><i class="fas fa-headset"></i> <span data-i18n="nav.support">Підтримка</span></a></li>
+      </ul>
+      <div class="nav-actions">
+        <div class="lang-dropdown" id="langDropdown">
+          <button class="lang-switch" onclick="toggleLangMenu()">
+            <span class="lang-flag" id="langFlag">UA</span>
+            <i class="fas fa-chevron-down lang-arrow" id="langArrow"></i>
+          </button>
+          <div class="lang-menu" id="langMenu">
+            <button class="lang-option active" data-lang="uk" onclick="selectLang('uk')">UA — Українська</button>
+            <button class="lang-option" data-lang="en" onclick="selectLang('en')">EN — English</button>
+            <button class="lang-option" data-lang="ru" onclick="selectLang('ru')">RU — Русский</button>
+          </div>
+        </div>
+        <div id="navAuth">
+          <a href="login.html" class="btn-steam-mini">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.606 0 11.979 0z"/></svg>
+            <span data-i18n="nav.login">Увійти</span>
+          </a>
+        </div>
+        <button class="burger" id="burger"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="vote-wrapper">
+    <div class="container" style="text-align:center; padding-top: 0;">
+      <h1 style="font-family:'Rajdhani',sans-serif; font-size:2rem; font-weight:700; color:#fff; padding-top:28px; margin:0;">
+        <i class="fas fa-map" style="color:var(--purple); margin-right:10px"></i><span data-i18n="vote.page.title">Вибір карти</span>
+      </h1>
+      <p style="font-size:0.85rem; color:rgba(255,255,255,0.4); margin-top:6px;" data-i18n="vote.page.sub">
+        Обери карту для наступного вайпу. Один голос з одного браузера.
+      </p>
+    </div>
+
+    <!-- Server tabs -->
+    <div class="srv-tabs">
+      <button class="srv-tab active" id="tab-main" onclick="switchServer('main')">
+        <i class="fas fa-fire"></i>&nbsp; <span data-i18n="vote.tab.main">Main ×2 — Четвер</span>
+      </button>
+      <button class="srv-tab monday" id="tab-monday" onclick="switchServer('monday')">
+        <i class="fas fa-bolt"></i>&nbsp; <span data-i18n="vote.tab.monday">Monday ×2 — Понеділок</span>
+      </button>
+    </div>
+
+    <!-- Summary panel -->
+    <div class="vote-panel" id="votePanel">
+      <div class="vote-loading"><i class="fas fa-circle-notch fa-spin"></i><span data-i18n="vote.loading">Завантаження...</span></div>
+    </div>
+
+    <!-- Map cards -->
+    <div class="maps-grid" id="mapsGrid">
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <div class="footer-logo"><img src="../assets/logo.png" alt="" /><span>Воля <span class="accent">Rust</span></span></div>
+        <p data-i18n="footer.desc">Українська Rust спільнота. Воля в кожному бою.</p>
+        <div class="socials">
+          <a href="https://discord.gg/FJJYfhqvgj" target="_blank"><i class="fab fa-discord"></i></a>
+          <a href="https://www.tiktok.com/@volia.rust" target="_blank"><i class="fab fa-tiktok"></i></a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4 data-i18n="footer.nav">Навігація</h4>
+        <a href="/" data-i18n="nav.home">Головна</a><a href="shop.html" data-i18n="nav.shop">Магазин</a>
+        <a href="vote.html">Вибір карти</a><a href="rules.html" data-i18n="footer.rules">Правила</a>
+      </div>
+      <div class="footer-links">
+        <h4 data-i18n="footer.legal">Правова інфо</h4>
+        <a href="rules.html" data-i18n="footer.rules">Правила сервера</a>
+        <a href="terms.html" data-i18n="footer.terms">Угода користувача</a>
+        <a href="privacy.html" data-i18n="footer.privacy">Конфіденційність</a>
+      </div>
+    </div>
+    <div class="footer-bottom"><span data-i18n="footer.copy">© 2025–2026 Воля Rust. Всі права захищені.</span></div>
+  </footer>
+
+  <div class="vote-toast" id="voteToast">
+    <i class="fas fa-check-circle"></i><span id="voteToastMsg"></span>
+  </div>
+
+  <!-- Steam login modal -->
+  <style>
+    #loginModal { display:none; position:fixed; inset:0; z-index:1000; background:rgba(0,0,0,.7); backdrop-filter:blur(4px); align-items:center; justify-content:center; }
+    #loginModal.open { display:flex; }
+  </style>
+  <div id="loginModal" onclick="if(event.target===this)this.classList.remove('open')">
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:32px 28px;max-width:360px;width:90%;text-align:center">
+      <i class="fab fa-steam" style="font-size:3rem;color:#4ade80;display:block;margin-bottom:16px"></i>
+      <h3 style="font-family:'Rajdhani',sans-serif;font-size:1.4rem;margin-bottom:8px" data-i18n="vote.login.title">Увійдіть через Steam</h3>
+      <p style="color:var(--text-sub);font-size:0.88rem;margin-bottom:24px;line-height:1.5" data-i18n="vote.login.desc">Щоб проголосувати, необхідно увійти через Steam.</p>
+      <a href="/api/auth/steam?from=vote" style="display:flex;align-items:center;justify-content:center;gap:8px;background:var(--purple);color:#fff;border:none;border-radius:10px;padding:12px 20px;font-family:'Rajdhani',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;text-decoration:none;margin-bottom:12px">
+        <i class="fab fa-steam"></i> <span data-i18n="vote.login.btn">Увійти через Steam</span>
+      </a>
+      <button onclick="document.getElementById('loginModal').classList.remove('open')"
+        style="background:none;border:none;color:var(--text-sub);font-size:0.85rem;cursor:pointer;font-family:'Inter',sans-serif" data-i18n="vote.login.cancel">Скасувати</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="../js/content.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+  const API = '/api';
+  const t = (key, fallback) => (typeof translations !== 'undefined' && translations[currentLang]?.[key]) || fallback;
+  const BAR_COLORS  = ['bar-0','bar-1','bar-2','bar-3','bar-4'];
+  const CARD_ACCENT = ['#f59e0b','#3b82f6','#10b981','#8b5cf6','#ef4444'];
+
+  let server   = 'main';
+  let data     = null;
+  let wipeIv   = null;
+  let voting   = false;
+  let toastTm;
+
+  // ── Browser ID (anonymous vote tracking) ────────────────────
+  function getBrowserId() {
+    let id = localStorage.getItem('volia_browser_id');
+    if (!id) {
+      id = 'br_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem('volia_browser_id', id);
+    }
+    return id;
+  }
+
+  function switchServer(srv) {
+    server = srv;
+    document.getElementById('tab-main').classList.toggle('active', srv === 'main');
+    document.getElementById('tab-monday').classList.toggle('active', srv === 'monday');
+    load();
+  }
+
+  // ── Load from API ────────────────────────────────────────────
+  async function load() {
+    document.getElementById('votePanel').innerHTML =
+      '<div class="vote-loading"><i class="fas fa-circle-notch fa-spin"></i>Завантаження...</div>';
+    document.getElementById('mapsGrid').innerHTML = '';
+    try {
+      const r = await fetch(`${API}/maps?server=${server}&browserId=${encodeURIComponent(getBrowserId())}`);
+      if (!r.ok) throw new Error(r.status);
+      data = await r.json();
+      renderPanel();
+      renderCards();
+      startWipeTimer(data.wipeDate);
+    } catch(e) {
+      document.getElementById('votePanel').innerHTML =
+        `<div class="vote-loading"><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i>
+         Сервер голосування недоступний<br>
+         <button onclick="load()" style="margin-top:12px;padding:7px 18px;background:var(--purple);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:Rajdhani,sans-serif;font-weight:700">Повторити</button>
+        </div>`;
+    }
+  }
+
+  // ── Summary panel ────────────────────────────────────────────
+  function renderPanel() {
+    const { maps, totalVotes, myVoteMapId, wipeDate } = data;
+    const sorted = [...maps].sort((a,b) => b.votes - a.votes);
+    const accentColor = server === 'monday' ? '#3b82f6' : 'var(--purple)';
+    const wipe = new Date(wipeDate);
+    const lang = (typeof currentLang !== 'undefined') ? currentLang : 'uk';
+    const days = lang === 'en'
+      ? ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+      : ['нд','пн','вт','ср','чт','пт','сб'];
+    const wipeFmt = wipe.toLocaleDateString(lang === 'en' ? 'en' : 'uk', {day:'numeric',month:'long'}) + ' (' + days[wipe.getDay()] + ')';
+
+    document.getElementById('votePanel').innerHTML = `
+      <div class="vote-total">
+        <div class="vote-total-num">${totalVotes}</div>
+        <div class="vote-total-label">${t('vote.total.label','всього голосів')}</div>
+      </div>
+      <div class="vote-wipe-row">
+        <i class="fas fa-sync-alt"></i>
+        <span>${t('vote.wipe.label','Вайп:')} <strong>${wipeFmt}</strong></span>
+        <span>·</span>
+        <span>${t('vote.timer.label','До вайпу:')} <span class="vote-wipe-countdown" id="wipeCountdown" style="color:${accentColor}">—</span></span>
+      </div>
+      ${sorted.map((m,i) => `
+        <div class="map-row${myVoteMapId === m.id ? ' is-my-vote' : ''}">
+          <div class="map-row-header">
+            <div class="map-row-name">
+              <div class="map-voted-dot"></div>
+              ${esc(m.name)}
+            </div>
+            <div class="map-row-stats"><strong>${m.votes}</strong> (${m.percent}%)</div>
+          </div>
+          <div class="map-bar-bg">
+            <div class="map-bar-fill ${BAR_COLORS[i] || BAR_COLORS[0]}" style="width:${m.percent}%"></div>
+          </div>
+        </div>
+      `).join('')}
+    `;
+  }
+
+  // ── Map cards ────────────────────────────────────────────────
+  function renderCards() {
+    const { maps, myVoteMapId, totalVotes } = data;
+    const sorted = [...maps].sort((a,b) => b.votes - a.votes);
+    const grid   = document.getElementById('mapsGrid');
+
+    grid.innerHTML = sorted.map((m, i) => {
+      const isVoted  = m.id === myVoteMapId;
+      const isWinner = i === 0 && totalVotes > 0;
+      const rank     = i + 1;
+      const accent   = CARD_ACCENT[i] || CARD_ACCENT[0];
+      const barCls   = BAR_COLORS[i] || BAR_COLORS[0];
+
+      const mapType     = m.type || 'Procedural_Map';
+      const mapImg      = m.imgUrl || '';
+      const typeLabel   = mapType === 'Barren' ? 'Barren' : 'Procedural';
+      const rustmapsUrl = m.mapUrl || (m.seed
+        ? `https://rustmaps.com/${mapType}/${m.size}_${m.seed}`
+        : 'https://rustmaps.com');
+
+      const rankHtml = rank <= 3
+        ? `<div class="map-rank-badge rank-${rank}">${rank}</div>`
+        : `<div class="map-rank-badge rank-n">${rank}</div>`;
+
+      const imgHtml = mapImg
+        ? `<img src="${mapImg}" alt="${esc(m.name)}"
+             onload="this.style.opacity=1"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+             style="opacity:0;transition:opacity .4s;width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" />
+           <div class="map-placeholder" style="display:none">
+             <div class="map-placeholder-type">${typeLabel}</div>
+             <div class="map-placeholder-seed">${m.seed || ''}</div>
+           </div>`
+        : `<div class="map-placeholder">
+             <div class="map-placeholder-type">${typeLabel}</div>
+             <div class="map-placeholder-seed">${m.seed || ''}</div>
+           </div>`;
+
+      return `
+      <div class="map-card${isVoted?' is-voted':''}${isWinner?' is-winner':''}" id="card-${m.id}">
+        <div class="map-img-wrap" style="position:relative">
+          ${imgHtml}
+          ${rankHtml}
+          <div class="map-crown">👑 ${t('vote.leader','Лідер')}</div>
+          <div class="map-my-vote"><i class="fas fa-check"></i> ${t('vote.your.vote','Ваш голос')}</div>
+          <div class="map-pct-overlay">${m.percent}%</div>
+        </div>
+        <div class="map-body">
+          <div class="map-name">${esc(m.name)}</div>
+          <div class="map-stats">
+            <span class="map-stat"><i class="fas fa-expand-arrows-alt"></i> ${m.size}</span>
+            ${m.seed ? `<span class="map-stat"><i class="fas fa-hashtag"></i> ${esc(m.seed)}</span>` : ''}
+            ${m.monuments ? `<span class="map-stat"><i class="fas fa-landmark"></i> ${m.monuments}</span>` : ''}
+            <span class="map-stat map-stat-votes"><i class="fas fa-vote-yea"></i> ${m.votes}</span>
+          </div>
+          <div class="card-bar-bg">
+            <div class="card-bar-fill ${barCls}" style="width:${m.percent}%"></div>
+          </div>
+          <div class="card-btns">
+            <button class="vote-btn${isVoted?' is-voted':''}" onclick="castVote(${m.id})">
+              ${isVoted
+                ? `<i class="fas fa-check-circle"></i> ${t('vote.btn.voted','Ваш вибір')}`
+                : `<i class="fas fa-vote-yea"></i> ${t('vote.btn.vote','Голосувати')}`}
+            </button>
+            <a href="${rustmapsUrl}" target="_blank" class="rustmaps-btn">
+              <i class="fas fa-map"></i> RustMaps
+            </a>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Vote ────────────────────────────────────────────────────
+  async function castVote(mapId) {
+    if (!getSavedSteam()) { showLoginModal(mapId); return; }
+    if (voting) return;
+    voting = true;
+    try {
+      const r = await fetch(`${API}/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mapId, server, browserId: getBrowserId() }),
+      });
+      const res = await r.json();
+      if (!res.ok) throw new Error(res.error);
+      data.myVoteMapId = res.myVoteMapId;
+      data.totalVotes  = res.totalVotes;
+      data.maps        = res.maps;
+      renderPanel();
+      renderCards();
+      const map = data.maps.find(m => m.id === mapId);
+      toast(res.changed ? `Голос змінено → «${map?.name}»` : `Проголосовано за «${map?.name}»!`);
+    } catch(e) { toast('Помилка: ' + e.message); }
+    finally { voting = false; }
+  }
+
+  // ── Wipe timer ───────────────────────────────────────────────
+  function startWipeTimer(iso) {
+    if (wipeIv) clearInterval(wipeIv);
+    const wipe = new Date(iso);
+    function tick() {
+      const el = document.getElementById('wipeCountdown');
+      if (!el) return;
+      const diff = wipe - Date.now();
+      if (diff <= 0) { el.textContent = 'ВАЙП!'; return; }
+      const d=Math.floor(diff/86400000), h=Math.floor(diff%86400000/3600000),
+            m=Math.floor(diff%3600000/60000), s=Math.floor(diff%60000/1000);
+      el.textContent = d > 0
+        ? `${d}д ${h}г ${m}хв`
+        : `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+    tick(); wipeIv = setInterval(tick, 1000);
+  }
+
+  function toast(msg) {
+    const el = document.getElementById('voteToast');
+    document.getElementById('voteToastMsg').textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTm);
+    toastTm = setTimeout(() => el.classList.remove('show'), 3000);
+  }
+
+  function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // ── Steam auth ───────────────────────────────────────────────
+  function getSavedSteam() {
+    try {
+      const tk = localStorage.getItem('volia_steam_token');
+      const u  = JSON.parse(localStorage.getItem('volia_user') || 'null');
+      if (!tk || !u?.steamId) return null;
+      const p = JSON.parse(atob(tk.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+      if (p.exp && p.exp < Math.floor(Date.now() / 1000)) {
+        localStorage.removeItem('volia_steam_token');
+        localStorage.removeItem('volia_user');
+        return null;
+      }
+      return { id: u.steamId, name: u.nickname || u.steamId };
+    } catch { return null; }
+  }
+
+  function showLoginModal(mapId) {
+    localStorage.setItem('volia_pending_vote', JSON.stringify({ mapId, server }));
+    const modal = document.getElementById('loginModal');
+    if (modal) modal.classList.add('open');
+  }
+
+  // After Steam return — auto-cast pending vote
+  (function resumePendingVote() {
+    const p = new URLSearchParams(location.search);
+    const token = p.get('token');
+    if (token) {
+      localStorage.setItem('volia_steam_token', token);
+      history.replaceState({}, '', location.pathname);
+    }
+    const pending = JSON.parse(localStorage.getItem('volia_pending_vote') || 'null');
+    if (pending && getSavedSteam()) {
+      localStorage.removeItem('volia_pending_vote');
+      server = pending.server || 'main';
+      document.getElementById('tab-main').classList.toggle('active', server === 'main');
+      document.getElementById('tab-monday').classList.toggle('active', server === 'monday');
+      setTimeout(async () => {
+        await load();
+        castVote(pending.mapId);
+      }, 300);
+    }
+  })();
+
+  (async () => {
+    getBrowserId();
+    load();
+    setInterval(load, 30000);
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="uk" data-lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Вхід — Воля Rust</title>
+  <link rel="icon" href="../assets/logo.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/auth.css" />
+</head>
+<body>
+  <nav class="navbar" id="navbar">
+    <div class="container nav-inner">
+      <a href="/" class="nav-logo">
+        <img src="../assets/logo.png" alt="Воля Rust" />
+        <div class="nav-logo-text">
+          <span class="nav-logo-name">Воля <span class="accent">Rust</span></span>
+          <span class="nav-logo-sub">Ukraine Rust Community</span>
+        </div>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="shop.html"><i class="fas fa-store"></i> <span data-i18n="nav.shop">Магазин</span></a></li>
+        <li><a href="news.html"><i class="fas fa-newspaper"></i> <span data-i18n="nav.news">Новини</span></a></li>
+        <li><a href="vote.html"><i class="fas fa-map"></i> <span data-i18n="nav.vote">Голосування</span></a></li>
+        <li><a href="statistics.html"><i class="fas fa-chart-bar"></i> <span data-i18n="nav.stats">Статистика</span></a></li>
+        <li><a href="support.html"><i class="fas fa-headset"></i> <span data-i18n="nav.support">Підтримка</span></a></li>
+      </ul>
+      <div class="nav-actions">
+        <div class="lang-dropdown" id="langDropdown">
+          <button class="lang-switch" onclick="toggleLangMenu()">
+            <span class="lang-flag" id="langFlag">UA</span>
+            <i class="fas fa-chevron-down lang-arrow" id="langArrow"></i>
+          </button>
+          <div class="lang-menu" id="langMenu">
+            <button class="lang-option active" data-lang="uk" onclick="selectLang('uk')">UA — Українська</button>
+            <button class="lang-option" data-lang="en" onclick="selectLang('en')">EN — English</button>
+            <button class="lang-option" data-lang="ru" onclick="selectLang('ru')">RU — Русский</button>
+          </div>
+        </div>
+        <div id="navAuth"></div>
+        <button class="burger" id="burger"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="auth-page">
+    <div class="auth-bg"><div class="auth-glow"></div></div>
+    <div class="auth-card">
+      <div class="auth-logo">
+        <img src="../assets/logo.png" alt="Воля Rust" />
+        <span>Воля <span class="accent">Rust</span></span>
+      </div>
+      <h1 class="auth-title" data-i18n="login.title">Вхід на сайт</h1>
+      <p class="auth-sub" data-i18n="login.sub">Для входу використовується ваш акаунт Steam.<br>Ніяких паролів — тільки Steam.</p>
+
+      <button class="btn-steam" id="steamLoginBtn" onclick="loginWithSteam()">
+        <svg class="steam-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.606 0 11.979 0z"/></svg>
+        <span data-i18n="login.btn">Увійти через Steam</span>
+      </button>
+
+
+      <div class="auth-info-box">
+        <i class="fas fa-info-circle"></i>
+        <div>
+          <strong data-i18n="login.why.title">Чому Steam?</strong>
+          <p data-i18n="login.why.desc">Rust — гра Steam. Вхід через Steam гарантує що ти реальний гравець та захищає акаунт.</p>
+        </div>
+      </div>
+
+      <div class="auth-steam-steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <span data-i18n="login.step1">Натисни кнопку</span>
+        </div>
+        <div class="step-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <span data-i18n="login.step2">Авторизуйся в Steam</span>
+        </div>
+        <div class="step-arrow"><i class="fas fa-arrow-right"></i></div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <span data-i18n="login.step3">Повернись на сайт</span>
+        </div>
+      </div>
+
+      <p class="auth-terms" data-i18n="login.terms">Входячи, ти погоджуєшся з <a href="#">Правилами</a> та <a href="#">Угодою</a>.</p>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="../js/i18n.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    function loginWithSteam() {
+      const btn = document.getElementById('steamLoginBtn');
+      btn.classList.add('loading');
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Перенаправлення...';
+      // Get the page user came from (stored in sessionStorage by main.js when login redirect happens)
+      const from = sessionStorage.getItem('login_from') || 'home';
+      // Use backend flow — issues JWT after Steam verification
+      window.location.href = '/api/auth/steam?from=' + encodeURIComponent(from);
+    }
+  </script>
+</body>
+</html>

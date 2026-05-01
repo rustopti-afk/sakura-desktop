@@ -1,0 +1,3357 @@
+<!DOCTYPE html>
+<html lang="uk" data-lang="uk">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Адмін панель — Воля Rust</title>
+  <link rel="icon" href="../assets/logo.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    body { background: var(--bg); }
+
+    .admin-wrap { display: flex; min-height: 100vh; padding-top: 64px; }
+
+    /* ── Sidebar ── */
+    .admin-sidebar {
+      width: 240px; flex-shrink: 0;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      padding: 20px 12px;
+      position: fixed; top: 64px; left: 0; bottom: 0;
+      overflow-y: auto; z-index: 10;
+    }
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 10px 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 12px;
+    }
+    .sidebar-logo img { width: 32px; height: 32px; border-radius: 8px; }
+    .sidebar-logo span { font-family: 'Rajdhani', sans-serif; font-size: 1rem; font-weight: 700; }
+    .admin-tag-small {
+      font-size: 0.62rem; background: rgba(239,68,68,0.15); color: #ef4444;
+      border: 1px solid rgba(239,68,68,0.25); border-radius: 4px;
+      padding: 1px 6px; font-weight: 700; letter-spacing: 0.05em;
+    }
+    .sidebar-section { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-sub); padding: 14px 10px 4px; }
+    .sidebar-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: 8px; cursor: pointer;
+      font-size: 0.875rem; color: var(--text-sub);
+      border: none; background: none; width: 100%; text-align: left;
+      transition: all 0.15s; position: relative;
+    }
+    .sidebar-item:hover { background: var(--bg-card2); color: var(--text); }
+    .sidebar-item.active { background: rgba(124,92,252,0.12); color: var(--purple); font-weight: 500; }
+    .sidebar-item i { width: 18px; text-align: center; font-size: 0.9rem; }
+    .sidebar-badge {
+      margin-left: auto; min-width: 20px; height: 20px;
+      background: #ef4444; color: #fff; border-radius: 10px;
+      font-size: 0.68rem; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 5px;
+    }
+
+    /* ── Main content ── */
+    .admin-main { margin-left: 240px; flex: 1; padding: 28px 32px; }
+
+    /* ── Panel ── */
+    .admin-panel { display: none; }
+    .admin-panel.active { display: block; }
+
+    .panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+    }
+    .panel-header h2 {
+      font-family: 'Rajdhani', sans-serif; font-size: 1.5rem; font-weight: 700;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .panel-header h2 i { color: var(--purple); }
+
+    /* ── Stats ── */
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 14px; margin-bottom: 24px; }
+    .stat-box {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 18px 16px; display: flex; flex-direction: column; gap: 4px;
+    }
+    .stat-box-num { font-family: 'Rajdhani',sans-serif; font-size: 2rem; font-weight: 700; line-height: 1; color: var(--purple); }
+    .stat-box-label { font-size: 0.75rem; color: var(--text-sub); }
+    .stat-box.green .stat-box-num { color: var(--green); }
+    .stat-box.red .stat-box-num { color: #ef4444; }
+    .stat-box.yellow .stat-box-num { color: #f59e0b; }
+
+    /* ── Table ── */
+    .table-wrap { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+    .table-toolbar { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .table-search {
+      flex: 1; min-width: 200px; background: var(--bg-card2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 7px 12px; color: var(--text); font-size: 0.85rem;
+      font-family: 'Inter',sans-serif; outline: none;
+    }
+    .table-search:focus { border-color: var(--purple); }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-sub); padding: 11px 16px; background: var(--bg-card2); border-bottom: 1px solid var(--border); white-space: nowrap; }
+    td { padding: 11px 16px; border-bottom: 1px solid var(--border); font-size: 0.875rem; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    .empty-cell { text-align: center; padding: 48px !important; color: var(--text-sub); font-size: 0.9rem; }
+    .empty-cell i { display: block; font-size: 2rem; opacity: 0.2; margin-bottom: 10px; }
+
+    /* ── Badges ── */
+    .badge { font-size: 0.7rem; padding: 3px 9px; border-radius: 20px; font-weight: 700; white-space: nowrap; }
+    .badge-open { background: rgba(124,92,252,0.15); color: var(--purple); }
+    .badge-closed { background: rgba(75,85,99,0.2); color: var(--text-sub); }
+    .badge-answered { background: rgba(34,197,94,0.15); color: var(--green); }
+    .badge-banned { background: rgba(239,68,68,0.15); color: #ef4444; }
+    .badge-admin { background: rgba(245,158,11,0.15); color: #f59e0b; }
+    .badge-player { background: rgba(75,85,99,0.15); color: var(--text-sub); }
+    .badge-active { background: rgba(34,197,94,0.15); color: var(--green); }
+
+    /* ── Buttons ── */
+    .btn-a { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-family: 'Rajdhani',sans-serif; font-size: 0.9rem; font-weight: 700; cursor: pointer; border: none; transition: all 0.15s; }
+    .btn-a:hover { transform: translateY(-1px); }
+    .btn-purple { background: var(--purple); color: #fff; }
+    .btn-purple:hover { background: var(--purple-h); }
+    .btn-red { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.25); }
+    .btn-red:hover { background: rgba(239,68,68,0.25); }
+    .btn-green { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.25); }
+    .btn-green:hover { background: rgba(34,197,94,0.25); }
+    .btn-gray { background: var(--bg-card2); color: var(--text-sub); border: 1px solid var(--border); }
+    .btn-gray:hover { color: var(--text); border-color: var(--border-act); }
+    .btn-sm-a { padding: 5px 10px; font-size: 0.78rem; border-radius: 6px; }
+
+    /* ── Modal ── */
+    .modal-overlay { display:none; position:fixed; inset:0; z-index:1000; background:rgba(0,0,0,0.75); backdrop-filter:blur(4px); align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal-box { background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:28px; width:100%; max-width:560px; margin:16px; position:relative; max-height:90vh; overflow-y:auto; }
+    .modal-title { font-family:'Rajdhani',sans-serif; font-size:1.3rem; font-weight:700; margin-bottom:18px; }
+    .modal-close-btn { position:absolute; top:16px; right:16px; background:none; border:none; color:var(--text-sub); font-size:1.1rem; cursor:pointer; }
+    .modal-close-btn:hover { color:var(--text); }
+
+    /* ── Form ── */
+    .form-row { margin-bottom: 14px; }
+    .form-row label { display: block; font-size: 0.8rem; color: var(--text-sub); margin-bottom: 5px; font-weight: 500; }
+    .form-input, .form-select, .form-textarea {
+      width: 100%; background: var(--bg-card2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 9px 13px; color: var(--text);
+      font-family: 'Inter',sans-serif; font-size: 0.88rem; outline: none; transition: border-color 0.2s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--purple); }
+    .form-select option { background: var(--bg-card2); }
+    .form-textarea { resize: vertical; min-height: 90px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* ── News card ── */
+    .news-admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 16px; }
+    .news-admin-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 18px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .news-admin-card-tag { display: inline-block; font-size: 0.7rem; padding: 2px 10px; border-radius: 20px; font-weight: 700; }
+    .tag-hot { background: rgba(239,68,68,0.15); color: #ef4444; }
+    .tag-update { background: rgba(124,92,252,0.15); color: var(--purple); }
+    .tag-event { background: rgba(34,197,94,0.15); color: var(--green); }
+    .tag-patch { background: rgba(245,158,11,0.15); color: #f59e0b; }
+    .news-admin-card h4 { font-family:'Rajdhani',sans-serif; font-size:1rem; font-weight:700; }
+    .news-admin-card p { font-size:0.82rem; color:var(--text-sub); line-height:1.5; flex:1; }
+    .news-admin-card-footer { display:flex; gap:8px; margin-top:4px; }
+
+    /* ── Ban form ── */
+    .reply-box {
+      background: var(--bg-card2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 12px; font-size: 0.88rem; line-height: 1.6; color: var(--text-sub);
+      white-space: pre-wrap; margin-bottom: 12px;
+    }
+    .admin-reply-block {
+      background: rgba(124,92,252,0.06); border: 1px solid rgba(124,92,252,0.2);
+      border-radius: 8px; padding: 12px; margin-bottom: 12px;
+    }
+    .admin-reply-label { font-size: 0.72rem; color: var(--purple); font-weight: 700; margin-bottom: 6px; }
+
+    /* ── Player row ── */
+    .player-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit:cover; }
+    .player-avatar-placeholder { width:32px;height:32px;border-radius:50%;background:var(--bg-card2);display:flex;align-items:center;justify-content:center;font-size:0.8rem; }
+
+    /* ── Wipe card ── */
+    .wipe-card { background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px; }
+    .wipe-timer-big { font-family:'Rajdhani',sans-serif; font-size:2.8rem; font-weight:700; color:var(--purple); letter-spacing:0.02em; }
+
+    /* ── Settings ── */
+    .settings-card { background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:20px; }
+    .settings-card-title { font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:18px;display:flex;align-items:center;gap:8px; }
+    .settings-card-title i { color:var(--purple); }
+    .swatches-row { display:flex;gap:8px;flex-wrap:wrap;margin-top:10px; }
+    .color-swatch { width:28px;height:28px;border-radius:7px;cursor:pointer;border:2px solid transparent;transition:all 0.15s; }
+    .color-swatch:hover,.color-swatch.selected { border-color:#fff;transform:scale(1.15); }
+
+    /* ── Shop product ── */
+    .badge-discount { background:rgba(239,68,68,0.15);color:#ef4444;font-size:0.7rem;padding:2px 8px;border-radius:20px;font-weight:700; }
+    .badge-inactive { background:rgba(75,85,99,0.2);color:var(--text-sub);font-size:0.7rem;padding:2px 8px;border-radius:20px;font-weight:700; }
+    .prod-icon { font-size:1.3rem; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar" id="navbar" style="z-index:20">
+    <div class="container nav-inner">
+      <a href="/" class="nav-logo">
+        <img src="../assets/logo.png" alt="Воля Rust" />
+        <div class="nav-logo-text">
+          <span class="nav-logo-name">Воля <span class="accent">Rust</span></span>
+          <span class="nav-logo-sub">Ukraine Rust Community</span>
+        </div>
+      </a>
+      <div class="nav-actions" style="margin-left:auto">
+        <div id="navAuth"></div>
+        <button class="burger" id="burger"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="admin-wrap" id="adminWrap">
+
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-logo">
+        <img src="../assets/logo.png" alt="" />
+        <div>
+          <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.95rem">Воля Rust</div>
+          <span class="admin-tag-small">ADMIN</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">Головне</div>
+      <button class="sidebar-item active" onclick="show('dashboard',this)"><i class="fas fa-th-large"></i> Дашборд</button>
+      <button class="sidebar-item" onclick="show('players',this)"><i class="fas fa-users"></i> Гравці</button>
+      <button class="sidebar-item" onclick="show('economy',this)"><i class="fas fa-coins"></i> Економіка</button>
+      <button class="sidebar-item" onclick="show('bans',this)"><i class="fas fa-ban"></i> Бани <span class="sidebar-badge" id="bansCount">0</span></button>
+      <button class="sidebar-item" onclick="show('tickets',this)"><i class="fas fa-ticket-alt"></i> Тікети <span class="sidebar-badge" id="ticketsCount" style="background:var(--purple)">0</span></button>
+      <button class="sidebar-item" onclick="show('reports',this)"><i class="fas fa-flag"></i> Скарги <span class="sidebar-badge" id="reportsCount" style="background:#f59e0b">0</span></button>
+
+      <div class="sidebar-section">Контент</div>
+      <button class="sidebar-item" onclick="show('news',this)"><i class="fas fa-newspaper"></i> Новини</button>
+      <button class="sidebar-item" onclick="show('announce',this)"><i class="fas fa-bullhorn"></i> Анонси</button>
+      <button class="sidebar-item" onclick="show('shop',this)"><i class="fas fa-store"></i> Магазин</button>
+      <button class="sidebar-item" onclick="show('orders',this)"><i class="fas fa-receipt"></i> Замовлення <span class="sidebar-badge" id="ordersCount" style="background:#10b981">0</span></button>
+      <button class="sidebar-item" onclick="show('promo',this)"><i class="fas fa-tag"></i> Промокоди</button>
+      <button class="sidebar-item" onclick="show('vote',this)"><i class="fas fa-vote-yea"></i> Голосування</button>
+      <button class="sidebar-item" onclick="show('rating',this)"><i class="fas fa-trophy"></i> Рейтинг гравців</button>
+      <button class="sidebar-item" onclick="show('rules',this)"><i class="fas fa-list-ol"></i> Правила</button>
+      <button class="sidebar-item" onclick="show('wipe',this)"><i class="fas fa-sync-alt"></i> Вайп</button>
+
+      <div class="sidebar-section">Редактор сайту</div>
+      <button class="sidebar-item" onclick="show('content',this)"><i class="fas fa-edit"></i> Контент сайту</button>
+      <button class="sidebar-item" onclick="show('media',this)"><i class="fas fa-images"></i> Медіафайли</button>
+
+      <div class="sidebar-section">Система</div>
+      <button class="sidebar-item" onclick="show('admins',this)"><i class="fas fa-shield-alt"></i> Адміни</button>
+      <button class="sidebar-item" onclick="show('privileges',this)"><i class="fas fa-gift"></i> Видати привілею</button>
+      <button class="sidebar-item" onclick="show('settings',this)"><i class="fas fa-cog"></i> Налаштування</button>
+      <button class="sidebar-item" onclick="window.open('/','_blank')"><i class="fas fa-external-link-alt"></i> Відкрити сайт</button>
+      <button class="sidebar-item" onclick="logout()" style="color:#ef4444"><i class="fas fa-sign-out-alt"></i> Вийти</button>
+
+      <div style="padding:16px 10px 0;font-size:0.72rem;color:var(--text-sub);border-top:1px solid var(--border);margin-top:12px">
+        Адмін: <strong id="adminName" style="color:var(--text)"></strong>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="admin-main">
+
+      <!-- ── DASHBOARD ── -->
+      <div class="admin-panel active" id="panel-dashboard">
+        <div class="panel-header">
+          <h2><i class="fas fa-th-large"></i> Дашборд</h2>
+          <span style="font-size:0.82rem;color:var(--text-sub)" id="dashTime"></span>
+        </div>
+        <!-- Статичні лічильники -->
+        <div class="stats-row" id="dashStats"></div>
+
+        <!-- Живий сервер (BattleMetrics) -->
+        <div style="font-size:.8rem;font-weight:600;color:var(--text-sub);margin:20px 0 10px;text-transform:uppercase;letter-spacing:.06em"><i class="fas fa-server" style="color:var(--green)"></i> Сервер онлайн — реальні дані</div>
+        <div class="stats-row" id="dashLive"></div>
+
+        <!-- Фінанси та реєстрації -->
+        <div style="font-size:.8rem;font-weight:600;color:var(--text-sub);margin:20px 0 10px;text-transform:uppercase;letter-spacing:.06em"><i class="fas fa-coins" style="color:#f59e0b"></i> Фінанси</div>
+        <div class="stats-row" id="dashRevenue"></div>
+
+        <!-- Голосування -->
+        <div style="font-size:.8rem;font-weight:600;color:var(--text-sub);margin:20px 0 10px;text-transform:uppercase;letter-spacing:.06em"><i class="fas fa-vote-yea" style="color:var(--purple)"></i> Голосування за карту</div>
+        <div class="stats-row" id="dashVotes"></div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;flex-wrap:wrap;margin-top:20px">
+          <div>
+            <div style="font-size:0.8rem;font-weight:600;color:var(--text-sub);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.06em">Останні тікети</div>
+            <div class="table-wrap"><table><thead><tr><th>Тема</th><th>Статус</th><th></th></tr></thead><tbody id="dashTickets"></tbody></table></div>
+          </div>
+          <div>
+            <div style="font-size:0.8rem;font-weight:600;color:var(--text-sub);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.06em">Останні бани</div>
+            <div class="table-wrap"><table><thead><tr><th>Гравець</th><th>Причина</th><th></th></tr></thead><tbody id="dashBans"></tbody></table></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PLAYERS ── -->
+      <div class="admin-panel" id="panel-players">
+        <div class="panel-header">
+          <h2><i class="fas fa-users"></i> Гравці</h2>
+        </div>
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <input class="table-search" id="playerSearch" placeholder="🔍 Пошук гравця..." oninput="renderPlayers()" />
+          </div>
+          <table><thead><tr><th>Гравець</th><th>Steam ID</th><th>Роль</th><th>Вхід</th><th>Дії</th></tr></thead>
+          <tbody id="playersTable"></tbody></table>
+        </div>
+      </div>
+
+      <!-- ── BANS ── -->
+      <div class="admin-panel" id="panel-bans">
+        <div class="panel-header">
+          <h2><i class="fas fa-ban"></i> Бани</h2>
+          <button class="btn-a btn-red" onclick="openModal('banModal')"><i class="fas fa-plus"></i> Додати бан</button>
+        </div>
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <input class="table-search" id="banSearch" placeholder="🔍 Пошук..." oninput="renderBans()" />
+          </div>
+          <table><thead><tr><th>Гравець</th><th>Steam ID</th><th>Причина</th><th>Адмін</th><th>До</th><th>Статус</th><th>Дії</th></tr></thead>
+          <tbody id="bansTable"></tbody></table>
+        </div>
+      </div>
+
+      <!-- ── TICKETS ── -->
+      <div class="admin-panel" id="panel-tickets">
+        <div class="panel-header">
+          <h2><i class="fas fa-ticket-alt"></i> Тікети</h2>
+          <select class="form-select" style="width:auto;padding:7px 12px" id="ticketFilter" onchange="renderTickets()">
+            <option value="all">Всі</option>
+            <option value="open">Відкриті</option>
+            <option value="answered">З відповіддю</option>
+            <option value="closed">Закриті</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Тема</th><th>Автор</th><th>Категорія</th><th>Дата</th><th>Статус</th><th>Дії</th></tr></thead>
+          <tbody id="ticketsTable"></tbody></table>
+        </div>
+      </div>
+
+      <!-- ── NEWS ── -->
+      <div class="admin-panel" id="panel-news">
+        <div class="panel-header">
+          <h2><i class="fas fa-newspaper"></i> Новини</h2>
+          <button class="btn-a btn-purple" onclick="openNewsModal()"><i class="fas fa-plus"></i> Додати новину</button>
+        </div>
+        <div class="news-admin-grid" id="newsGrid"></div>
+      </div>
+
+      <!-- ── SHOP ── -->
+      <div class="admin-panel" id="panel-shop">
+        <div class="panel-header">
+          <h2><i class="fas fa-store"></i> Магазин</h2>
+          <button class="btn-a btn-purple" onclick="openProductModal()"><i class="fas fa-plus"></i> Додати товар</button>
+        </div>
+        <div class="stats-row">
+          <div class="stat-box"><div class="stat-box-num" id="shopProductCount">0</div><div class="stat-box-label">Всього товарів</div></div>
+          <div class="stat-box green"><div class="stat-box-num" id="shopActiveCount">0</div><div class="stat-box-label">Активних</div></div>
+          <div class="stat-box red"><div class="stat-box-num" id="shopHiddenCount">0</div><div class="stat-box-label">Прихованих</div></div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <select class="form-select" style="width:auto;padding:7px 12px" id="shopCatFilter" onchange="renderShop()">
+              <option value="all">Всі категорії</option>
+              <option value="vip">VIP Привілеї</option>
+              <option value="bundles">Одноразові набори</option>
+              <option value="coins">Воля Койни</option>
+            </select>
+          </div>
+          <table><thead><tr><th>Товар</th><th>Категорія</th><th>Ціна</th><th>Стара ціна</th><th>Бейдж</th><th>Статус</th><th>Дії</th></tr></thead>
+          <tbody id="shopTable"></tbody></table>
+        </div>
+      </div>
+
+      <!-- ── ORDERS ── -->
+      <div class="admin-panel" id="panel-orders">
+        <div class="panel-header">
+          <h2><i class="fas fa-receipt"></i> Замовлення</h2>
+          <div style="display:flex;gap:8px">
+            <button class="btn-a btn-green" onclick="document.getElementById('manualOrderForm').style.display=document.getElementById('manualOrderForm').style.display==='none'?'flex':'none'"><i class="fas fa-plus"></i> Додати вручну</button>
+            <button class="btn-a btn-purple" onclick="loadOrders()"><i class="fas fa-sync-alt"></i> Оновити</button>
+          </div>
+        </div>
+
+        <!-- Manual order form -->
+        <div id="manualOrderForm" style="display:none;gap:10px;flex-wrap:wrap;align-items:flex-end;padding:16px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;margin-bottom:16px">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:0.75rem;color:var(--text-sub)">Steam ID</label>
+            <input id="moSteamId" class="admin-input" placeholder="7656119..." style="width:180px">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:0.75rem;color:var(--text-sub)">Ім'я гравця</label>
+            <input id="moName" class="admin-input" placeholder="Nickname" style="width:140px">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:0.75rem;color:var(--text-sub)">Товар</label>
+            <select id="moProduct" class="admin-input">
+              <option value="1">Gold VIP</option>
+              <option value="2">Titan VIP</option>
+              <option value="3">Imperial VIP</option>
+              <option value="4">Тех-набір</option>
+              <option value="5">Рес-набір</option>
+              <option value="6">Фарм-набір</option>
+              <option value="7">10 Монет</option>
+              <option value="8">20 Монет</option>
+              <option value="9">85 Монет</option>
+            </select>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:0.75rem;color:var(--text-sub)">Сума (₴)</label>
+            <input id="moPrice" class="admin-input" type="number" placeholder="150" style="width:90px">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <label style="font-size:0.75rem;color:var(--text-sub)">Сервер</label>
+            <select id="moServer" class="admin-input">
+              <option value="main">Main</option>
+              <option value="monday">Monday</option>
+            </select>
+          </div>
+          <button class="btn-a btn-green" onclick="createManualOrder()"><i class="fas fa-check"></i> Створити та виконати</button>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-box"><div class="stat-box-num" id="ordersTotal">0</div><div class="stat-box-label">Всього</div></div>
+          <div class="stat-box green"><div class="stat-box-num" id="ordersCompleted">0</div><div class="stat-box-label">Виконано</div></div>
+          <div class="stat-box" style="border-color:rgba(245,158,11,0.3)"><div class="stat-box-num" id="ordersPending" style="color:#f59e0b">0</div><div class="stat-box-label">Очікують</div></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Дата</th><th>Гравець</th><th>Товар</th><th>Сума</th><th>Сервер</th><th>Код</th><th>Статус</th><th>Дія</th></tr></thead>
+            <tbody id="ordersTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── WIPE ── -->
+      <div class="admin-panel" id="panel-wipe">
+        <div class="panel-header">
+          <h2><i class="fas fa-sync-alt"></i> Вайп</h2>
+        </div>
+        <div class="wipe-card">
+          <div style="font-size:0.8rem;color:var(--text-sub);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.06em">До наступного вайпу</div>
+          <div class="wipe-timer-big" id="adminWipeTimer">—</div>
+          <div style="font-size:0.85rem;color:var(--text-sub);margin-top:8px" id="wipeDate">—</div>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:24px;max-width:400px">
+          <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:16px">Змінити дату вайпу</div>
+          <div class="form-row">
+            <label>Дата та час вайпу</label>
+            <input type="datetime-local" class="form-input" id="wipeInput" />
+          </div>
+          <div class="form-row">
+            <label>Тип вайпу</label>
+            <select class="form-select" id="wipeType">
+              <option value="global">Глобальний (BP + карта)</option>
+              <option value="map">Тільки карта</option>
+            </select>
+          </div>
+          <button class="btn-a btn-purple" onclick="saveWipe()"><i class="fas fa-save"></i> Зберегти</button>
+        </div>
+
+        <div style="margin-top:20px">
+          <div style="font-size:0.8rem;font-weight:600;color:var(--text-sub);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.06em">Історія вайпів</div>
+          <div class="table-wrap"><table><thead><tr><th>Дата</th><th>Тип</th><th>Адмін</th></tr></thead><tbody id="wipeHistory"></tbody></table></div>
+        </div>
+
+        <!-- Wipe Map Preparation -->
+        <div style="margin-top:28px;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:24px">
+          <div style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.1rem;margin-bottom:18px">
+            <i class="fas fa-map" style="color:var(--purple)"></i> Підготовка карт до вайпу
+          </div>
+
+          <!-- AUTO button — one click loads maps directly -->
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px">
+            <select class="form-select" id="autoWipeServer" style="width:auto;padding:8px 14px">
+              <option value="main">Main — Четвер</option>
+              <option value="monday">Monday — Понеділок</option>
+            </select>
+            <select class="form-select" id="autoWipeCount" style="width:auto;padding:8px 14px">
+              <option value="3">3 карти</option>
+              <option value="4" selected>4 карти</option>
+              <option value="5">5 карт</option>
+            </select>
+            <button class="btn-a btn-purple" id="autoWipeBtn"
+              style="padding:10px 24px;font-size:1rem;font-weight:700;letter-spacing:0.04em;box-shadow:0 4px 20px rgba(124,92,252,0.35)"
+              onclick="autoLoadWipeMaps()">
+              <i class="fas fa-magic"></i> Авто-завантажити карти з RustMaps
+            </button>
+          </div>
+          <div style="font-size:0.78rem;color:var(--text-sub);margin-bottom:20px">
+            Автоматично бере реальні 3700 мапи з активних Rust серверів (BattleMetrics + RustMaps), замінює поточні карти і скидає голоси.
+          </div>
+
+          <!-- Result preview -->
+          <div id="autoWipeResult" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px"></div>
+        </div>
+      </div>
+
+      <!-- ── ADMINS ── -->
+      <div class="admin-panel" id="panel-admins">
+        <div class="panel-header">
+          <h2><i class="fas fa-shield-alt"></i> Адміни</h2>
+          <button class="btn-a btn-purple" onclick="openAdminAddModal()"><i class="fas fa-plus"></i> Додати адміна</button>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Нікнейм</th><th>Роль</th><th>Додано</th><th>Дії</th></tr></thead>
+          <tbody id="adminsTable"></tbody></table>
+        </div>
+      </div>
+
+      <!-- ── PRIVILEGES ── -->
+      <div class="admin-panel" id="panel-privileges">
+        <div class="panel-header">
+          <h2><i class="fas fa-gift"></i> Видати привілею</h2>
+        </div>
+        <div style="max-width:520px">
+          <div class="form-group" style="margin-bottom:14px">
+            <label class="form-label">Гравець</label>
+            <select id="privPlayer" class="form-input" style="width:100%">
+              <option value="">— Завантаження... —</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:14px">
+            <label class="form-label">Привілея</label>
+            <select id="privType" class="form-input" style="width:100%">
+              <option value="addgroup {steam_id} gold 7d">VIP Gold — 7 днів</option>
+              <option value="addgroup {steam_id} gold 30d">VIP Gold — 30 днів</option>
+              <option value="addgroup {steam_id} titan 7d">VIP Titan — 7 днів</option>
+              <option value="addgroup {steam_id} titan 30d">VIP Titan — 30 днів</option>
+              <option value="addgroup {steam_id} imperial 7d">VIP Imperial — 7 днів</option>
+              <option value="addgroup {steam_id} imperial 30d">VIP Imperial — 30 днів</option>
+              <option value="givekit {steam_id} tech">Кіт Tech</option>
+              <option value="givekit {steam_id} res">Кіт Res</option>
+              <option value="givekit {steam_id} farm">Кіт Farm</option>
+              <option value="givecredits {steam_id} 10">+10 кредитів</option>
+              <option value="givecredits {steam_id} 20">+20 кредитів</option>
+              <option value="givecredits {steam_id} 85">+85 кредитів</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:14px">
+            <label class="form-label">Сервер</label>
+            <select id="privServer" class="form-input" style="width:100%">
+              <option value="main">Main</option>
+              <option value="monday">Monday</option>
+              <option value="5x">5x</option>
+            </select>
+          </div>
+          <button class="btn-a btn-purple" onclick="givePrivilege()" style="width:100%"><i class="fas fa-paper-plane"></i> Видати</button>
+        </div>
+        <div style="margin-top:28px">
+          <div style="font-size:.8rem;font-weight:600;color:var(--text-sub);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em"><i class="fas fa-clock"></i> Черга команд</div>
+          <div class="table-wrap"><table><thead><tr><th>Гравець</th><th>Команда</th><th>Сервер</th><th>Час</th></tr></thead>
+          <tbody id="privQueue"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- ── ECONOMY ── -->
+      <div class="admin-panel" id="panel-economy">
+        <div class="panel-header">
+          <h2><i class="fas fa-coins"></i> Економіка</h2>
+          <button class="btn-a btn-purple" onclick="openModal('econModal')"><i class="fas fa-plus"></i> Нарахувати монети</button>
+        </div>
+        <div class="stats-row" id="econStats"></div>
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <input class="table-search" id="econSearch" placeholder="🔍 Пошук гравця..." oninput="renderEconomy()" />
+          </div>
+          <table><thead><tr><th>Гравець</th><th>Steam ID</th><th>Баланс <i class="fas fa-coins" style="color:#34d399"></i></th><th>Всього витрачено</th><th>Дії</th></tr></thead>
+          <tbody id="econTable"></tbody></table>
+        </div>
+        <div style="margin-top:20px">
+          <div style="font-size:0.8rem;font-weight:600;color:var(--text-sub);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.06em">Останні транзакції</div>
+          <div class="table-wrap"><table><thead><tr><th>Гравець</th><th>Сума</th><th>Причина</th><th>Адмін</th><th>Дата</th></tr></thead><tbody id="econHistory"></tbody></table></div>
+        </div>
+      </div>
+
+      <!-- ── REPORTS ── -->
+      <div class="admin-panel" id="panel-reports">
+        <div class="panel-header">
+          <h2><i class="fas fa-flag"></i> Скарги на гравців</h2>
+          <select class="form-select" style="width:auto;padding:7px 12px" id="reportFilter" onchange="renderReports()">
+            <option value="all">Всі</option>
+            <option value="open">Відкриті</option>
+            <option value="closed">Закриті</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>На кого</th><th>Від кого</th><th>Причина</th><th>Сервер</th><th>Дата</th><th>Статус</th><th>Дії</th></tr></thead>
+          <tbody id="reportsTable"></tbody></table>
+        </div>
+      </div>
+
+      <!-- ── ANNOUNCE ── -->
+      <div class="admin-panel" id="panel-announce">
+        <div class="panel-header">
+          <h2><i class="fas fa-bullhorn"></i> Анонси</h2>
+          <button class="btn-a btn-purple" onclick="openAnnounceModal()"><i class="fas fa-plus"></i> Новий анонс</button>
+        </div>
+        <div style="background:rgba(124,92,252,0.08);border:1px solid rgba(124,92,252,0.2);border-radius:10px;padding:12px 16px;font-size:0.83rem;color:var(--text-sub);margin-bottom:20px">
+          <i class="fas fa-info-circle" style="color:var(--purple);margin-right:6px"></i>
+          Активні анонси відображаються як банер на всіх сторінках сайту.
+        </div>
+        <div id="announceList"></div>
+      </div>
+
+      <!-- ── PROMO ── -->
+      <div class="admin-panel" id="panel-promo">
+        <div class="panel-header">
+          <h2><i class="fas fa-tag"></i> Промокоди</h2>
+          <button class="btn-a btn-purple" onclick="openPromoModal()"><i class="fas fa-plus"></i> Створити промокод</button>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>Код</th><th>Тип знижки</th><th>Розмір</th><th>Використань</th><th>Макс</th><th>До</th><th>Статус</th><th>Дії</th></tr></thead>
+          <tbody id="promoTable"></tbody></table>
+        </div>
+      </div>
+
+      <!-- ── VOTE ADMIN ── -->
+      <div class="admin-panel" id="panel-vote">
+        <div class="panel-header">
+          <h2><i class="fas fa-map"></i> Голосування за карту</h2>
+          <button class="btn-a btn-green" onclick="generateMaps()" id="btnGenerateMaps"><i class="fas fa-dice"></i> Згенерувати 3 мапи</button>
+          <span id="imgLoadStatus" style="font-size:0.82rem;color:var(--text-sub);margin-left:8px"></span>
+          <button class="btn-a btn-purple" onclick="openMapModal()"><i class="fas fa-plus"></i> Додати карту</button>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row" id="voteAdminStats" style="margin-bottom:20px"></div>
+
+        <!-- Server tabs -->
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <button class="btn-a btn-purple" id="vtab-main"   onclick="switchVoteTab('main')"  >Main ×2 — Четвер</button>
+          <button class="btn-a btn-gray"   id="vtab-monday" onclick="switchVoteTab('monday')">Monday ×2 — Понеділок</button>
+          <div style="flex:1"></div>
+          <button class="btn-a btn-red" onclick="resetVotesAdmin()" id="resetVotesBtn"><i class="fas fa-trash-alt"></i> Скинути голоси</button>
+        </div>
+
+        <!-- Maps table -->
+        <div class="table-wrap" style="margin-bottom:24px">
+          <table>
+            <thead><tr><th>Карта</th><th>Seed</th><th>Розмір</th><th>Тип</th><th>Монум.</th><th>Голосів</th><th>%</th><th>Фото</th><th>Дії</th></tr></thead>
+            <tbody id="mapsAdminTable"></tbody>
+          </table>
+        </div>
+
+        <!-- Voters list -->
+        <div style="font-size:0.8rem;font-weight:600;color:var(--text-sub);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.06em">
+          <i class="fas fa-users" style="color:var(--purple)"></i> Хто голосував
+          <span id="votersWipeId" style="font-weight:400;text-transform:none;letter-spacing:0;margin-left:8px;color:var(--text-sub)"></span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Гравець</th><th>Steam ID</th><th>За карту</th><th>Час</th></tr></thead>
+            <tbody id="votersTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── MAP MODAL ── -->
+      <div class="modal-overlay" id="mapModal" onclick="if(event.target===this)closeMapModal()">
+        <div class="modal" style="max-width:480px">
+          <div class="modal-header">
+            <span id="mapModalTitle">Додати карту</span>
+            <button class="modal-close" onclick="closeMapModal()">×</button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="mapEditId" />
+            <div class="form-row"><label>Назва *</label><input class="form-input" id="mapName" placeholder="Procedural 4500" /></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="form-row"><label>Seed</label><input class="form-input" id="mapSeed" placeholder="1284637" /></div>
+              <div class="form-row"><label>Розмір</label><input class="form-input" id="mapSize" type="number" placeholder="4500" /></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="form-row">
+                <label>Тип</label>
+                <select class="form-input" id="mapType">
+                  <option value="Procedural_Map">Procedural</option>
+                  <option value="Barren">Barren</option>
+                  <option value="Hapsis">Hapsis</option>
+                </select>
+              </div>
+              <div class="form-row"><label>Монументи</label><input class="form-input" id="mapMonuments" type="number" placeholder="14" /></div>
+            </div>
+            <div class="form-row">
+              <label>Сервер</label>
+              <select class="form-input" id="mapServer">
+                <option value="main">Main ×2 — Четвер</option>
+                <option value="monday">Monday ×2 — Понеділок</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>URL зображення <span style="color:var(--text-sub);font-weight:400">(з rustmaps або свій)</span></label>
+              <input class="form-input" id="mapImgUrl" placeholder="https://..." />
+            </div>
+            <div style="background:rgba(124,92,252,0.08);border:1px solid rgba(124,92,252,0.2);border-radius:8px;padding:10px 14px;font-size:0.78rem;color:var(--text-sub);margin-top:4px">
+              <i class="fas fa-info-circle" style="color:var(--purple)"></i>
+              Зображення: зайди на <a href="https://rustmaps.com" target="_blank" style="color:var(--purple)">rustmaps.com</a>, введи seed і size, зроби правий клік на картинку → "Копіювати адресу зображення".
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-a btn-gray" onclick="closeMapModal()">Скасувати</button>
+            <button class="btn-a btn-purple" onclick="saveMap()"><i class="fas fa-save"></i> Зберегти</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── RATING ── -->
+      <div class="admin-panel" id="panel-rating">
+        <div class="panel-header">
+          <h2><i class="fas fa-trophy"></i> Рейтинг гравців</h2>
+          <div style="display:flex;gap:8px">
+            <button class="btn-a btn-gray" onclick="openBulkImport()"><i class="fas fa-file-import"></i> Імпорт</button>
+            <button class="btn-a btn-purple" onclick="openPlayerModal()"><i class="fas fa-plus"></i> Додати гравця</button>
+          </div>
+        </div>
+
+        <!-- Stat boxes -->
+        <div class="stats-row" id="ratingStats" style="margin-bottom:20px"></div>
+
+        <!-- Server filter + reset -->
+        <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center">
+          <select class="form-select" id="ratingServerFilter" onchange="loadRatingAdmin()" style="width:auto;padding:7px 14px">
+            <option value="">Всі сервери</option>
+            <option value="main">Main</option>
+            <option value="monday">Monday</option>
+          </select>
+          <input class="form-input" id="ratingSearch" placeholder="Пошук..." oninput="loadRatingAdmin()" style="max-width:220px" />
+          <div style="flex:1"></div>
+          <button class="btn-a btn-red" onclick="resetStatsAdmin()"><i class="fas fa-trash-alt"></i> Скинути вайп</button>
+        </div>
+
+        <!-- Players table -->
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Гравець</th><th>Steam ID</th><th>Сервер</th><th>Вб.</th><th>Смер.</th><th>K/D</th><th>Час</th><th>Рейди</th><th>Ресурси</th><th>Дії</th></tr></thead>
+            <tbody id="ratingTable"></tbody>
+          </table>
+        </div>
+
+        <!-- Webhook info -->
+        <div style="margin-top:24px;background:rgba(124,92,252,0.06);border:1px solid rgba(124,92,252,0.2);border-radius:12px;padding:16px 20px">
+          <div style="font-size:0.82rem;font-weight:700;color:var(--purple);margin-bottom:10px"><i class="fas fa-plug"></i> Підключення ігрового сервера (webhook)</div>
+          <div style="font-size:0.8rem;color:var(--text-sub);margin-bottom:8px">Плагін на сервері Rust надсилає статистику автоматично. POST-запит на:</div>
+          <div style="font-family:monospace;font-size:0.78rem;background:rgba(0,0,0,0.3);padding:8px 12px;border-radius:6px;color:#a78bfa;margin-bottom:8px">POST https://georgiys.vibe.brobots.org.ua/api/stats/push</div>
+          <div style="font-size:0.78rem;color:var(--text-sub);margin-bottom:6px">Тіло запиту (JSON):</div>
+          <pre style="font-family:monospace;font-size:0.72rem;background:rgba(0,0,0,0.3);padding:10px 14px;border-radius:6px;color:rgba(255,255,255,0.7);overflow-x:auto;margin:0">{"token":"volia-webhook-2026","players":[
+  {"steamId":"76561198...","name":"PlayerName","kills":15,"deaths":4,
+   "raids":2,"playtime":180,"gathered":12000,"server":"main"}
+]}</pre>
+          <div style="font-size:0.75rem;color:var(--text-sub);margin-top:8px"><i class="fas fa-info-circle"></i> Токен: <code style="color:var(--purple)">volia-webhook-2026</code> — змінити через env <code>WEBHOOK_TOKEN</code></div>
+        </div>
+      </div>
+
+      <!-- ── PLAYER MODAL ── -->
+      <div class="modal-overlay" id="playerModal" onclick="if(event.target===this)closeModal('playerModal')">
+        <div class="modal" style="max-width:500px">
+          <div class="modal-header">
+            <span id="playerModalTitle">Додати гравця</span>
+            <button class="modal-close" onclick="closeModal('playerModal')">×</button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="playerEditId" />
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div class="form-row" style="grid-column:1/-1"><label>Steam ID *</label><input class="form-input" id="pSteamId" placeholder="76561198000000000" /></div>
+              <div class="form-row" style="grid-column:1/-1"><label>Нікнейм *</label><input class="form-input" id="pName" placeholder="PlayerName" /></div>
+              <div class="form-row" style="grid-column:1/-1"><label>Аватар URL</label><input class="form-input" id="pAvatar" placeholder="https://avatars.steamstatic.com/..." /></div>
+              <div class="form-row">
+                <label>Сервер</label>
+                <select class="form-input" id="pServer">
+                  <option value="main">Main ×2</option>
+                  <option value="monday">Monday ×2</option>
+                </select>
+              </div>
+              <div class="form-row"><label>Клан</label><input class="form-input" id="pClan" placeholder="[ВОЛЯ]" /></div>
+              <div class="form-row"><label>Вбивства</label><input class="form-input" id="pKills" type="number" placeholder="0" /></div>
+              <div class="form-row"><label>Смерті</label><input class="form-input" id="pDeaths" type="number" placeholder="0" /></div>
+              <div class="form-row"><label>Рейди</label><input class="form-input" id="pRaids" type="number" placeholder="0" /></div>
+              <div class="form-row"><label>Час гри (хв)</label><input class="form-input" id="pPlaytime" type="number" placeholder="0" /></div>
+              <div class="form-row" style="grid-column:1/-1"><label>Зібрано ресурсів</label><input class="form-input" id="pGathered" type="number" placeholder="0" /></div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-a btn-gray" onclick="closeModal('playerModal')">Скасувати</button>
+            <button class="btn-a btn-purple" onclick="savePlayer()"><i class="fas fa-save"></i> Зберегти</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── BULK IMPORT MODAL ── -->
+      <div class="modal-overlay" id="bulkModal" onclick="if(event.target===this)closeModal('bulkModal')">
+        <div class="modal" style="max-width:560px">
+          <div class="modal-header">
+            <span>Імпорт гравців (JSON)</span>
+            <button class="modal-close" onclick="closeModal('bulkModal')">×</button>
+          </div>
+          <div class="modal-body">
+            <div style="font-size:0.8rem;color:var(--text-sub);margin-bottom:8px">Вставте масив гравців у форматі JSON:</div>
+            <textarea class="form-input" id="bulkJson" rows="8" style="font-family:monospace;font-size:0.75rem;resize:vertical" placeholder='[
+  {"steamId":"76561198...","name":"Player1","kills":50,"deaths":10,"raids":3,"playtime":240,"gathered":20000,"server":"main"},
+  {"steamId":"76561198...","name":"Player2","kills":30,"deaths":15,"raids":1,"playtime":120,"gathered":8000,"server":"main"}
+]'></textarea>
+            <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+              <input type="checkbox" id="bulkReplace" />
+              <label for="bulkReplace" style="font-size:0.82rem;color:var(--text-sub)">Замінити всіх (видалити поточних)</label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn-a btn-gray" onclick="closeModal('bulkModal')">Скасувати</button>
+            <button class="btn-a btn-purple" onclick="runBulkImport()"><i class="fas fa-file-import"></i> Імпортувати</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── RULES ── -->
+      <div class="admin-panel" id="panel-rules">
+        <div class="panel-header">
+          <h2><i class="fas fa-list-ol"></i> Правила сервера</h2>
+          <button class="btn-a btn-purple" onclick="openRuleModal()"><i class="fas fa-plus"></i> Додати правило</button>
+        </div>
+        <div style="background:rgba(124,92,252,0.08);border:1px solid rgba(124,92,252,0.2);border-radius:10px;padding:12px 16px;font-size:0.83rem;color:var(--text-sub);margin-bottom:20px">
+          <i class="fas fa-info-circle" style="color:var(--purple);margin-right:6px"></i>
+          Правила відображаються на сторінці <a href="rules.html" target="_blank" style="color:var(--purple)">Правила</a>.
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>#</th><th>Категорія</th><th>Правило</th><th>Дії</th></tr></thead>
+          <tbody id="rulesTable"></tbody></table>
+        </div>
+      </div>
+
+      <!-- ── SETTINGS ── -->
+      <div class="admin-panel" id="panel-settings">
+        <div class="panel-header">
+          <h2><i class="fas fa-cog"></i> Налаштування сайту</h2>
+          <div style="display:flex;gap:8px">
+            <button class="btn-a btn-gray" onclick="resetSettings()"><i class="fas fa-undo"></i> Скинути</button>
+            <button class="btn-a btn-purple" onclick="saveAllSettings()"><i class="fas fa-save"></i> Зберегти все</button>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <!-- Left: General -->
+          <div>
+            <div class="settings-card">
+              <div class="settings-card-title"><i class="fas fa-globe"></i> Загальна інформація</div>
+              <div class="form-row"><label>Назва сайту</label><input class="form-input" id="set-siteName" placeholder="Воля Rust" /></div>
+              <div class="form-row"><label>Підзаголовок навбару</label><input class="form-input" id="set-siteSub" placeholder="Ukraine Rust Community" /></div>
+              <div class="form-row"><label>IP сервера (відображається на головній)</label><input class="form-input" id="set-serverIp" placeholder="connect.voliarust.com:28015" /></div>
+              <div class="form-row"><label>Текст у футері (копірайт)</label><input class="form-input" id="set-footerCopy" placeholder="© 2025–2026 Воля Rust" /></div>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card-title"><i class="fas fa-image"></i> Секція Герой (головна сторінка)</div>
+              <div class="form-row"><label>Заголовок героя</label><input class="form-input" id="set-heroTitle" placeholder="Грай. Вільно." /></div>
+              <div class="form-row"><label>Підтекст героя</label><textarea class="form-textarea" id="set-heroSub" style="min-height:80px" placeholder="Перший в Україні..."></textarea></div>
+              <div class="form-row"><label>Текст кнопки героя</label><input class="form-input" id="set-heroBtn" placeholder="Грати зараз" /></div>
+            </div>
+          </div>
+
+          <!-- Right: Design + Socials -->
+          <div>
+            <div class="settings-card">
+              <div class="settings-card-title"><i class="fas fa-palette"></i> Дизайн та кольори</div>
+              <div class="form-row">
+                <label>Акцентний колір (фіолетовий)</label>
+                <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+                  <input type="color" id="set-accentPicker" style="width:44px;height:36px;border:1px solid var(--border);border-radius:8px;background:none;cursor:pointer;padding:2px" oninput="onColorPick(this.value)" />
+                  <input class="form-input" id="set-accentHex" placeholder="#7C5CFC" style="flex:1;font-family:monospace" oninput="onColorHex(this.value)" />
+                </div>
+                <div class="swatches-row">
+                  <div class="color-swatch" style="background:#7C5CFC" onclick="onColorPick('#7C5CFC')" title="Фіолетовий"></div>
+                  <div class="color-swatch" style="background:#3B82F6" onclick="onColorPick('#3B82F6')" title="Синій"></div>
+                  <div class="color-swatch" style="background:#10B981" onclick="onColorPick('#10B981')" title="Зелений"></div>
+                  <div class="color-swatch" style="background:#F59E0B" onclick="onColorPick('#F59E0B')" title="Жовтий"></div>
+                  <div class="color-swatch" style="background:#EF4444" onclick="onColorPick('#EF4444')" title="Червоний"></div>
+                  <div class="color-swatch" style="background:#EC4899" onclick="onColorPick('#EC4899')" title="Рожевий"></div>
+                  <div class="color-swatch" style="background:#8B5CF6" onclick="onColorPick('#8B5CF6')" title="Indigo"></div>
+                  <div class="color-swatch" style="background:#06B6D4" onclick="onColorPick('#06B6D4')" title="Cyan"></div>
+                </div>
+              </div>
+
+              <div class="form-row" style="margin-top:16px">
+                <label>Попередній перегляд</label>
+                <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:10px;padding:16px;background:var(--bg-card2);border-radius:10px">
+                  <button class="btn-a btn-purple" id="previewBtn" style="pointer-events:none">Кнопка</button>
+                  <span id="previewText" style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:1.1rem;color:var(--purple)">Акцент</span>
+                  <span id="previewBadge" style="font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(124,92,252,0.15);color:var(--purple)">Бейдж</span>
+                  <div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center" id="previewDot" style="background:rgba(124,92,252,0.15)">●</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-card">
+              <div class="settings-card-title"><i class="fas fa-share-alt"></i> Соцмережі та посилання</div>
+              <div class="form-row"><label><i class="fab fa-discord" style="color:#5865F2"></i> Discord</label><input class="form-input" id="set-discord" placeholder="https://discord.gg/..." /></div>
+              <div class="form-row"><label><i class="fab fa-tiktok"></i> TikTok</label><input class="form-input" id="set-tiktok" placeholder="https://www.tiktok.com/@..." /></div>
+              <div class="form-row"><label><i class="fab fa-telegram" style="color:#2AABEE"></i> Telegram (необов'язково)</label><input class="form-input" id="set-telegram" placeholder="https://t.me/..." /></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Monobank webhook -->
+        <div class="settings-card" style="margin-top:20px">
+          <div class="settings-card-title"><i class="fas fa-credit-card"></i> Monobank вебхук (автоматична оплата)</div>
+          <p style="font-size:0.85rem;color:var(--text-sub);margin-bottom:16px">
+            Щоб оплати з Monobank проходили автоматично — потрібно зареєструвати вебхук.<br>
+            Для цього додай <code style="color:var(--purple)">MONO_TOKEN</code> у файл <code>.env</code> на хостингу (токен з <a href="https://api.monobank.ua" target="_blank" style="color:var(--purple)">api.monobank.ua</a>).
+          </p>
+          <div id="monoWebhookStatus" style="margin-bottom:12px;font-size:0.85rem;color:var(--text-sub)">Натисни "Перевірити" щоб дізнатись статус</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn-a btn-gray" onclick="checkMonoWebhook()"><i class="fas fa-search"></i> Перевірити</button>
+            <button class="btn-a btn-green" onclick="registerMonoWebhook()"><i class="fas fa-plug"></i> Зареєструвати вебхук</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CONTENT EDITOR ── -->
+      <div class="admin-panel" id="panel-content">
+        <div class="panel-header">
+          <h2><i class="fas fa-edit"></i> Контент сайту</h2>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn-a btn-gray" onclick="exportContent()"><i class="fas fa-download"></i> Експорт JSON</button>
+            <button class="btn-a btn-gray" onclick="importContent()"><i class="fas fa-upload"></i> Імпорт JSON</button>
+            <button class="btn-a btn-red"  onclick="clearContent()"><i class="fas fa-trash"></i> Очистити всі</button>
+            <button class="btn-a btn-purple" onclick="openEditMode()"><i class="fas fa-mouse-pointer"></i> Режим редагування</button>
+          </div>
+        </div>
+
+        <!-- Info card -->
+        <div style="background:rgba(124,92,252,0.08);border:1px solid rgba(124,92,252,0.2);border-radius:12px;padding:16px;margin-bottom:20px;font-size:0.87rem;line-height:1.6">
+          <strong style="color:var(--purple)"><i class="fas fa-info-circle"></i> Як редагувати тексти на сайті:</strong><br>
+          Натисни <strong>«Режим редагування»</strong> — відкриється головна сторінка з фіолетовою рамкою навколо кожного тексту.
+          Клікни на будь-який текст і пиши прямо на сайті. Зміни зберігаються автоматично при натисканні в інше місце.
+        </div>
+
+        <!-- Pages quick-open -->
+        <div class="settings-card">
+          <div class="settings-card-title"><i class="fas fa-external-link-alt"></i> Відкрити сторінку в режимі редагування</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+            <button class="btn-a btn-gray" onclick="openEditPage('../index.html')"><i class="fas fa-home"></i> Головна</button>
+            <button class="btn-a btn-gray" onclick="openEditPage('news.html')"><i class="fas fa-newspaper"></i> Новини</button>
+            <button class="btn-a btn-gray" onclick="openEditPage('shop.html')"><i class="fas fa-store"></i> Магазин</button>
+            <button class="btn-a btn-gray" onclick="openEditPage('rules.html')"><i class="fas fa-list-ol"></i> Правила</button>
+            <button class="btn-a btn-gray" onclick="openEditPage('support.html')"><i class="fas fa-headset"></i> Підтримка</button>
+          </div>
+        </div>
+
+        <!-- Saved content table -->
+        <div class="table-wrap" style="margin-top:20px">
+          <div class="table-toolbar">
+            <span style="font-weight:600;font-size:0.9rem">Збережені тексти</span>
+            <input class="table-search" id="contentSearch" placeholder="Пошук по ключу або тексту..." oninput="filterContent(this.value)" />
+          </div>
+          <table>
+            <thead><tr>
+              <th style="width:220px">Ключ</th>
+              <th>Значення</th>
+              <th style="width:100px">Дії</th>
+            </tr></thead>
+            <tbody id="contentTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── MEDIA MANAGER ── -->
+      <div class="admin-panel" id="panel-media">
+        <div class="panel-header">
+          <h2><i class="fas fa-images"></i> Медіафайли</h2>
+          <div style="display:flex;gap:8px">
+            <span id="mediaStats" style="font-size:0.82rem;color:var(--text-sub);align-self:center"></span>
+            <button class="btn-a btn-purple" onclick="document.getElementById('mediaInput').click()">
+              <i class="fas fa-plus"></i> Завантажити
+            </button>
+          </div>
+        </div>
+
+        <!-- Hidden file input -->
+        <input type="file" id="mediaInput" accept="image/*" multiple style="display:none" onchange="handleMediaUpload(this.files)" />
+
+        <!-- Drop zone -->
+        <div id="mediaDropZone"
+          style="border:2px dashed var(--border);border-radius:14px;padding:40px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:24px;color:var(--text-sub)"
+          onclick="document.getElementById('mediaInput').click()"
+          ondragover="event.preventDefault();this.style.borderColor='var(--purple)';this.style.background='rgba(124,92,252,0.06)'"
+          ondragleave="this.style.borderColor='var(--border)';this.style.background=''"
+          ondrop="event.preventDefault();this.style.borderColor='var(--border)';this.style.background='';handleMediaUpload(event.dataTransfer.files)">
+          <i class="fas fa-cloud-upload-alt" style="font-size:2.5rem;opacity:.3;margin-bottom:12px;display:block"></i>
+          <div style="font-size:0.95rem;margin-bottom:6px">Перетягни зображення сюди або натисни щоб вибрати</div>
+          <div style="font-size:0.78rem">JPEG, PNG, WebP · максимум 5 МБ на файл · стискається автоматично до 900 КБ</div>
+        </div>
+
+        <!-- Upload progress -->
+        <div id="mediaProgress" style="display:none;margin-bottom:16px">
+          <div style="background:var(--bg-card);border-radius:8px;padding:12px 16px;font-size:0.85rem;display:flex;align-items:center;gap:10px">
+            <i class="fas fa-circle-notch fa-spin" style="color:var(--purple)"></i>
+            <span id="mediaProgressText">Обробка зображення...</span>
+          </div>
+        </div>
+
+        <!-- Section binding helper -->
+        <div class="settings-card" style="margin-bottom:20px">
+          <div class="settings-card-title"><i class="fas fa-link"></i> Застосувати фото до секції сайту</div>
+          <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+            <select id="mediaSectionKey" class="form-input" style="flex:1;min-width:200px">
+              <option value="hero-bg">Фон героя (головна)</option>
+              <option value="shop-banner">Банер магазину</option>
+              <option value="news-banner">Банер новин</option>
+              <option value="support-banner">Банер підтримки</option>
+            </select>
+            <select id="mediaSelectFile" class="form-input" style="flex:2;min-width:200px">
+              <option value="">— Оберіть зображення з бібліотеки —</option>
+            </select>
+            <button class="btn-a btn-purple" onclick="applyMediaToSection()"><i class="fas fa-check"></i> Застосувати</button>
+          </div>
+        </div>
+
+        <!-- Media grid -->
+        <div id="mediaGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px"></div>
+        <div id="mediaEmpty" style="display:none;text-align:center;padding:60px;color:var(--text-sub)">
+          <i class="fas fa-images" style="font-size:2.5rem;opacity:.2;display:block;margin-bottom:12px"></i>
+          Бібліотека порожня. Завантаж перше зображення!
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ── MODALS ── -->
+
+  <!-- Ban modal -->
+  <div class="modal-overlay" id="banModal" onclick="closeOverlay(event,'banModal')">
+    <div class="modal-box">
+      <button class="modal-close-btn" onclick="closeModal('banModal')"><i class="fas fa-times"></i></button>
+      <div class="modal-title"><i class="fas fa-ban" style="color:#ef4444;margin-right:8px"></i>Додати бан</div>
+      <div class="form-grid">
+        <div class="form-row"><label>Нікнейм гравця</label><input class="form-input" id="banNick" placeholder="SteamNick" /></div>
+        <div class="form-row"><label>Steam ID</label><input class="form-input" id="banSteamId" placeholder="76561198..." /></div>
+      </div>
+      <div class="form-row"><label>Причина</label><input class="form-input" id="banReason" placeholder="Чіт, гріфінг, образа..." /></div>
+      <div class="form-grid">
+        <div class="form-row"><label>Тривалість</label>
+          <select class="form-select" id="banDuration">
+            <option value="1">1 день</option>
+            <option value="3">3 дні</option>
+            <option value="7">7 днів</option>
+            <option value="14">14 днів</option>
+            <option value="30">30 днів</option>
+            <option value="0">Назавжди</option>
+          </select>
+        </div>
+        <div class="form-row"><label>Сервер</label>
+          <select class="form-select" id="banServer">
+            <option>ВОЛЯ RUST Main</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row"><label>Докази (посилання або опис)</label><textarea class="form-textarea" id="banProof" placeholder="Посилання на скріншот, відео..."></textarea></div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn-a btn-red" onclick="addBan()"><i class="fas fa-ban"></i> Забанити</button>
+        <button class="btn-a btn-gray" onclick="closeModal('banModal')">Скасувати</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ticket modal -->
+  <div class="modal-overlay" id="ticketModal" onclick="closeOverlay(event,'ticketModal')">
+    <div class="modal-box" style="max-width:600px">
+      <button class="modal-close-btn" onclick="closeModal('ticketModal')"><i class="fas fa-times"></i></button>
+      <div id="ticketModalBody"></div>
+    </div>
+  </div>
+
+  <!-- News modal -->
+  <div class="modal-overlay" id="newsModal" onclick="closeOverlay(event,'newsModal')">
+    <div class="modal-box">
+      <button class="modal-close-btn" onclick="closeModal('newsModal')"><i class="fas fa-times"></i></button>
+      <div class="modal-title" id="newsModalTitle">Нова новина</div>
+      <div class="form-row"><label>Заголовок</label><input class="form-input" id="newsTitle" placeholder="Заголовок новини" /></div>
+      <div class="form-row"><label>Короткий текст</label><textarea class="form-textarea" id="newsBody" placeholder="Текст новини..."></textarea></div>
+      <div class="form-grid">
+        <div class="form-row"><label>Тег</label>
+          <select class="form-select" id="newsTag">
+            <option value="hot">🔥 Гаряче</option>
+            <option value="update">Оновлення</option>
+            <option value="event">Подія</option>
+            <option value="patch">Зміни</option>
+          </select>
+        </div>
+        <div class="form-row"><label>Дата</label><input type="date" class="form-input" id="newsDate" /></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn-a btn-purple" onclick="saveNews()"><i class="fas fa-save"></i> Зберегти</button>
+        <button class="btn-a btn-gray" onclick="closeModal('newsModal')">Скасувати</button>
+      </div>
+      <input type="hidden" id="newsEditId" value="" />
+    </div>
+  </div>
+
+  <!-- Shop product modal -->
+  <div class="modal-overlay" id="productModal" onclick="closeOverlay(event,'productModal')">
+    <div class="modal-box" style="max-width:580px">
+      <button class="modal-close-btn" onclick="closeModal('productModal')"><i class="fas fa-times"></i></button>
+      <div class="modal-title" id="productModalTitle">Новий товар</div>
+      <div class="form-grid">
+        <div class="form-row"><label>Назва товару</label><input class="form-input" id="prod-name" placeholder="GOLD VIP" /></div>
+        <div class="form-row"><label>Іконка (emoji)</label><input class="form-input" id="prod-icon" placeholder="👑" style="font-size:1.2rem" /></div>
+      </div>
+      <div class="form-row"><label>Опис</label><textarea class="form-textarea" id="prod-desc" placeholder="Короткий опис товару..."></textarea></div>
+      <div class="form-row"><label>Категорія</label>
+        <select class="form-select" id="prod-cat">
+          <option value="vip">VIP Привілеї</option>
+          <option value="bundles">Одноразові набори</option>
+          <option value="coins">Воля Койни</option>
+        </select>
+      </div>
+      <div class="form-grid">
+        <div class="form-row"><label>Ціна (₴)</label><input class="form-input" id="prod-price" type="number" placeholder="100" /></div>
+        <div class="form-row"><label>Стара ціна ₴ (для знижки)</label><input class="form-input" id="prod-oldprice" type="number" placeholder="200" /></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row"><label>Бейдж (текст на карточці)</label><input class="form-input" id="prod-badge" placeholder="-50%" /></div>
+        <div class="form-row"><label>Балів (для Койнів)</label><input class="form-input" id="prod-points" type="number" placeholder="0" /></div>
+      </div>
+      <div class="form-row">
+        <label>Статус</label>
+        <select class="form-select" id="prod-status">
+          <option value="active">Активний (видно в магазині)</option>
+          <option value="hidden">Прихований</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button class="btn-a btn-purple" onclick="saveProduct()"><i class="fas fa-save"></i> Зберегти</button>
+        <button class="btn-a btn-gray" onclick="closeModal('productModal')">Скасувати</button>
+      </div>
+      <input type="hidden" id="prod-editId" value="" />
+    </div>
+  </div>
+
+  <!-- Admin add modal -->
+  <div class="modal-overlay" id="adminAddModal" onclick="closeOverlay(event,'adminAddModal')">
+    <div class="modal-box" style="max-width:420px">
+      <button class="modal-close-btn" onclick="closeModal('adminAddModal')"><i class="fas fa-times"></i></button>
+      <div class="modal-title">Додати адміна</div>
+      <div class="form-row">
+        <label>Гравець (зареєстровані на сайті)</label>
+        <select class="form-select" id="newAdminPlayer" style="width:100%">
+          <option value="">— Завантаження... —</option>
+        </select>
+      </div>
+      <div class="form-row"><label>Роль</label>
+        <select class="form-select" id="newAdminRole">
+          <option value="Модератор">Модератор</option>
+          <option value="Адмін">Адмін</option>
+          <option value="Старший адмін">Старший адмін</option>
+          <option value="Власник">Власник</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn-a btn-purple" onclick="addAdmin()"><i class="fas fa-plus"></i> Додати</button>
+        <button class="btn-a btn-gray" onclick="closeModal('adminAddModal')">Скасувати</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Economy modal -->
+  <div class="modal-overlay" id="econModal" onclick="closeOverlay(event,'econModal')">
+    <div class="modal-box" style="max-width:420px">
+      <button class="modal-close-btn" onclick="closeModal('econModal')"><i class="fas fa-times"></i></button>
+      <div class="modal-title"><i class="fas fa-coins" style="color:#34d399;margin-right:8px"></i>Управління монетами</div>
+      <div class="form-row"><label>Нікнейм гравця</label><input class="form-input" id="econ-nick" placeholder="SteamNick" /></div>
+      <div class="form-row"><label>Дія</label>
+        <select class="form-select" id="econ-action">
+          <option value="add">➕ Нарахувати монети</option>
+          <option value="remove">➖ Списати монети</option>
+          <option value="set">🔄 Встановити баланс</option>
+        </select>
+      </div>
+      <div class="form-row"><label>Кількість монет</label><input class="form-input" id="econ-amount" type="number" placeholder="100" /></div>
+      <div class="form-row"><label>Причина</label><input class="form-input" id="econ-reason" placeholder="Нагорода за активність..." /></div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button class="btn-a btn-purple" onclick="applyEcon()"><i class="fas fa-check"></i> Застосувати</button>
+        <button class="btn-a btn-gray" onclick="closeModal('econModal')">Скасувати</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Announce modal -->
+  <div class="modal-overlay" id="announceModal" onclick="closeOverlay(event,'announceModal')">
+    <div class="modal-box" style="max-width:520px">
+      <button class="modal-close-btn" onclick="closeModal('announceModal')"><i class="fas fa-times"></i></button>
+      <div class="modal-title" id="announceMTitle">Новий анонс</div>
+      <div class="form-row"><label>Заголовок</label><input class="form-input" id="ann-title" placeholder="Великий вайп у четвер!" /></div>
+      <div class="form-row"><label>Текст</label><textarea class="form-textarea" id="ann-body" placeholder="Детальний опис анонсу..."></textarea></div>
+      <div class="form-grid">
+        <div class="form-row"><label>Тип</label>
+          <select class="form-select" id="ann-type">
+            <option value="info">ℹ️ Інформація</option>
+            <option value="warning">⚠️ Увага</option>
+            <option value="success">✅ Успіх</option>
+            <option value="danger">🚨 Важливо</option>
+          </select>
+        </div>
+        <div class="form-row"><label>Активний до (необов'язково)</label><input type="date" class="form-input" id="ann-expires" /></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button class="btn-a btn-purple" onclick="saveAnnounce()"><i class="fas fa-save"></i> Зберегти</button>
+        <button class="btn-a btn-gray" onclick="closeModal('announceModal')">Скасувати</button>
+      </div>
+      <input type="hidden" id="ann-editId" value="" />
+    </div>
+  </div>
+
+  <!-- Promo modal -->
+  <div class="modal-overlay" id="promoModal" onclick="closeOverlay(event,'promoModal')">
+    <div class="modal-box" style="max-width:480px">
+      <button class="modal-close-btn" onclick="closeModal('promoModal')"><i class="fas fa-times"></i></button>
+      <div class="modal-title">Промокод</div>
+      <div class="form-row"><label>Код (великими літерами)</label>
+        <div style="display:flex;gap:8px">
+          <input class="form-input" id="promo-code" placeholder="WIPE2026" style="text-transform:uppercase;flex:1" />
+          <button class="btn-a btn-gray" onclick="genPromoCode()" style="white-space:nowrap"><i class="fas fa-random"></i> Авто</button>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row"><label>Тип знижки</label>
+          <select class="form-select" id="promo-type">
+            <option value="percent">% від суми</option>
+            <option value="fixed">Фіксована ₴</option>
+            <option value="coins">Монети бонус</option>
+          </select>
+        </div>
+        <div class="form-row"><label>Розмір</label><input class="form-input" id="promo-value" type="number" placeholder="10" /></div>
+      </div>
+      <div class="form-grid">
+        <div class="form-row"><label>Макс. використань (0 = ∞)</label><input class="form-input" id="promo-max" type="number" placeholder="100" /></div>
+        <div class="form-row"><label>Діє до</label><input type="date" class="form-input" id="promo-expires" /></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button class="btn-a btn-purple" onclick="savePromo()"><i class="fas fa-save"></i> Зберегти</button>
+        <button class="btn-a btn-gray" onclick="closeModal('promoModal')">Скасувати</button>
+      </div>
+      <input type="hidden" id="promo-editId" value="" />
+    </div>
+  </div>
+
+  <!-- Rule modal -->
+  <div class="modal-overlay" id="ruleModal" onclick="closeOverlay(event,'ruleModal')">
+    <div class="modal-box" style="max-width:480px">
+      <button class="modal-close-btn" onclick="closeModal('ruleModal')"><i class="fas fa-times"></i></button>
+      <div class="modal-title" id="ruleMTitle">Нове правило</div>
+      <div class="form-row"><label>Категорія</label>
+        <select class="form-select" id="rule-cat">
+          <option value="general">Загальні</option>
+          <option value="chat">Чат</option>
+          <option value="game">Гра</option>
+          <option value="building">Будівництво</option>
+          <option value="cheats">Читерство</option>
+        </select>
+      </div>
+      <div class="form-row"><label>Текст правила</label><textarea class="form-textarea" id="rule-text" placeholder="Забороняється..."></textarea></div>
+      <div class="form-row"><label>Покарання (необов'язково)</label><input class="form-input" id="rule-punishment" placeholder="Бан на 7 днів" /></div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button class="btn-a btn-purple" onclick="saveRule()"><i class="fas fa-save"></i> Зберегти</button>
+        <button class="btn-a btn-gray" onclick="closeModal('ruleModal')">Скасувати</button>
+      </div>
+      <input type="hidden" id="rule-editId" value="" />
+    </div>
+  </div>
+
+  <!-- Report view modal -->
+  <div class="modal-overlay" id="reportModal" onclick="closeOverlay(event,'reportModal')">
+    <div class="modal-box" style="max-width:560px">
+      <button class="modal-close-btn" onclick="closeModal('reportModal')"><i class="fas fa-times"></i></button>
+      <div id="reportModalBody"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+  // ── Access control ─────────────────────────────────────────
+  // Owner Steam IDs — must be logged in via real Steam to match
+  const OWNER_IDS = ['76561199571061873'];
+
+  let user = JSON.parse(localStorage.getItem('volia_user') || 'null');
+  if (!user) {
+    window.location.href = 'login.html';
+    throw new Error('not logged in');
+  }
+
+  function getAdmins() { return JSON.parse(localStorage.getItem('volia_admins') || '[]'); }
+  function saveAdmins(arr) { localStorage.setItem('volia_admins', JSON.stringify(arr)); }
+
+  const steamIdStr = String(user.steamId || '').trim();
+  const isOwner = OWNER_IDS.includes(steamIdStr);
+
+  // Hide page until access check completes
+  document.getElementById('adminWrap').style.display = 'none';
+
+  (async function checkAccess() {
+    let hasAccess = isOwner;
+    if (!hasAccess) {
+      try {
+        const r = await fetch('/api/admin/admins', { headers: { 'X-Admin-Token': 'dbe9fb7b9f563ee4f4d2f939dc86502ea23258064f691eb31a4d90c1658cc3df' } });
+        const list = await r.json();
+        hasAccess = Array.isArray(list) && list.some(a => String(a.steamId).trim() === steamIdStr);
+      } catch(e) {
+        // fallback to localStorage if API fails
+        hasAccess = getAdmins().some(a => String(a.steamId||'').trim() === steamIdStr);
+      }
+    }
+    if (!hasAccess) {
+      document.body.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:16px;color:var(--text-sub);text-align:center;font-family:'Inter',sans-serif;background:#0c0c18"><i class="fas fa-ban" style="font-size:3rem;color:#ef4444"></i><h2 style="font-family:'Rajdhani',sans-serif;font-size:1.5rem;color:#e2e8f0">Доступ заборонено</h2><p>Steam ID: ${steamIdStr}</p><a href="/" style="color:#7C5CFC">← На головну</a></div>`;
+      return;
+    }
+    document.getElementById('adminWrap').style.display = '';
+    document.getElementById('adminName').textContent = user?.nickname || '';
+  })();
+
+  // ── Storage helpers ────────────────────────────────────────
+  const getBans    = () => JSON.parse(localStorage.getItem('volia_bans') || '[]');
+  const saveBans   = a  => localStorage.setItem('volia_bans', JSON.stringify(a));
+  const getTickets = () => JSON.parse(localStorage.getItem('volia_tickets') || '[]');
+  const saveTickets= a  => localStorage.setItem('volia_tickets', JSON.stringify(a));
+  const getNews    = () => JSON.parse(localStorage.getItem('volia_news') || JSON.stringify(defaultNews()));
+  const saveNews2  = a  => localStorage.setItem('volia_news', JSON.stringify(a));
+  const getUsers   = () => {
+    const all = JSON.parse(localStorage.getItem('volia_all_users') || '[]');
+    if (user && !all.find(u => u.steamId === user.steamId)) { all.push(user); localStorage.setItem('volia_all_users', JSON.stringify(all)); }
+    return all;
+  };
+  const CATS = { ban:'Апеляція бану', bug:'Технічна проблема', shop:'Магазин', griefer:'Скарга на гравця', other:'Інше' };
+
+  function defaultNews() {
+    return [
+      { id:1, title:'Великий вайп — нова карта', body:'У четвер о 00:00 відбудеться глобальний вайп. Нова процедурна карта, нові POI.', tag:'hot', date:'2026-04-20', author:'Адмін' },
+      { id:2, title:'Розклад вайпів', body:'Глобальні вайпи щочетверга — повний скидання прогресу.', tag:'update', date:'2025-11-17', author:'Адмін' },
+      { id:3, title:'3D ДРУК — ТОВАРИ У СТИЛІ RUST', body:'Анонс 3D-друкованих товарів у стилі Rust.', tag:'event', date:'2025-11-17', author:'Адмін' },
+    ];
+  }
+
+  // ── Show panel ────────────────────────────────────────────
+  function show(name, btn) {
+    document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    btn.classList.add('active');
+    const renders = { players:renderPlayers, bans:renderBans, tickets:renderTickets, news:renderNewsGrid, shop:renderShop, orders:loadOrders, admins:renderAdmins, privileges:renderPrivileges, wipe:renderWipe, dashboard:renderDashboard, settings:renderSettings, economy:renderEconomy, reports:renderReports, announce:renderAnnounces, promo:renderPromo, vote:renderVoteAdmin, rating:renderRatingAdmin, rules:renderRules, content:renderContent, media:renderMedia };
+    if (renders[name]) renders[name]();
+  }
+
+  // ── DASHBOARD ─────────────────────────────────────────────
+  const ADMIN_TOKEN = 'dbe9fb7b9f563ee4f4d2f939dc86502ea23258064f691eb31a4d90c1658cc3df';
+  const BM_ID       = '38823465';
+  const API         = '/api';
+
+  async function renderDashboard() {
+    const tickets     = getTickets();
+    const bans        = getBans();
+    const users       = getUsers();
+    const open        = tickets.filter(t => t.status==='open').length;
+    const openReports = getReports().filter(r => r.status==='open').length;
+    const eco         = getEconomy();
+    const totalCoins  = Object.values(eco).reduce((s,e) => s+(e.balance||0), 0);
+    const promos      = getPromos().filter(p => !p.expires || new Date(p.expires) >= new Date()).length;
+
+    document.getElementById('bansCount').textContent    = bans.filter(b=>b.active).length;
+    document.getElementById('ticketsCount').textContent = open;
+    document.getElementById('reportsCount').textContent = openReports;
+    document.getElementById('dashTime').textContent     = new Date().toLocaleString('uk');
+
+    // ── Статичні лічильники (localStorage) ──────────────────
+    document.getElementById('dashStats').innerHTML = `
+      <div class="stat-box red"><div class="stat-box-num">${bans.filter(b=>b.active).length}</div><div class="stat-box-label">Активних банів</div></div>
+      <div class="stat-box yellow"><div class="stat-box-num">${open}</div><div class="stat-box-label">Відкритих тікетів</div></div>
+      <div class="stat-box"><div class="stat-box-num">${openReports}</div><div class="stat-box-label">Скарг відкрито</div></div>
+      <div class="stat-box green"><div class="stat-box-num">${totalCoins}</div><div class="stat-box-label">Монет в обігу 🪙</div></div>
+      <div class="stat-box"><div class="stat-box-num">${promos}</div><div class="stat-box-label">Активних промокодів</div></div>
+    `;
+
+    // ── Реальний онлайн з BattleMetrics ─────────────────────
+    fetchBMDashboard();
+
+    // ── Реальна статистика голосування з API ─────────────────
+    fetchVoteStats();
+
+    // ── Заробіток і зареєстровані з БД ──────────────────────
+    fetchRevenueDash();
+
+    // ── Тікети і бани ────────────────────────────────────────
+    const dt = document.getElementById('dashTickets');
+    const recent = tickets.slice(-4).reverse();
+    dt.innerHTML = recent.length ? recent.map(t =>
+      `<tr><td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(t.subject)}</td>
+       <td><span class="badge badge-${t.status}">${statusLabel(t.status)}</span></td>
+       <td><button class="btn-a btn-gray btn-sm-a" onclick="openTicket(${getTickets().indexOf(t)})">→</button></td></tr>`
+    ).join('') : '<tr><td colspan="3" class="empty-cell"><i class="fas fa-inbox"></i>Немає тікетів</td></tr>';
+
+    const dbEl = document.getElementById('dashBans');
+    const recentB = bans.slice(-4).reverse();
+    dbEl.innerHTML = recentB.length ? recentB.map(b =>
+      `<tr><td>${escHtml(b.nick)}</td>
+       <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-sub);font-size:0.82rem">${escHtml(b.reason)}</td>
+       <td><span class="badge ${b.active?'badge-banned':'badge-closed'}">${b.active?'Активний':'Знято'}</span></td></tr>`
+    ).join('') : '<tr><td colspan="3" class="empty-cell"><i class="fas fa-ban"></i>Немає банів</td></tr>';
+  }
+
+  async function fetchBMDashboard() {
+    const box = document.getElementById('dashLive');
+    if (!box) return;
+    box.innerHTML = `<div class="stat-box" style="grid-column:1/-1">
+      <div class="stat-box-num" style="font-size:1.2rem"><i class="fas fa-circle-notch fa-spin" style="font-size:1rem;color:var(--text-sub)"></i></div>
+      <div class="stat-box-label">Завантаження сервера...</div>
+    </div>`;
+    try {
+      const r = await fetch(`https://api.battlemetrics.com/servers/${BM_ID}`);
+      const { data } = await r.json();
+      const { players, maxPlayers, status, name } = data.attributes;
+      const pct     = maxPlayers > 0 ? Math.round(players / maxPlayers * 100) : 0;
+      const isOnline = status === 'online';
+      box.innerHTML = `
+        <div class="stat-box green">
+          <div class="stat-box-num">${players}</div>
+          <div class="stat-box-label">Онлайн зараз <span style="font-size:0.7rem;color:${isOnline?'var(--green)':'#ef4444'}">${isOnline?'● Online':'● Offline'}</span></div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-num">${maxPlayers}</div>
+          <div class="stat-box-label">Слотів всього</div>
+        </div>
+        <div class="stat-box ${pct>80?'red':pct>50?'yellow':''}">
+          <div class="stat-box-num">${pct}%</div>
+          <div class="stat-box-label">Заповненість</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-num" style="font-size:0.9rem;line-height:1.3">${isOnline?'🟢 Online':'🔴 Offline'}</div>
+          <div class="stat-box-label">Статус Main ×2</div>
+        </div>`;
+    } catch {
+      box.innerHTML = `<div class="stat-box" style="grid-column:1/-1"><div class="stat-box-num" style="font-size:0.9rem;color:#ef4444">—</div><div class="stat-box-label">BattleMetrics недоступний</div></div>`;
+    }
+  }
+
+  async function fetchVoteStats() {
+    const box = document.getElementById('dashVotes');
+    if (!box) return;
+    try {
+      const r = await fetch('/api/admin/stats', { headers: { 'x-admin-token': ADMIN_TOKEN } });
+      if (!r.ok) throw new Error();
+      const d = await r.json();
+      box.innerHTML = `
+        <div class="stat-box"><div class="stat-box-num">${d.mainVotes}</div><div class="stat-box-label">Голосів Main</div></div>
+        <div class="stat-box"><div class="stat-box-num">${d.mondayVotes}</div><div class="stat-box-label">Голосів Monday</div></div>
+        <div class="stat-box green"><div class="stat-box-num" style="font-size:.9rem">${d.mainLeader?.name||'—'}</div><div class="stat-box-label">Лідер Main (${d.mainLeader?.percent||0}%)</div></div>
+        <div class="stat-box" style="border-color:rgba(59,130,246,.3)"><div class="stat-box-num" style="font-size:.9rem;color:#3b82f6">${d.mondayLeader?.name||'—'}</div><div class="stat-box-label">Лідер Monday (${d.mondayLeader?.percent||0}%)</div></div>`;
+    } catch {
+      box.innerHTML = `<div class="stat-box" style="grid-column:1/-1"><div class="stat-box-num" style="font-size:.85rem;color:var(--text-sub)">API голосування недоступне</div></div>`;
+    }
+  }
+
+  async function fetchRevenueDash() {
+    const box = document.getElementById('dashRevenue');
+    if (!box) return;
+    try {
+      const r = await fetch('/api/admin/dashboard', { headers: { 'x-admin-token': ADMIN_TOKEN } });
+      const d = await r.json();
+      box.innerHTML = `
+        <div class="stat-box green"><div class="stat-box-num">${Number(d.revenue||0).toFixed(0)} ₴</div><div class="stat-box-label">Зароблено всього</div></div>
+        <div class="stat-box"><div class="stat-box-num">${d.registered||0}</div><div class="stat-box-label">Зареєстровано в БД</div></div>
+        <div class="stat-box" style="border-color:rgba(16,185,129,.3)"><div class="stat-box-num" style="color:#10b981">${d.completedOrders||0}</div><div class="stat-box-label">Виконаних замовлень</div></div>`;
+    } catch {
+      box.innerHTML = `<div class="stat-box" style="grid-column:1/-1"><div class="stat-box-num" style="font-size:.85rem;color:var(--text-sub)">—</div></div>`;
+    }
+  }
+
+  // ── PRIVILEGES ───────────────────────────────────────────
+  async function renderPrivileges() {
+    // load players into dropdown
+    const sel = document.getElementById('privPlayer');
+    sel.innerHTML = '<option value="">— Завантаження... —</option>';
+    try {
+      const r = await fetch(`${API}/admin/players`, { headers: { 'X-Admin-Token': ADMIN_TOKEN } });
+      const players = await r.json();
+      sel.innerHTML = players.map(p => `<option value="${escHtml(p.steamId)}" data-name="${escHtml(p.name||p.steamId)}">${escHtml(p.name||p.steamId)} (${p.steamId})</option>`).join('');
+    } catch(e) { sel.innerHTML = `<option value="">Помилка: ${e.message}</option>`; }
+    // load pending queue
+    renderPrivQueue();
+  }
+
+  async function renderPrivQueue() {
+    const tbody = document.getElementById('privQueue');
+    if (!tbody) return;
+    try {
+      const r = await fetch(`${API}/admin/pending-commands`, { headers: { 'X-Admin-Token': ADMIN_TOKEN } });
+      const list = await r.json();
+      tbody.innerHTML = list.length ? list.map(c => `<tr>
+        <td>${escHtml(c.playerName||c.steamId)}</td>
+        <td style="font-family:monospace;font-size:.82rem">${escHtml(c.command)}</td>
+        <td>${escHtml(c.server)}</td>
+        <td style="color:var(--text-sub);font-size:.8rem">${(c.createdAt||'').slice(0,16)}</td>
+      </tr>`).join('') : '<tr><td colspan="4" class="empty-cell">Черга порожня — всі команди виконані</td></tr>';
+    } catch { tbody.innerHTML = '<tr><td colspan="4" class="empty-cell">—</td></tr>'; }
+  }
+
+  async function givePrivilege() {
+    const sel = document.getElementById('privPlayer');
+    const steamId = sel.value;
+    const playerName = sel.options[sel.selectedIndex]?.dataset?.name || steamId;
+    const command = document.getElementById('privType').value;
+    const server  = document.getElementById('privServer').value;
+    if (!steamId) { showToast('Вибери гравця!'); return; }
+    const r = await fetch(`${API}/admin/give-privilege`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Token': ADMIN_TOKEN },
+      body: JSON.stringify({ steamId, playerName, command, server }),
+    });
+    const d = await r.json();
+    if (!d.ok) { showToast('Помилка: ' + (d.error||'?')); return; }
+    showToast('Привілею додано в чергу!');
+    renderPrivQueue();
+  }
+
+  // ── PLAYERS ───────────────────────────────────────────────
+  async function renderPlayers() {
+    const tbody = document.getElementById('playersTable');
+    const q = (document.getElementById('playerSearch')?.value||'').toLowerCase();
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-cell"><i class="fas fa-circle-notch fa-spin"></i></td></tr>';
+    try {
+      const url = q ? `${API}/admin/players?search=${encodeURIComponent(q)}` : `${API}/admin/players`;
+      const r = await fetch(url, { headers: { 'X-Admin-Token': ADMIN_TOKEN } });
+      const players = await r.json();
+      const bans = getBans();
+      // fetch admins list for role display
+      let adminList = [];
+      try { const ar = await fetch(`${API}/admin/admins`, { headers: { 'X-Admin-Token': ADMIN_TOKEN } }); adminList = await ar.json(); } catch {}
+      tbody.innerHTML = players.length ? players.map(u => {
+        const banned = bans.find(b => b.steamId === u.steamId && b.active);
+        const adm = adminList.find(a => a.steamId === u.steamId);
+        return `<tr>
+          <td style="display:flex;align-items:center;gap:10px">
+            ${u.avatar ? `<img src="${u.avatar}" class="player-avatar">` : `<div class="player-avatar-placeholder">👤</div>`}
+            <span>${escHtml(u.name||u.steamId)}</span>
+          </td>
+          <td style="font-size:0.78rem;color:var(--text-sub)">${u.steamId}</td>
+          <td><span class="badge ${banned?'badge-banned':adm?'badge-admin':'badge-player'}">${banned?'Забанений':adm?adm.role:'Гравець'}</span></td>
+          <td style="color:var(--text-sub);font-size:0.82rem">${(u.updatedAt||'').slice(0,10)||'—'}</td>
+          <td style="display:flex;gap:6px">
+            ${banned
+              ? `<button class="btn-a btn-green btn-sm-a" onclick="unbanBySteam('${u.steamId}')"><i class="fas fa-unlock"></i> Розбан</button>`
+              : `<button class="btn-a btn-red btn-sm-a" onclick="quickBan('${escHtml(u.name||'')}','${u.steamId}')"><i class="fas fa-ban"></i> Бан</button>`}
+          </td></tr>`;
+      }).join('') : '<tr><td colspan="5" class="empty-cell"><i class="fas fa-users"></i>Немає гравців</td></tr>';
+    } catch(e) {
+      tbody.innerHTML = `<tr><td colspan="5" class="empty-cell">Помилка: ${e.message}</td></tr>`;
+    }
+  }
+
+  function quickBan(nick, steamId) {
+    document.getElementById('banNick').value = nick;
+    document.getElementById('banSteamId').value = steamId;
+    openModal('banModal');
+  }
+
+  // ── BANS ──────────────────────────────────────────────────
+  function renderBans() {
+    const q = (document.getElementById('banSearch')?.value||'').toLowerCase();
+    const bans = getBans().filter(b => !q || b.nick?.toLowerCase().includes(q) || b.steamId?.includes(q) || b.reason?.toLowerCase().includes(q));
+    const tbody = document.getElementById('bansTable');
+    tbody.innerHTML = bans.length ? bans.slice().reverse().map((b,ri) => {
+      const i = getBans().indexOf(b);
+      return `<tr>
+        <td>${escHtml(b.nick)}</td>
+        <td style="font-size:0.78rem;color:var(--text-sub)">${b.steamId}</td>
+        <td style="max-width:180px">${escHtml(b.reason)}</td>
+        <td style="color:var(--text-sub);font-size:0.82rem">${escHtml(b.admin)}</td>
+        <td style="color:var(--text-sub);font-size:0.82rem">${b.until || 'Назавжди'}</td>
+        <td><span class="badge ${b.active?'badge-banned':'badge-closed'}">${b.active?'Активний':'Знято'}</span></td>
+        <td style="display:flex;gap:6px">
+          ${b.active
+            ? `<button class="btn-a btn-green btn-sm-a" onclick="unban(${i})"><i class="fas fa-unlock"></i> Зняти</button>`
+            : `<button class="btn-a btn-gray btn-sm-a" onclick="deleteBan(${i})"><i class="fas fa-trash"></i></button>`}
+        </td></tr>`;
+    }).join('') : '<tr><td colspan="7" class="empty-cell"><i class="fas fa-ban"></i>Банів немає</td></tr>';
+  }
+
+  function addBan() {
+    const nick = document.getElementById('banNick').value.trim();
+    const steamId = document.getElementById('banSteamId').value.trim();
+    const reason = document.getElementById('banReason').value.trim();
+    const days = +document.getElementById('banDuration').value;
+    if (!nick || !reason) { showToast('Заповни нік і причину!'); return; }
+    const until = days === 0 ? null : new Date(Date.now() + days*86400000).toLocaleDateString('uk');
+    const bans = getBans();
+    bans.push({ nick, steamId, reason, admin: user.nickname, until, active: true, date: new Date().toLocaleDateString('uk'), proof: document.getElementById('banProof').value });
+    saveBans(bans);
+    closeModal('banModal');
+    renderBans(); renderDashboard();
+    document.getElementById('bansCount').textContent = bans.filter(b=>b.active).length;
+    showToast(`${nick} забанений!`);
+  }
+
+  function unban(i) {
+    const bans = getBans(); bans[i].active = false; saveBans(bans);
+    renderBans(); renderDashboard();
+    document.getElementById('bansCount').textContent = getBans().filter(b=>b.active).length;
+    showToast('Бан знято');
+  }
+
+  function unbanBySteam(steamId) {
+    const bans = getBans();
+    bans.forEach(b => { if (b.steamId === steamId) b.active = false; });
+    saveBans(bans); renderPlayers(); renderDashboard();
+    showToast('Бан знято');
+  }
+
+  function deleteBan(i) {
+    const bans = getBans(); bans.splice(i,1); saveBans(bans); renderBans();
+  }
+
+  // ── TICKETS ───────────────────────────────────────────────
+  function renderTickets() {
+    const filter = document.getElementById('ticketFilter')?.value || 'all';
+    const all = getTickets();
+    const tickets = filter === 'all' ? all : all.filter(t => t.status === filter);
+    const tbody = document.getElementById('ticketsTable');
+    tbody.innerHTML = tickets.length ? tickets.slice().reverse().map(t => {
+      const i = all.indexOf(t);
+      return `<tr>
+        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500">${escHtml(t.subject)}</td>
+        <td>${escHtml(t.name)}</td>
+        <td style="color:var(--text-sub);font-size:0.82rem">${CATS[t.category]||t.category}</td>
+        <td style="color:var(--text-sub);font-size:0.82rem">${t.date}</td>
+        <td><span class="badge badge-${t.status}">${statusLabel(t.status)}</span></td>
+        <td style="display:flex;gap:6px">
+          <button class="btn-a btn-purple btn-sm-a" onclick="openTicket(${i})"><i class="fas fa-reply"></i> Відповісти</button>
+          ${t.status==='open' ? `<button class="btn-a btn-red btn-sm-a" onclick="closeTicket(${i})"><i class="fas fa-times"></i></button>` : `<button class="btn-a btn-gray btn-sm-a" onclick="reopenTicket(${i})"><i class="fas fa-redo"></i></button>`}
+        </td></tr>`;
+    }).join('') : '<tr><td colspan="6" class="empty-cell"><i class="fas fa-inbox"></i>Тікетів немає</td></tr>';
+  }
+
+  function openTicket(i) {
+    const t = getTickets()[i];
+    document.getElementById('ticketModalBody').innerHTML = `
+      <span style="display:inline-block;font-size:0.72rem;padding:2px 10px;border-radius:20px;background:rgba(124,92,252,0.15);color:var(--purple);margin-bottom:10px;font-weight:700">${CATS[t.category]||t.category}</span>
+      <div class="modal-title">${escHtml(t.subject)}</div>
+      <div style="font-size:0.8rem;color:var(--text-sub);margin-bottom:14px;display:flex;align-items:center;gap:8px">
+        <i class="fas fa-user"></i>${escHtml(t.name)} &nbsp;·&nbsp; ${t.date} &nbsp;·&nbsp; <span class="badge badge-${t.status}">${statusLabel(t.status)}</span>
+      </div>
+      <div class="reply-box">${escHtml(t.body)}</div>
+      ${t.adminReply ? `<div class="admin-reply-block"><div class="admin-reply-label"><i class="fas fa-shield-alt"></i> ВІДПОВІДЬ АДМІНА</div><div style="font-size:0.88rem;line-height:1.6">${escHtml(t.adminReply)}</div></div>` : ''}
+      <div class="form-row"><label>Ваша відповідь</label><textarea class="form-textarea" id="replyArea" placeholder="Напиши відповідь гравцю...">${t.adminReply||''}</textarea></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-a btn-purple" onclick="sendReply(${i})"><i class="fas fa-reply"></i> Надіслати</button>
+        ${t.status==='open' ? `<button class="btn-a btn-red" onclick="closeTicket(${i});closeModal('ticketModal')"><i class="fas fa-times"></i> Закрити</button>` : `<button class="btn-a btn-green" onclick="reopenTicket(${i});closeModal('ticketModal')"><i class="fas fa-redo"></i> Відкрити</button>`}
+      </div>`;
+    openModal('ticketModal');
+  }
+
+  function sendReply(i) {
+    const reply = document.getElementById('replyArea').value.trim();
+    if (!reply) { showToast('Напиши відповідь!'); return; }
+    const tickets = getTickets();
+    tickets[i].adminReply = reply;
+    tickets[i].status = 'answered';
+    saveTickets(tickets);
+    closeModal('ticketModal');
+    renderTickets(); renderDashboard();
+    showToast('Відповідь надіслано!');
+  }
+
+  function closeTicket(i) {
+    const tickets = getTickets(); tickets[i].status = 'closed'; saveTickets(tickets);
+    renderTickets(); renderDashboard(); showToast('Тікет закрито');
+  }
+
+  function reopenTicket(i) {
+    const tickets = getTickets(); tickets[i].status = 'open'; saveTickets(tickets);
+    renderTickets(); renderDashboard(); showToast('Тікет відкрито');
+  }
+
+  // ── NEWS ──────────────────────────────────────────────────
+  function renderNewsGrid() {
+    const news = getNews();
+    const tagLabels = { hot:'🔥 Гаряче', update:'Оновлення', event:'Подія', patch:'Зміни' };
+    const tagClasses = { hot:'tag-hot', update:'tag-update', event:'tag-event', patch:'tag-patch' };
+    document.getElementById('newsGrid').innerHTML = news.length ? news.slice().reverse().map(n => `
+      <div class="news-admin-card">
+        <div><span class="news-admin-card-tag ${tagClasses[n.tag]||'tag-update'}">${tagLabels[n.tag]||n.tag}</span></div>
+        <h4>${escHtml(n.title)}</h4>
+        <p>${escHtml(n.body)}</p>
+        <div style="font-size:0.75rem;color:var(--text-sub)">${n.date}</div>
+        <div class="news-admin-card-footer">
+          <button class="btn-a btn-gray btn-sm-a" onclick="editNews(${n.id})"><i class="fas fa-edit"></i> Редагувати</button>
+          <button class="btn-a btn-red btn-sm-a" onclick="deleteNews(${n.id})"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>`).join('') : '<div style="color:var(--text-sub);padding:40px 0;text-align:center">Новин немає</div>';
+  }
+
+  function openNewsModal(id) {
+    document.getElementById('newsEditId').value = id || '';
+    document.getElementById('newsModalTitle').textContent = id ? 'Редагувати новину' : 'Нова новина';
+    if (id) {
+      const n = getNews().find(x => x.id === id);
+      document.getElementById('newsTitle').value = n.title;
+      document.getElementById('newsBody').value = n.body;
+      document.getElementById('newsTag').value = n.tag;
+      document.getElementById('newsDate').value = n.date;
+    } else {
+      document.getElementById('newsTitle').value = '';
+      document.getElementById('newsBody').value = '';
+      document.getElementById('newsDate').value = new Date().toISOString().split('T')[0];
+    }
+    openModal('newsModal');
+  }
+
+  function editNews(id) { openNewsModal(id); }
+
+  function saveNews() {
+    const title = document.getElementById('newsTitle').value.trim();
+    const body = document.getElementById('newsBody').value.trim();
+    if (!title || !body) { showToast('Заповни заголовок і текст!'); return; }
+    const news = getNews();
+    const editId = +document.getElementById('newsEditId').value;
+    const item = { title, body, tag: document.getElementById('newsTag').value, date: document.getElementById('newsDate').value, author: user.nickname };
+    if (editId) {
+      const idx = news.findIndex(n => n.id === editId);
+      news[idx] = { ...news[idx], ...item };
+    } else {
+      item.id = Date.now();
+      news.push(item);
+    }
+    saveNews2(news);
+    closeModal('newsModal');
+    renderNewsGrid();
+    showToast('Новину збережено!');
+  }
+
+  function deleteNews(id) {
+    const news = getNews().filter(n => n.id !== id);
+    saveNews2(news);
+    renderNewsGrid();
+    showToast('Новину видалено');
+  }
+
+  // ── SHOP ──────────────────────────────────────────────────
+  const DEFAULT_PRODUCTS = [
+    { id:1, icon:'👑', name:'GOLD VIP', cat:'vip', price:50, oldPrice:100, badge:'-50%', desc:'Базові привілеї для гравця', points:0, status:'active' },
+    { id:2, icon:'💎', name:'TITAN VIP', cat:'vip', price:100, oldPrice:200, badge:'-50%', desc:'Розширені привілеї та доступ до команд', points:0, status:'active' },
+    { id:3, icon:'🏆', name:'IMPERIAL VIP', cat:'vip', price:150, oldPrice:300, badge:'-50%', desc:'Максимальні привілеї та особливі права', points:0, status:'active' },
+    { id:4, icon:'🔧', name:'Тех-набір', cat:'bundles', price:100, oldPrice:200, badge:'-50%', desc:'Компоненти і ресурси для техніки', points:200, status:'active' },
+    { id:5, icon:'🌿', name:'Рес-набір', cat:'bundles', price:125, oldPrice:250, badge:'-50%', desc:'Природні ресурси для будівництва', points:250, status:'active' },
+    { id:6, icon:'⛏️', name:'Фарм-набір', cat:'bundles', price:150, oldPrice:300, badge:'-50%', desc:'Інструменти для ефективного фармінгу', points:300, status:'active' },
+    { id:7, icon:'🪙', name:'10 Воля Койнів', cat:'coins', price:35, oldPrice:70, badge:'-50%', desc:'10 ігрових монет', points:10, status:'active' },
+    { id:8, icon:'🪙', name:'20 Воля Койнів', cat:'coins', price:65, oldPrice:130, badge:'-50%', desc:'20 ігрових монет', points:20, status:'active' },
+    { id:9, icon:'🪙', name:'85 Воля Койнів', cat:'coins', price:275, oldPrice:550, badge:'-50%', desc:'85 ігрових монет — найвигідніше', points:85, status:'active' },
+  ];
+  const CAT_LABELS = { vip:'VIP Привілеї', bundles:'Одноразові набори', coins:'Воля Койни' };
+
+  function getProducts() {
+    const raw = localStorage.getItem('volia_shop_products');
+    if (!raw) { localStorage.setItem('volia_shop_products', JSON.stringify(DEFAULT_PRODUCTS)); return DEFAULT_PRODUCTS; }
+    return JSON.parse(raw);
+  }
+  function saveProducts(arr) { localStorage.setItem('volia_shop_products', JSON.stringify(arr)); }
+
+  function renderShop() {
+    const catFilter = document.getElementById('shopCatFilter')?.value || 'all';
+    let prods = getProducts();
+    if (catFilter !== 'all') prods = prods.filter(p => p.cat === catFilter);
+    const all = getProducts();
+    document.getElementById('shopProductCount').textContent = all.length;
+    document.getElementById('shopActiveCount').textContent = all.filter(p => p.status === 'active').length;
+    document.getElementById('shopHiddenCount').textContent = all.filter(p => p.status === 'hidden').length;
+
+    document.getElementById('shopTable').innerHTML = prods.length ? prods.map(p => `<tr>
+      <td style="display:flex;align-items:center;gap:10px">
+        <span class="prod-icon">${p.icon||'📦'}</span>
+        <div>
+          <div style="font-weight:500">${escHtml(p.name)}</div>
+          <div style="font-size:0.75rem;color:var(--text-sub)">${escHtml(p.desc||'')}</div>
+        </div>
+      </td>
+      <td style="color:var(--text-sub);font-size:0.82rem">${CAT_LABELS[p.cat]||p.cat}</td>
+      <td style="color:var(--green);font-weight:600">${p.price} ₴</td>
+      <td style="color:var(--text-sub);text-decoration:line-through;font-size:0.82rem">${p.oldPrice ? p.oldPrice+' ₴' : '—'}</td>
+      <td>${p.badge ? `<span class="badge-discount">${escHtml(p.badge)}</span>` : '—'}</td>
+      <td><span class="badge ${p.status==='active'?'badge-active':'badge-closed'}">${p.status==='active'?'Активний':'Прихований'}</span></td>
+      <td style="display:flex;gap:6px">
+        <button class="btn-a btn-gray btn-sm-a" onclick="openProductModal(${p.id})"><i class="fas fa-edit"></i></button>
+        <button class="btn-a ${p.status==='active'?'btn-gray':'btn-green'} btn-sm-a" onclick="toggleProduct(${p.id})">${p.status==='active'?'<i class="fas fa-eye-slash"></i>':'<i class="fas fa-eye"></i>'}</button>
+        <button class="btn-a btn-red btn-sm-a" onclick="deleteProduct(${p.id})"><i class="fas fa-trash"></i></button>
+      </td></tr>`).join('')
+    : '<tr><td colspan="7" class="empty-cell"><i class="fas fa-store"></i>Товарів немає</td></tr>';
+  }
+
+  function openProductModal(id) {
+    document.getElementById('prod-editId').value = id || '';
+    document.getElementById('productModalTitle').textContent = id ? 'Редагувати товар' : 'Новий товар';
+    if (id) {
+      const p = getProducts().find(x => x.id === id);
+      if (!p) return;
+      document.getElementById('prod-name').value = p.name;
+      document.getElementById('prod-icon').value = p.icon || '';
+      document.getElementById('prod-desc').value = p.desc || '';
+      document.getElementById('prod-cat').value = p.cat;
+      document.getElementById('prod-price').value = p.price;
+      document.getElementById('prod-oldprice').value = p.oldPrice || '';
+      document.getElementById('prod-badge').value = p.badge || '';
+      document.getElementById('prod-points').value = p.points || 0;
+      document.getElementById('prod-status').value = p.status || 'active';
+    } else {
+      ['prod-name','prod-icon','prod-desc','prod-oldprice','prod-badge'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('prod-price').value = '';
+      document.getElementById('prod-points').value = 0;
+      document.getElementById('prod-cat').value = 'vip';
+      document.getElementById('prod-status').value = 'active';
+    }
+    openModal('productModal');
+  }
+
+  function saveProduct() {
+    const name = document.getElementById('prod-name').value.trim();
+    const price = +document.getElementById('prod-price').value;
+    if (!name || !price) { showToast('Назва і ціна обов\'язкові!'); return; }
+    const prods = getProducts();
+    const editId = +document.getElementById('prod-editId').value;
+    const item = {
+      icon: document.getElementById('prod-icon').value.trim() || '📦',
+      name, cat: document.getElementById('prod-cat').value,
+      price, oldPrice: +document.getElementById('prod-oldprice').value || 0,
+      badge: document.getElementById('prod-badge').value.trim(),
+      desc: document.getElementById('prod-desc').value.trim(),
+      points: +document.getElementById('prod-points').value || 0,
+      status: document.getElementById('prod-status').value,
+    };
+    if (editId) {
+      const idx = prods.findIndex(p => p.id === editId);
+      prods[idx] = { ...prods[idx], ...item };
+    } else {
+      item.id = Date.now();
+      prods.push(item);
+    }
+    saveProducts(prods);
+    closeModal('productModal');
+    renderShop();
+    showToast('Товар збережено!');
+  }
+
+  function toggleProduct(id) {
+    const prods = getProducts();
+    const p = prods.find(x => x.id === id);
+    if (p) { p.status = p.status === 'active' ? 'hidden' : 'active'; saveProducts(prods); renderShop(); }
+  }
+
+  function deleteProduct(id) {
+    if (!confirm('Видалити товар?')) return;
+    saveProducts(getProducts().filter(p => p.id !== id));
+    renderShop();
+    showToast('Товар видалено');
+  }
+
+  // ── WIPE ──────────────────────────────────────────────────
+  function renderWipe() {
+    const wipeData = JSON.parse(localStorage.getItem('volia_wipe') || '{"date":"2026-04-24T00:00:00","type":"global"}');
+    document.getElementById('wipeInput').value = wipeData.date.slice(0,16);
+    document.getElementById('wipeType').value = wipeData.type;
+    const d = new Date(wipeData.date);
+    document.getElementById('wipeDate').textContent = 'Дата: ' + d.toLocaleString('uk');
+    updateWipeTimer();
+
+    const history = JSON.parse(localStorage.getItem('volia_wipe_history') || '[]');
+    document.getElementById('wipeHistory').innerHTML = history.length
+      ? history.slice().reverse().map(w => `<tr><td>${w.date}</td><td>${w.type==='global'?'Глобальний':'Карта'}</td><td>${w.admin}</td></tr>`).join('')
+      : '<tr><td colspan="3" class="empty-cell">Немає записів</td></tr>';
+  }
+
+  function updateWipeTimer() {
+    const el = document.getElementById('adminWipeTimer'); if (!el) return;
+    const wipeData = JSON.parse(localStorage.getItem('volia_wipe') || '{"date":"2026-04-24T00:00:00"}');
+    let diff = new Date(wipeData.date) - new Date();
+    if (diff < 0) { el.textContent = 'Вайп!'; return; }
+    const d = Math.floor(diff/86400000), h = Math.floor((diff%86400000)/3600000), m = Math.floor((diff%3600000)/60000), s = Math.floor((diff%60000)/1000);
+    el.textContent = d > 0 ? `${d}д ${h}г ${m}хв` : `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+  setInterval(updateWipeTimer, 1000);
+
+  function saveWipe() {
+    const date = document.getElementById('wipeInput').value;
+    const type = document.getElementById('wipeType').value;
+    if (!date) { showToast('Вкажи дату!'); return; }
+    localStorage.setItem('volia_wipe', JSON.stringify({ date, type }));
+    const history = JSON.parse(localStorage.getItem('volia_wipe_history') || '[]');
+    history.push({ date: new Date(date).toLocaleDateString('uk'), type, admin: user.nickname });
+    localStorage.setItem('volia_wipe_history', JSON.stringify(history));
+    renderWipe(); showToast('Дату вайпу збережено!');
+  }
+
+  // ── WIPE MAP PREPARATION ────────────────────────────────
+  let _wipeCandidates = [];
+
+  async function autoLoadWipeMaps() {
+    const server = document.getElementById('autoWipeServer').value;
+    const count  = parseInt(document.getElementById('autoWipeCount').value) || 4;
+    const btn    = document.getElementById('autoWipeBtn');
+    const result = document.getElementById('autoWipeResult');
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Завантажую…';
+    result.innerHTML = '';
+
+    try {
+      const r = await fetch('/api/admin/auto-wipe-maps', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Token': ADMIN_TOKEN },
+        body: JSON.stringify({ server, count }),
+      });
+      const data = await r.json();
+      if (!data.ok) throw new Error(data.error);
+
+      result.innerHTML = data.maps.map((m, i) => `
+        <div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+          <div style="height:160px;position:relative">
+            <img src="${m.imgUrl}" style="width:100%;height:100%;object-fit:cover" />
+            <a href="${m.mapUrl}" target="_blank"
+               style="position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.75);color:#fff;padding:3px 8px;border-radius:5px;font-size:0.72rem;text-decoration:none;font-family:'Rajdhani',sans-serif;font-weight:700">
+              <i class="fas fa-external-link-alt"></i> RustMaps
+            </a>
+          </div>
+          <div style="padding:10px 12px;font-size:0.8rem">
+            <div style="font-family:'Rajdhani',sans-serif;font-weight:700;margin-bottom:4px">Procedural 3700 #${i+1}</div>
+            <span style="color:var(--text-sub)"><i class="fas fa-hashtag"></i> ${m.seed}</span>
+            ${m.monuments ? `<span style="color:var(--text-sub);margin-left:8px"><i class="fas fa-landmark"></i> ${m.monuments}</span>` : ''}
+          </div>
+        </div>`).join('');
+
+      showToast(`Завантажено ${data.added} карт для голосування!`);
+    } catch(e) {
+      result.innerHTML = `<div style="color:#f87171;padding:12px"><i class="fas fa-exclamation-circle"></i> ${e.message}</div>`;
+      showToast(e.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-magic"></i> Авто-завантажити карти з RustMaps';
+    }
+  }
+
+  async function genWipeMaps() {
+    const server  = document.getElementById('wipeMapServer').value;
+    const mapType = document.getElementById('wipeMapType').value;
+    const box     = document.getElementById('wipeMapsPreview');
+
+    box.innerHTML = '<div style="padding:24px;text-align:center;color:var(--text-sub)"><i class="fas fa-spinner fa-spin"></i> Завантажую реальні карти з BattleMetrics…</div>';
+    document.getElementById('wipeMapsActions').style.display = 'none';
+
+    try {
+      const r = await fetch(`/api/admin/random-maps?size=3700&count=6&type=${mapType}`, {
+        headers: { 'X-Admin-Token': ADMIN_TOKEN }
+      });
+      const data = await r.json();
+      if (!data.ok || !data.maps.length) throw new Error(data.error || 'Немає карт');
+
+      _wipeCandidates = data.maps.map((m, i) => ({
+        seed: m.seed, size: 3700, type: mapType, server,
+        name: `${mapType === 'Barren' ? 'Barren' : 'Procedural'} 3700 #${i + 1}`,
+        selected: true,
+      }));
+      renderWipeMapsPreview();
+    } catch(e) {
+      box.innerHTML = `<div style="padding:16px;color:#f87171"><i class="fas fa-exclamation-circle"></i> Помилка: ${e.message}</div>`;
+    }
+  }
+
+  function renderWipeMapsPreview() {
+    const box = document.getElementById('wipeMapsPreview');
+    box.innerHTML = _wipeCandidates.map((m, i) => {
+      const rmUrl = m.mapUrl || `https://rustmaps.com`;
+      const thumb = m.thumbnailUrl || '';
+      return `
+        <div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+          <div style="height:200px;position:relative;background:#0b1820;overflow:hidden">
+            ${thumb
+              ? `<img src="${thumb}" style="width:100%;height:100%;object-fit:cover;display:block" />`
+              : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-sub);font-size:0.8rem"><i class="fas fa-map" style="font-size:2rem;opacity:0.3"></i></div>`
+            }
+            <a href="${rmUrl}" target="_blank"
+               style="position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:flex-end;padding:8px;text-decoration:none;background:linear-gradient(to top,rgba(0,0,0,0.6) 0%,transparent 50%)">
+              <span style="background:rgba(0,0,0,0.75);color:#fff;border-radius:6px;padding:4px 10px;font-size:0.75rem;font-family:'Rajdhani',sans-serif;font-weight:700">
+                <i class="fas fa-external-link-alt"></i> Відкрити на RustMaps
+              </span>
+            </a>
+          </div>
+          <div style="padding:12px 14px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex:1">
+                <input type="checkbox" id="wc_${i}" ${m.selected ? 'checked' : ''} onchange="_wipeCandidates[${i}].selected=this.checked" style="width:15px;height:15px;accent-color:var(--purple)">
+                <span style="font-family:'Rajdhani',sans-serif;font-weight:700;font-size:0.95rem">${m.name}</span>
+              </label>
+            </div>
+            <div style="font-size:0.78rem;color:var(--text-sub)">
+              <span style="margin-right:10px"><i class="fas fa-hashtag"></i> ${m.seed}</span>
+              <span style="margin-right:10px"><i class="fas fa-expand-arrows-alt"></i> ${m.size}</span>
+              ${m.monuments ? `<span style="margin-right:10px"><i class="fas fa-landmark"></i> ${m.monuments} монум.</span>` : ''}
+              <span><i class="fas fa-layer-group"></i> ${m.type === 'Barren' ? 'Barren' : 'Procedural'}</span>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+    document.getElementById('wipeMapsActions').style.display = 'block';
+  }
+
+  async function applyWipeMaps() {
+    const selected = _wipeCandidates.filter(m => m.selected);
+    if (!selected.length) { showToast('Вибери хоча б одну карту!', 'error'); return; }
+    let ok = 0;
+    for (const m of selected) {
+      const r = await fetch('/api/admin/maps', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Token': ADMIN_TOKEN },
+        body: JSON.stringify({ name: m.name, seed: m.seed, size: m.size, type: m.type, server: m.server, imgUrl: m.thumbnailUrl || '', mapUrl: m.mapUrl || '', monuments: m.monuments || 0 }),
+      });
+      if (r.ok) ok++;
+    }
+    showToast(`Додано ${ok} карт для голосування!`);
+    _wipeCandidates = [];
+    document.getElementById('wipeMapsPreview').innerHTML = '';
+    document.getElementById('wipeMapsActions').style.display = 'none';
+  }
+
+  // ── ADMINS ────────────────────────────────────────────────
+  async function renderAdmins() {
+    document.getElementById('adminsTable').innerHTML = '<tr><td colspan="4" class="empty-cell"><i class="fas fa-circle-notch fa-spin"></i></td></tr>';
+    try {
+      const r = await fetch(`${API}/admin/admins`, { headers: { 'X-Admin-Token': ADMIN_TOKEN } });
+      const admins = await r.json();
+      document.getElementById('adminsTable').innerHTML = admins.length ? admins.map(a => `<tr>
+        <td style="display:flex;align-items:center;gap:8px">
+          ${a.avatar ? `<img src="${a.avatar}" style="width:28px;height:28px;border-radius:6px;object-fit:cover">` : ''}
+          <span style="font-weight:500">${escHtml(a.name || a.steamId)}</span>
+        </td>
+        <td><span class="badge badge-admin">${escHtml(a.role)}</span></td>
+        <td style="color:var(--text-sub);font-size:0.82rem">${(a.addedAt||'').slice(0,10)}</td>
+        <td>${a.steamId !== user.steamId ? `<button class="btn-a btn-red btn-sm-a" onclick="removeAdmin('${escHtml(a.steamId)}')"><i class="fas fa-times"></i> Видалити</button>` : '<span style="color:var(--text-sub);font-size:0.8rem">Ти</span>'}</td>
+      </tr>`).join('') : '<tr><td colspan="4" class="empty-cell">Немає адмінів</td></tr>';
+    } catch(e) { document.getElementById('adminsTable').innerHTML = `<tr><td colspan="4" class="empty-cell">Помилка: ${e.message}</td></tr>`; console.error('[admins]', e); }
+  }
+
+  async function openAdminAddModal() {
+    openModal('adminAddModal');
+    const sel = document.getElementById('newAdminPlayer');
+    sel.innerHTML = '<option value="">— Завантаження... —</option>';
+    try {
+      const r = await fetch(`${API}/admin/players`, { headers: { 'X-Admin-Token': ADMIN_TOKEN } });
+      const players = await r.json();
+      sel.innerHTML = players.map(p => `<option value="${escHtml(p.steamId)}">${escHtml(p.name)} (${p.steamId})</option>`).join('');
+    } catch(e) { sel.innerHTML = `<option value="">Помилка: ${e.message}</option>`; console.error('[players]', e); }
+  }
+
+  async function addAdmin() {
+    const steamId = document.getElementById('newAdminPlayer').value;
+    const role    = document.getElementById('newAdminRole').value;
+    if (!steamId) { showToast('Вибери гравця!'); return; }
+    const r = await fetch(`${API}/admin/admins`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Token': ADMIN_TOKEN },
+      body: JSON.stringify({ steamId, role, addedBy: user.steamId }),
+    });
+    const d = await r.json();
+    if (!d.ok) { showToast('Помилка: ' + (d.error||'?')); return; }
+    closeModal('adminAddModal');
+    renderAdmins();
+    showToast('Адміна додано!');
+  }
+
+  async function removeAdmin(steamId) {
+    if (steamId === user.steamId) { showToast('Не можна видалити себе!'); return; }
+    await fetch(`${API}/admin/admins/${steamId}`, { method: 'DELETE', headers: { 'X-Admin-Token': ADMIN_TOKEN } });
+    renderAdmins();
+    showToast('Адміна видалено');
+  }
+
+  // ── ECONOMY ───────────────────────────────────────────────
+  function getEconomy() { return JSON.parse(localStorage.getItem('volia_economy') || '{}'); }
+  function saveEconomy(obj) { localStorage.setItem('volia_economy', JSON.stringify(obj)); }
+  function getEconHistory() { return JSON.parse(localStorage.getItem('volia_econ_history') || '[]'); }
+  function saveEconHistory(arr) { localStorage.setItem('volia_econ_history', JSON.stringify(arr)); }
+
+  function renderEconomy() {
+    const eco = getEconomy();
+    const users = getUsers();
+    const q = (document.getElementById('econSearch')?.value||'').toLowerCase();
+    const filtered = users.filter(u => !q || u.nickname?.toLowerCase().includes(q));
+
+    const totalCoins = Object.values(eco).reduce((s,e) => s + (e.balance||0), 0);
+    const richest = users.reduce((best, u) => { const b = eco[u.steamId]?.balance||0; return b > (eco[best?.steamId]?.balance||0) ? u : best; }, users[0]);
+    document.getElementById('econStats').innerHTML = `
+      <div class="stat-box"><div class="stat-box-num">${users.length}</div><div class="stat-box-label">Гравців</div></div>
+      <div class="stat-box green"><div class="stat-box-num">${totalCoins}</div><div class="stat-box-label">Монет в обігу <i class="fas fa-coins"></i></div></div>
+      <div class="stat-box yellow"><div class="stat-box-num">${richest ? (eco[richest.steamId]?.balance||0) : 0}</div><div class="stat-box-label">Макс. баланс</div></div>`;
+
+    document.getElementById('econTable').innerHTML = filtered.length ? filtered.map(u => {
+      const e = eco[u.steamId] || { balance:0, spent:0 };
+      return `<tr>
+        <td style="display:flex;align-items:center;gap:8px">
+          ${u.avatar ? `<img src="${u.avatar}" class="player-avatar">` : `<div class="player-avatar-placeholder">👤</div>`}
+          ${escHtml(u.nickname)}
+        </td>
+        <td style="font-size:0.78rem;color:var(--text-sub)">${u.steamId}</td>
+        <td><span style="color:#34d399;font-weight:700;font-family:'Rajdhani',sans-serif;font-size:1.1rem">${e.balance||0}</span> 🪙</td>
+        <td style="color:var(--text-sub);font-size:0.82rem">${e.spent||0} 🪙</td>
+        <td style="display:flex;gap:6px">
+          <button class="btn-a btn-green btn-sm-a" onclick="quickEcon('${u.steamId}','${escHtml(u.nickname)}','add')"><i class="fas fa-plus"></i></button>
+          <button class="btn-a btn-red btn-sm-a" onclick="quickEcon('${u.steamId}','${escHtml(u.nickname)}','remove')"><i class="fas fa-minus"></i></button>
+          <button class="btn-a btn-gray btn-sm-a" onclick="quickEcon('${u.steamId}','${escHtml(u.nickname)}','set')"><i class="fas fa-pen"></i></button>
+        </td></tr>`;
+    }).join('') : '<tr><td colspan="5" class="empty-cell"><i class="fas fa-coins"></i>Немає гравців</td></tr>';
+
+    const hist = getEconHistory().slice(-10).reverse();
+    document.getElementById('econHistory').innerHTML = hist.length ? hist.map(h =>
+      `<tr><td>${escHtml(h.nick)}</td>
+       <td style="color:${h.amount>0?'#34d399':'#ef4444'};font-weight:600">${h.amount>0?'+':''}${h.amount} 🪙</td>
+       <td style="color:var(--text-sub);font-size:0.82rem">${escHtml(h.reason)}</td>
+       <td style="color:var(--text-sub);font-size:0.82rem">${escHtml(h.admin)}</td>
+       <td style="color:var(--text-sub);font-size:0.82rem">${h.date}</td></tr>`).join('')
+    : '<tr><td colspan="5" class="empty-cell">Немає транзакцій</td></tr>';
+  }
+
+  function quickEcon(steamId, nick, action) {
+    document.getElementById('econ-nick').value = nick;
+    document.getElementById('econ-action').value = action;
+    document.getElementById('econ-amount').value = '';
+    document.getElementById('econ-reason').value = '';
+    openModal('econModal');
+  }
+
+  function applyEcon() {
+    const nick = document.getElementById('econ-nick').value.trim();
+    const action = document.getElementById('econ-action').value;
+    const amount = +document.getElementById('econ-amount').value;
+    const reason = document.getElementById('econ-reason').value.trim() || 'Без причини';
+    if (!nick || !amount) { showToast('Заповни нікнейм і суму!'); return; }
+
+    const users = getUsers();
+    const u = users.find(x => x.nickname === nick);
+    const steamId = u?.steamId || nick;
+
+    const eco = getEconomy();
+    if (!eco[steamId]) eco[steamId] = { balance:0, spent:0 };
+    const before = eco[steamId].balance;
+
+    if (action === 'add') eco[steamId].balance += amount;
+    else if (action === 'remove') eco[steamId].balance = Math.max(0, eco[steamId].balance - amount);
+    else eco[steamId].balance = amount;
+
+    const diff = eco[steamId].balance - before;
+    saveEconomy(eco);
+
+    const hist = getEconHistory();
+    hist.push({ nick, steamId, amount: diff, reason, admin: user.nickname, date: new Date().toLocaleDateString('uk') });
+    saveEconHistory(hist);
+
+    closeModal('econModal');
+    renderEconomy();
+    showToast(`${nick}: ${diff >= 0 ? '+' : ''}${diff} 🪙`);
+  }
+
+  // ── REPORTS ───────────────────────────────────────────────
+  function getReports() { return JSON.parse(localStorage.getItem('volia_reports') || '[]'); }
+  function saveReports(arr) { localStorage.setItem('volia_reports', JSON.stringify(arr)); }
+
+  function renderReports() {
+    const filter = document.getElementById('reportFilter')?.value || 'all';
+    const all = getReports();
+    const list = filter === 'all' ? all : all.filter(r => r.status === filter);
+    const open = all.filter(r => r.status === 'open').length;
+    document.getElementById('reportsCount').textContent = open;
+
+    const REASONS = { cheat:'Читерство', grief:'Гріфінг', abuse:'Образа', steal:'Крадіжка', other:'Інше' };
+    document.getElementById('reportsTable').innerHTML = list.length ? list.slice().reverse().map(r => {
+      const i = all.indexOf(r);
+      return `<tr>
+        <td style="font-weight:500">${escHtml(r.target)}</td>
+        <td style="color:var(--text-sub)">${escHtml(r.reporter)}</td>
+        <td style="font-size:0.82rem">${REASONS[r.reason]||r.reason}</td>
+        <td style="color:var(--text-sub);font-size:0.82rem">${escHtml(r.server||'ВОЛЯ RUST')}</td>
+        <td style="color:var(--text-sub);font-size:0.82rem">${r.date}</td>
+        <td><span class="badge ${r.status==='open'?'badge-open':'badge-closed'}">${r.status==='open'?'Відкрита':'Закрита'}</span></td>
+        <td style="display:flex;gap:6px">
+          <button class="btn-a btn-purple btn-sm-a" onclick="viewReport(${i})"><i class="fas fa-eye"></i></button>
+          <button class="btn-a btn-red btn-sm-a" onclick="quickBan('${escHtml(r.target)}','')"><i class="fas fa-ban"></i> Бан</button>
+          ${r.status==='open' ? `<button class="btn-a btn-gray btn-sm-a" onclick="closeReport(${i})"><i class="fas fa-check"></i></button>` : ''}
+        </td></tr>`;
+    }).join('') : '<tr><td colspan="7" class="empty-cell"><i class="fas fa-flag"></i>Скарг немає</td></tr>';
+  }
+
+  function viewReport(i) {
+    const r = getReports()[i];
+    const REASONS = { cheat:'Читерство', grief:'Гріфінг', abuse:'Образа', steal:'Крадіжка', other:'Інше' };
+    document.getElementById('reportModalBody').innerHTML = `
+      <div class="modal-title"><i class="fas fa-flag" style="color:#ef4444;margin-right:8px"></i>Скарга</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div style="background:var(--bg-card2);border-radius:10px;padding:12px">
+          <div style="font-size:0.72rem;color:var(--text-sub);margin-bottom:4px">НА КОГО</div>
+          <div style="font-weight:600;font-size:1rem">${escHtml(r.target)}</div>
+        </div>
+        <div style="background:var(--bg-card2);border-radius:10px;padding:12px">
+          <div style="font-size:0.72rem;color:var(--text-sub);margin-bottom:4px">ВІД КОГО</div>
+          <div style="font-weight:600;font-size:1rem">${escHtml(r.reporter)}</div>
+        </div>
+      </div>
+      <div style="margin-bottom:12px"><div style="font-size:0.78rem;color:var(--text-sub);margin-bottom:4px">ПРИЧИНА</div><div>${REASONS[r.reason]||r.reason}</div></div>
+      <div style="margin-bottom:16px"><div style="font-size:0.78rem;color:var(--text-sub);margin-bottom:6px">ДЕТАЛІ</div><div class="reply-box">${escHtml(r.body||'Без деталей')}</div></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-a btn-red" onclick="quickBan('${escHtml(r.target)}','');closeModal('reportModal')"><i class="fas fa-ban"></i> Забанити</button>
+        <button class="btn-a btn-gray" onclick="closeReport(${i});closeModal('reportModal')"><i class="fas fa-check"></i> Закрити</button>
+      </div>`;
+    openModal('reportModal');
+  }
+
+  function closeReport(i) {
+    const reports = getReports(); reports[i].status = 'closed'; saveReports(reports);
+    renderReports(); showToast('Скаргу закрито');
+  }
+
+  // ── ANNOUNCEMENTS ─────────────────────────────────────────
+  function getAnnounces() { return JSON.parse(localStorage.getItem('volia_announces') || '[]'); }
+  function saveAnnounces(arr) { localStorage.setItem('volia_announces', JSON.stringify(arr)); }
+
+  const ANN_STYLES = {
+    info:    { bg:'rgba(59,130,246,0.1)',  border:'rgba(59,130,246,0.3)',  color:'#60a5fa', icon:'fa-info-circle' },
+    warning: { bg:'rgba(245,158,11,0.1)',  border:'rgba(245,158,11,0.3)',  color:'#fbbf24', icon:'fa-exclamation-triangle' },
+    success: { bg:'rgba(34,197,94,0.1)',   border:'rgba(34,197,94,0.3)',   color:'#4ade80', icon:'fa-check-circle' },
+    danger:  { bg:'rgba(239,68,68,0.1)',   border:'rgba(239,68,68,0.3)',   color:'#f87171', icon:'fa-radiation' },
+  };
+
+  function renderAnnounces() {
+    const list = getAnnounces();
+    const el = document.getElementById('announceList');
+    if (!list.length) { el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-sub)"><i class="fas fa-bullhorn" style="font-size:2rem;opacity:0.2;display:block;margin-bottom:12px"></i>Анонсів немає</div>'; return; }
+    el.innerHTML = list.slice().reverse().map(a => {
+      const s = ANN_STYLES[a.type] || ANN_STYLES.info;
+      return `<div style="background:${s.bg};border:1px solid ${s.border};border-radius:12px;padding:16px 20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:14px">
+        <i class="fas ${s.icon}" style="color:${s.color};font-size:1.2rem;flex-shrink:0;margin-top:2px"></i>
+        <div style="flex:1">
+          <div style="font-weight:600;color:var(--text);margin-bottom:4px">${escHtml(a.title)}</div>
+          <div style="font-size:0.85rem;color:var(--text-sub)">${escHtml(a.body)}</div>
+          ${a.expires ? `<div style="font-size:0.75rem;color:var(--text-sub);margin-top:6px"><i class="fas fa-clock"></i> До ${a.expires}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <button class="btn-a btn-gray btn-sm-a" onclick="toggleAnnounce(${a.id})" title="${a.active?'Деактивувати':'Активувати'}">
+            <i class="fas ${a.active?'fa-eye':'fa-eye-slash'}"></i>
+          </button>
+          <button class="btn-a btn-gray btn-sm-a" onclick="editAnnounce(${a.id})"><i class="fas fa-edit"></i></button>
+          <button class="btn-a btn-red btn-sm-a" onclick="deleteAnnounce(${a.id})"><i class="fas fa-trash"></i></button>
+        </div>
+        <span class="badge ${a.active?'badge-active':'badge-closed'}" style="flex-shrink:0">${a.active?'Активний':'Вимкнено'}</span>
+      </div>`;
+    }).join('');
+  }
+
+  function openAnnounceModal(id) {
+    document.getElementById('ann-editId').value = id || '';
+    document.getElementById('announceMTitle').textContent = id ? 'Редагувати анонс' : 'Новий анонс';
+    if (id) {
+      const a = getAnnounces().find(x => x.id === id);
+      document.getElementById('ann-title').value = a.title;
+      document.getElementById('ann-body').value = a.body;
+      document.getElementById('ann-type').value = a.type;
+      document.getElementById('ann-expires').value = a.expires || '';
+    } else {
+      ['ann-title','ann-body','ann-expires'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('ann-type').value = 'info';
+    }
+    openModal('announceModal');
+  }
+
+  function editAnnounce(id) { openAnnounceModal(id); }
+
+  function saveAnnounce() {
+    const title = document.getElementById('ann-title').value.trim();
+    const body = document.getElementById('ann-body').value.trim();
+    if (!title) { showToast('Введи заголовок!'); return; }
+    const list = getAnnounces();
+    const editId = +document.getElementById('ann-editId').value;
+    const item = { title, body, type: document.getElementById('ann-type').value, expires: document.getElementById('ann-expires').value, active: true };
+    if (editId) {
+      const idx = list.findIndex(a => a.id === editId);
+      list[idx] = { ...list[idx], ...item };
+    } else { item.id = Date.now(); list.push(item); }
+    saveAnnounces(list);
+    closeModal('announceModal');
+    renderAnnounces();
+    showToast('Анонс збережено!');
+  }
+
+  function toggleAnnounce(id) {
+    const list = getAnnounces();
+    const a = list.find(x => x.id === id);
+    if (a) { a.active = !a.active; saveAnnounces(list); renderAnnounces(); }
+  }
+
+  function deleteAnnounce(id) {
+    saveAnnounces(getAnnounces().filter(a => a.id !== id));
+    renderAnnounces(); showToast('Анонс видалено');
+  }
+
+  // ── PROMO CODES ───────────────────────────────────────────
+  function getPromos() { return JSON.parse(localStorage.getItem('volia_promos') || '[]'); }
+  function savePromos(arr) { localStorage.setItem('volia_promos', JSON.stringify(arr)); }
+
+  function renderPromo() {
+    const list = getPromos();
+    const TYPE_L = { percent:'%', fixed:'₴', coins:'🪙' };
+    document.getElementById('promoTable').innerHTML = list.length ? list.slice().reverse().map(p => {
+      const expired = p.expires && new Date(p.expires) < new Date();
+      const maxed = p.max > 0 && p.uses >= p.max;
+      const active = !expired && !maxed;
+      return `<tr>
+        <td><code style="background:var(--bg-card2);padding:2px 8px;border-radius:5px;font-size:0.9rem">${escHtml(p.code)}</code></td>
+        <td style="color:var(--text-sub);font-size:0.82rem">${{percent:'Відсоток',fixed:'Фіксована',coins:'Монети'}[p.type]||p.type}</td>
+        <td style="font-weight:600;color:var(--green)">${p.value}${TYPE_L[p.type]||''}</td>
+        <td>${p.uses||0}</td>
+        <td>${p.max||'∞'}</td>
+        <td style="color:var(--text-sub);font-size:0.82rem">${p.expires||'∞'}</td>
+        <td><span class="badge ${active?'badge-active':'badge-closed'}">${expired?'Протермінований':maxed?'Вичерпаний':'Активний'}</span></td>
+        <td style="display:flex;gap:6px">
+          <button class="btn-a btn-gray btn-sm-a" onclick="editPromo(${p.id})"><i class="fas fa-edit"></i></button>
+          <button class="btn-a btn-red btn-sm-a" onclick="deletePromo(${p.id})"><i class="fas fa-trash"></i></button>
+        </td></tr>`;
+    }).join('') : '<tr><td colspan="8" class="empty-cell"><i class="fas fa-tag"></i>Промокодів немає</td></tr>';
+  }
+
+  function openPromoModal(id) {
+    document.getElementById('promo-editId').value = id || '';
+    if (id) {
+      const p = getPromos().find(x => x.id === id);
+      document.getElementById('promo-code').value = p.code;
+      document.getElementById('promo-type').value = p.type;
+      document.getElementById('promo-value').value = p.value;
+      document.getElementById('promo-max').value = p.max || 0;
+      document.getElementById('promo-expires').value = p.expires || '';
+    } else {
+      ['promo-code','promo-value'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('promo-max').value = 0;
+      document.getElementById('promo-expires').value = '';
+      document.getElementById('promo-type').value = 'percent';
+    }
+    openModal('promoModal');
+  }
+
+  function editPromo(id) { openPromoModal(id); }
+
+  function genPromoCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    document.getElementById('promo-code').value = Array.from({length:8}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+  }
+
+  function savePromo() {
+    const code = document.getElementById('promo-code').value.trim().toUpperCase();
+    const value = +document.getElementById('promo-value').value;
+    if (!code || !value) { showToast('Заповни код і розмір!'); return; }
+    const list = getPromos();
+    const editId = +document.getElementById('promo-editId').value;
+    const item = { code, type: document.getElementById('promo-type').value, value, max: +document.getElementById('promo-max').value || 0, expires: document.getElementById('promo-expires').value, uses: 0 };
+    if (editId) {
+      const idx = list.findIndex(p => p.id === editId);
+      list[idx] = { ...list[idx], ...item };
+    } else { item.id = Date.now(); list.push(item); }
+    savePromos(list);
+    closeModal('promoModal');
+    renderPromo();
+    showToast(`Промокод ${code} збережено!`);
+  }
+
+  function deletePromo(id) {
+    savePromos(getPromos().filter(p => p.id !== id));
+    renderPromo(); showToast('Промокод видалено');
+  }
+
+  // ── VOTE ADMIN ────────────────────────────────────────────
+  function getVoteSettings() { return JSON.parse(localStorage.getItem('volia_vote_settings') || '{"coins":10,"streak":50,"msg":"Дякуємо за голос! +{coins} монет"}'); }
+
+  // ── VOTE ADMIN ────────────────────────────────────────────────
+  let voteTab = 'main';
+
+  function switchVoteTab(tab) {
+    voteTab = tab;
+    document.getElementById('vtab-main').className   = 'btn-a ' + (tab === 'main'   ? 'btn-purple' : 'btn-gray');
+    document.getElementById('vtab-monday').className = 'btn-a ' + (tab === 'monday' ? 'btn-purple' : 'btn-gray');
+    loadVoteTab();
+  }
+
+  async function renderVoteAdmin() {
+    // Load stats for dashboard boxes
+    try {
+      const r = await fetch('/api/admin/stats', { headers: { 'x-admin-token': ADMIN_TOKEN } });
+      const d = await r.json();
+      if (d.ok) {
+        document.getElementById('voteAdminStats').innerHTML = `
+          <div class="stat-box"><div class="stat-box-num">${d.mainVotes}</div><div class="stat-box-label">Голосів Main</div></div>
+          <div class="stat-box" style="border-color:rgba(59,130,246,.3)"><div class="stat-box-num" style="color:#3b82f6">${d.mondayVotes}</div><div class="stat-box-label">Голосів Monday</div></div>
+          <div class="stat-box green"><div class="stat-box-num" style="font-size:.85rem">${d.mainLeader?.name||'—'}</div><div class="stat-box-label">Лідер Main (${d.mainLeader?.percent||0}%)</div></div>
+          <div class="stat-box" style="border-color:rgba(59,130,246,.3)"><div class="stat-box-num" style="font-size:.85rem;color:#3b82f6">${d.mondayLeader?.name||'—'}</div><div class="stat-box-label">Лідер Monday (${d.mondayLeader?.percent||0}%)</div></div>`;
+      }
+    } catch {}
+    loadVoteTab();
+  }
+
+  async function loadVoteTab() {
+    const server = voteTab;
+    try {
+      const [mapsR, votersR] = await Promise.all([
+        fetch(`/api/admin/maps?server=${server}`, { headers: { 'x-admin-token': ADMIN_TOKEN } }),
+        fetch(`/api/admin/voters?server=${server}`, { headers: { 'x-admin-token': ADMIN_TOKEN } }),
+      ]);
+      const mapsD   = await mapsR.json();
+      const votersD = await votersR.json();
+      renderMapsTable(mapsD.maps || []);
+      renderVotersTable(votersD.votes || [], votersD.wipeId || '');
+    } catch (e) {
+      document.getElementById('mapsAdminTable').innerHTML = '<tr><td colspan="9" class="empty-cell">Помилка завантаження</td></tr>';
+    }
+  }
+
+  function renderMapsTable(maps) {
+    const tbody = document.getElementById('mapsAdminTable');
+    tbody.innerHTML = maps.length ? maps.map(m => `
+      <tr>
+        <td><strong>${escHtml(m.name)}</strong></td>
+        <td style="font-family:monospace;color:var(--text-sub);font-size:0.82rem">${m.seed||'—'}</td>
+        <td style="color:var(--text-sub)">${m.size}</td>
+        <td><span class="badge badge-player" style="font-size:0.7rem">${m.type==='Barren'?'Barren':'Proc.'}</span></td>
+        <td style="color:var(--text-sub)">${m.monuments||'—'}</td>
+        <td><strong>${m.votes}</strong></td>
+        <td>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="flex:1;height:5px;background:rgba(255,255,255,0.08);border-radius:3px;min-width:50px">
+              <div style="height:100%;border-radius:3px;background:var(--purple);width:${m.percent}%"></div>
+            </div>
+            <span style="font-size:0.8rem;color:var(--text-sub);min-width:30px">${m.percent}%</span>
+          </div>
+        </td>
+        <td>
+          ${m.imgUrl
+            ? `<img src="${escHtml(m.imgUrl)}" style="width:48px;height:32px;object-fit:cover;border-radius:4px;border:1px solid rgba(255,255,255,0.1)">`
+            : '<span style="color:var(--text-sub);font-size:0.75rem">немає</span>'}
+        </td>
+        <td style="display:flex;gap:5px">
+          <button class="btn-a btn-gray btn-sm-a" onclick="openMapModal(${JSON.stringify(m).replace(/"/g,'&quot;')})"><i class="fas fa-edit"></i></button>
+          <button class="btn-a btn-red btn-sm-a" onclick="deleteMap(${m.id})"><i class="fas fa-trash"></i></button>
+        </td>
+      </tr>`).join('')
+    : '<tr><td colspan="9" class="empty-cell"><i class="fas fa-map"></i> Карт немає — додайте першу</td></tr>';
+  }
+
+  function renderVotersTable(votes, wipeId) {
+    document.getElementById('votersWipeId').textContent = wipeId ? `(вайп: ${wipeId})` : '';
+    const tbody = document.getElementById('votersTable');
+    tbody.innerHTML = votes.length ? votes.map(v => `
+      <tr>
+        <td style="display:flex;align-items:center;gap:8px">
+          <i class="fab fa-steam" style="color:#4a90d9"></i>
+          <span>${escHtml(v.name||v.steamId)}</span>
+        </td>
+        <td style="font-family:monospace;font-size:0.75rem;color:var(--text-sub)">${v.steamId}</td>
+        <td><strong>${escHtml(v.mapName)}</strong></td>
+        <td style="color:var(--text-sub);font-size:0.8rem">${v.at ? new Date(v.at).toLocaleString('uk') : '—'}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="4" class="empty-cell"><i class="fas fa-vote-yea"></i> Голосів ще немає</td></tr>';
+  }
+
+  async function generateMaps() {
+    const btn = document.getElementById('btnGenerateMaps');
+    const server = voteTab || 'main';
+    if (!confirm(`Згенерувати 3 нові рандомні мапи для сервера "${server}"?\nПоточні мапи будуть деактивовані.`)) return;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Генерую...';
+    try {
+      const r = await fetch('/api/admin/maps/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': ADMIN_TOKEN },
+        body: JSON.stringify({ server })
+      });
+      if (!r.ok) throw new Error(await r.text());
+      await loadVoteTab();
+      showToast('3 мапи згенеровано! Завантажую зображення з RustMaps...', 'success');
+      // Auto-poll for images every 5s up to 3 minutes
+      pollForImages(server, 36);
+    } catch(e) {
+      showToast('Помилка генерації: ' + e.message, 'error');
+    }
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-dice"></i> Згенерувати 3 мапи';
+  }
+
+  async function pollForImages(server, attemptsLeft) {
+    if (attemptsLeft <= 0) return;
+    const statusEl = document.getElementById('imgLoadStatus');
+    if (statusEl) statusEl.textContent = '⏳ Зображення завантажуються з RustMaps...';
+    try {
+      const r = await fetch('/api/admin/maps/refresh-images', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': ADMIN_TOKEN },
+        body: JSON.stringify({ server })
+      });
+      const d = await r.json();
+      if (d.updated > 0) {
+        await loadVoteTab();
+        const remaining = (d.maps || []).filter(m => !m.imgUrl).length;
+        if (remaining === 0) {
+          if (statusEl) statusEl.textContent = '';
+          showToast('Зображення з RustMaps завантажено!', 'success');
+          return;
+        }
+      }
+    } catch(e) {}
+    setTimeout(() => pollForImages(server, attemptsLeft - 1), 5000);
+  }
+
+  function openMapModal(map) {
+    document.getElementById('mapModalTitle').textContent = map ? 'Редагувати карту' : 'Додати карту';
+    document.getElementById('mapEditId').value    = map?.id || '';
+    document.getElementById('mapName').value      = map?.name || '';
+    document.getElementById('mapSeed').value      = map?.seed || '';
+    document.getElementById('mapSize').value      = map?.size || '';
+    document.getElementById('mapType').value      = map?.type || 'Procedural_Map';
+    document.getElementById('mapMonuments').value = map?.monuments || '';
+    document.getElementById('mapServer').value    = map?.server || voteTab;
+    document.getElementById('mapImgUrl').value    = map?.imgUrl || '';
+    openModal('mapModal');
+  }
+
+  function closeMapModal() { closeModal('mapModal'); }
+
+  async function saveMap() {
+    const id   = document.getElementById('mapEditId').value;
+    const body = {
+      name:      document.getElementById('mapName').value.trim(),
+      seed:      document.getElementById('mapSeed').value.trim(),
+      size:      document.getElementById('mapSize').value,
+      type:      document.getElementById('mapType').value,
+      monuments: document.getElementById('mapMonuments').value,
+      server:    document.getElementById('mapServer').value,
+      imgUrl:    document.getElementById('mapImgUrl').value.trim(),
+    };
+    if (!body.name) { showToast('Введіть назву карти', 'error'); return; }
+
+    try {
+      let r;
+      if (id) {
+        // Edit: delete old + add new (simple approach)
+        await fetch(`/api/admin/maps/${id}`, { method: 'DELETE', headers: { 'x-admin-token': ADMIN_TOKEN } });
+        r = await fetch('/api/admin/maps', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-token': ADMIN_TOKEN }, body: JSON.stringify(body) });
+      } else {
+        r = await fetch('/api/admin/maps', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-token': ADMIN_TOKEN }, body: JSON.stringify(body) });
+      }
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error);
+      closeMapModal();
+      showToast(id ? 'Карту оновлено!' : 'Карту додано!');
+      loadVoteTab();
+    } catch(e) { showToast('Помилка: ' + e.message, 'error'); }
+  }
+
+  async function deleteMap(id) {
+    if (!confirm('Видалити цю карту?')) return;
+    try {
+      const r = await fetch(`/api/admin/maps/${id}`, { method: 'DELETE', headers: { 'x-admin-token': ADMIN_TOKEN } });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error);
+      showToast('Карту видалено');
+      loadVoteTab();
+    } catch(e) { showToast('Помилка: ' + e.message, 'error'); }
+  }
+
+  async function resetVotesAdmin() {
+    const server = voteTab;
+    const label  = server === 'monday' ? 'Monday' : 'Main';
+    if (!confirm(`Скинути всі голоси для сервера ${label}? Цю дію не можна відмінити.`)) return;
+    try {
+      const r = await fetch('/api/admin/reset-votes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': ADMIN_TOKEN },
+        body: JSON.stringify({ server }),
+      });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error);
+      showToast(`Видалено ${d.removed} голосів`);
+      loadVoteTab();
+      fetchVoteStats();
+    } catch(e) { showToast('Помилка: ' + e.message, 'error'); }
+  }
+
+  // ── RATING ADMIN ──────────────────────────────────────────
+  async function renderRatingAdmin() { await loadRatingAdmin(); }
+
+  async function loadRatingAdmin() {
+    const server = document.getElementById('ratingServerFilter')?.value || '';
+    const search = (document.getElementById('ratingSearch')?.value || '').toLowerCase();
+    try {
+      const url = `/api/admin/stats/players${server ? `?server=${server}` : ''}`;
+      const r = await fetch(url, { headers: { 'x-admin-token': ADMIN_TOKEN } });
+      const d = await r.json();
+      if (!d.ok) throw new Error();
+
+      const players = d.players.filter(p =>
+        !search || p.name?.toLowerCase().includes(search) || p.steamId?.includes(search));
+
+      // Stats boxes
+      const totKills  = players.reduce((s,p) => s + (p.kills||0), 0);
+      const totDeaths = players.reduce((s,p) => s + (p.deaths||0), 0);
+      const totRaids  = players.reduce((s,p) => s + (p.raids||0), 0);
+      document.getElementById('ratingStats').innerHTML = `
+        <div class="stat-box"><div class="stat-box-num">${players.length}</div><div class="stat-box-label">Гравців</div></div>
+        <div class="stat-box green"><div class="stat-box-num">${totKills.toLocaleString('uk')}</div><div class="stat-box-label">Вбивств всього</div></div>
+        <div class="stat-box" style="border-color:rgba(239,68,68,.3)"><div class="stat-box-num" style="color:#ef4444">${totDeaths.toLocaleString('uk')}</div><div class="stat-box-label">Смертей всього</div></div>
+        <div class="stat-box" style="border-color:rgba(245,158,11,.3)"><div class="stat-box-num" style="color:#f59e0b">${totRaids.toLocaleString('uk')}</div><div class="stat-box-label">Рейдів всього</div></div>`;
+
+      // Table
+      const tbody = document.getElementById('ratingTable');
+      tbody.innerHTML = players.length ? players.map((p, i) => `
+        <tr>
+          <td style="color:var(--text-sub);font-size:0.82rem">${i+1}</td>
+          <td>
+            <div style="display:flex;align-items:center;gap:8px">
+              ${p.avatar ? `<img src="${escHtml(p.avatar)}" style="width:28px;height:28px;border-radius:4px;object-fit:cover" onerror="this.style.display='none'">` : '<i class="fas fa-user" style="color:var(--text-sub)"></i>'}
+              <div>
+                <div style="font-weight:500">${escHtml(p.name)}</div>
+                ${p.clan ? `<div style="font-size:0.72rem;color:var(--text-sub)">${escHtml(p.clan)}</div>` : ''}
+              </div>
+            </div>
+          </td>
+          <td style="font-family:monospace;font-size:0.72rem;color:var(--text-sub)">${p.steamId}</td>
+          <td><span class="badge badge-player" style="font-size:0.7rem">${p.server||'main'}</span></td>
+          <td><strong style="color:#4ade80">${p.kills||0}</strong></td>
+          <td style="color:#ef4444">${p.deaths||0}</td>
+          <td><span style="font-size:0.82rem;font-weight:600;color:${p.kd>=2?'#4ade80':p.kd>=1?'#f59e0b':'#ef4444'}">${p.kd.toFixed(2)}</span></td>
+          <td style="color:var(--text-sub);font-size:0.82rem">${fmtTimeAdmin(p.playtime)}</td>
+          <td style="color:#f59e0b">${p.raids||0}</td>
+          <td style="color:var(--text-sub);font-size:0.8rem">${(p.gathered||0).toLocaleString('uk')}</td>
+          <td style="display:flex;gap:5px">
+            <button class="btn-a btn-gray btn-sm-a" onclick="openPlayerModal(${JSON.stringify(p).replace(/"/g,'&quot;')})"><i class="fas fa-edit"></i></button>
+            <button class="btn-a btn-red  btn-sm-a" onclick="deletePlayer('${p.steamId}')"><i class="fas fa-trash"></i></button>
+          </td>
+        </tr>`).join('')
+      : '<tr><td colspan="11" class="empty-cell"><i class="fas fa-trophy"></i> Немає гравців — додайте вручну або підключіть webhook</td></tr>';
+    } catch {
+      document.getElementById('ratingTable').innerHTML =
+        '<tr><td colspan="11" class="empty-cell">Помилка завантаження</td></tr>';
+    }
+  }
+
+  function fmtTimeAdmin(mins) {
+    const h = Math.floor((mins||0) / 60), m = (mins||0) % 60;
+    return h > 0 ? `${h}г ${m}хв` : `${m}хв`;
+  }
+
+  function openPlayerModal(p) {
+    document.getElementById('playerModalTitle').textContent = p ? 'Редагувати гравця' : 'Додати гравця';
+    document.getElementById('playerEditId').value = p?.steamId || '';
+    document.getElementById('pSteamId').value   = p?.steamId  || '';
+    document.getElementById('pSteamId').disabled = !!p;
+    document.getElementById('pName').value      = p?.name     || '';
+    document.getElementById('pAvatar').value    = p?.avatar   || '';
+    document.getElementById('pServer').value    = p?.server   || 'main';
+    document.getElementById('pClan').value      = p?.clan     || '';
+    document.getElementById('pKills').value     = p?.kills    ?? '';
+    document.getElementById('pDeaths').value    = p?.deaths   ?? '';
+    document.getElementById('pRaids').value     = p?.raids    ?? '';
+    document.getElementById('pPlaytime').value  = p?.playtime ?? '';
+    document.getElementById('pGathered').value  = p?.gathered ?? '';
+    openModal('playerModal');
+  }
+
+  async function savePlayer() {
+    const body = {
+      steamId:  document.getElementById('pSteamId').value.trim(),
+      name:     document.getElementById('pName').value.trim(),
+      avatar:   document.getElementById('pAvatar').value.trim(),
+      server:   document.getElementById('pServer').value,
+      clan:     document.getElementById('pClan').value.trim(),
+      kills:    document.getElementById('pKills').value,
+      deaths:   document.getElementById('pDeaths').value,
+      raids:    document.getElementById('pRaids').value,
+      playtime: document.getElementById('pPlaytime').value,
+      gathered: document.getElementById('pGathered').value,
+    };
+    if (!body.steamId || !body.name) { showToast('Заповніть Steam ID і нік', 'error'); return; }
+    try {
+      const r = await fetch('/api/admin/stats/player', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': ADMIN_TOKEN },
+        body: JSON.stringify(body),
+      });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error);
+      closeModal('playerModal');
+      showToast('Гравця збережено!');
+      loadRatingAdmin();
+    } catch(e) { showToast('Помилка: ' + e.message, 'error'); }
+  }
+
+  async function deletePlayer(steamId) {
+    if (!confirm(`Видалити гравця ${steamId}?`)) return;
+    try {
+      const r = await fetch(`/api/admin/stats/${encodeURIComponent(steamId)}`, {
+        method: 'DELETE', headers: { 'x-admin-token': ADMIN_TOKEN },
+      });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error);
+      showToast('Гравця видалено');
+      loadRatingAdmin();
+    } catch(e) { showToast('Помилка: ' + e.message, 'error'); }
+  }
+
+  function openBulkImport() { openModal('bulkModal'); }
+
+  async function runBulkImport() {
+    const raw     = document.getElementById('bulkJson').value.trim();
+    const replace = document.getElementById('bulkReplace').checked;
+    let players;
+    try { players = JSON.parse(raw); }
+    catch { showToast('Невалідний JSON', 'error'); return; }
+    if (!Array.isArray(players)) { showToast('Очікується масив []', 'error'); return; }
+    try {
+      const r = await fetch('/api/admin/stats/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': ADMIN_TOKEN },
+        body: JSON.stringify({ players, replace }),
+      });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error);
+      closeModal('bulkModal');
+      showToast(`Імпортовано ${d.imported} гравців!`);
+      loadRatingAdmin();
+    } catch(e) { showToast('Помилка: ' + e.message, 'error'); }
+  }
+
+  async function resetStatsAdmin() {
+    const server = document.getElementById('ratingServerFilter')?.value || '';
+    const label  = server ? (server === 'monday' ? 'Monday' : 'Main') : 'всіх серверів';
+    if (!confirm(`Скинути статистику ${label}? Дію не можна відмінити.`)) return;
+    try {
+      const r = await fetch('/api/admin/stats/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-token': ADMIN_TOKEN },
+        body: JSON.stringify({ server: server || null }),
+      });
+      const d = await r.json();
+      if (!d.ok) throw new Error();
+      showToast(`Видалено ${d.removed} гравців`);
+      loadRatingAdmin();
+    } catch(e) { showToast('Помилка скидання', 'error'); }
+  }
+
+  // ── RULES ─────────────────────────────────────────────────
+  const DEFAULT_RULES = [
+    { id:1, cat:'general', text:'Поважай інших гравців та адміністрацію.', punishment:'Попередження / Бан' },
+    { id:2, cat:'chat', text:'Заборонено спам, флуд, образи в чаті.', punishment:'Мут 24 години' },
+    { id:3, cat:'cheats', text:'Заборонено використання читів, макросів та стороннього ПЗ.', punishment:'Перманентний бан' },
+    { id:4, cat:'game', text:'Заборонено гріфінг — знищення бази без причини.', punishment:'Бан 7 днів' },
+    { id:5, cat:'building', text:'Забороняється будуватися поряд з пам\'ятниками та дорогами.', punishment:'Знесення бази' },
+  ];
+  function getRules() {
+    const raw = localStorage.getItem('volia_rules');
+    if (!raw) { localStorage.setItem('volia_rules', JSON.stringify(DEFAULT_RULES)); return DEFAULT_RULES; }
+    return JSON.parse(raw);
+  }
+  function saveRulesData(arr) { localStorage.setItem('volia_rules', JSON.stringify(arr)); }
+
+  const CAT_RULES = { general:'Загальні', chat:'Чат', game:'Гра', building:'Будівництво', cheats:'Читерство' };
+
+  function renderRules() {
+    const rules = getRules();
+    document.getElementById('rulesTable').innerHTML = rules.length ? rules.map((r, i) =>
+      `<tr>
+        <td style="color:var(--text-sub);font-size:0.85rem;width:40px">${i+1}</td>
+        <td><span class="badge badge-player">${CAT_RULES[r.cat]||r.cat}</span></td>
+        <td>
+          <div style="font-size:0.88rem">${escHtml(r.text)}</div>
+          ${r.punishment ? `<div style="font-size:0.75rem;color:#ef4444;margin-top:3px"><i class="fas fa-gavel"></i> ${escHtml(r.punishment)}</div>` : ''}
+        </td>
+        <td style="display:flex;gap:6px">
+          <button class="btn-a btn-gray btn-sm-a" onclick="editRule(${r.id})"><i class="fas fa-edit"></i></button>
+          <button class="btn-a btn-red btn-sm-a" onclick="deleteRule(${r.id})"><i class="fas fa-trash"></i></button>
+        </td></tr>`).join('')
+    : '<tr><td colspan="4" class="empty-cell"><i class="fas fa-list-ol"></i>Правил немає</td></tr>';
+  }
+
+  function openRuleModal(id) {
+    document.getElementById('rule-editId').value = id || '';
+    document.getElementById('ruleMTitle').textContent = id ? 'Редагувати правило' : 'Нове правило';
+    if (id) {
+      const r = getRules().find(x => x.id === id);
+      document.getElementById('rule-cat').value = r.cat;
+      document.getElementById('rule-text').value = r.text;
+      document.getElementById('rule-punishment').value = r.punishment || '';
+    } else {
+      document.getElementById('rule-text').value = '';
+      document.getElementById('rule-punishment').value = '';
+      document.getElementById('rule-cat').value = 'general';
+    }
+    openModal('ruleModal');
+  }
+
+  function editRule(id) { openRuleModal(id); }
+
+  function saveRule() {
+    const text = document.getElementById('rule-text').value.trim();
+    if (!text) { showToast('Введи текст правила!'); return; }
+    const rules = getRules();
+    const editId = +document.getElementById('rule-editId').value;
+    const item = { cat: document.getElementById('rule-cat').value, text, punishment: document.getElementById('rule-punishment').value.trim() };
+    if (editId) {
+      const idx = rules.findIndex(r => r.id === editId);
+      rules[idx] = { ...rules[idx], ...item };
+    } else { item.id = Date.now(); rules.push(item); }
+    saveRulesData(rules);
+    closeModal('ruleModal');
+    renderRules();
+    showToast('Правило збережено!');
+  }
+
+  function deleteRule(id) {
+    saveRulesData(getRules().filter(r => r.id !== id));
+    renderRules(); showToast('Правило видалено');
+  }
+
+  // ── SETTINGS ──────────────────────────────────────────────
+  const DEFAULT_SETTINGS = {
+    siteName: 'Воля Rust', siteSub: 'Ukraine Rust Community',
+    heroTitle: 'Грай. Вільно.', heroSub: 'Перший в Україні PvP сервер без Pay2Win.\nЧесна гра. Сильна спільнота. Воля.',
+    heroBtn: 'Грати зараз', serverIp: 'connect.voliarust.com:28015',
+    footerCopy: '© 2025–2026 Воля Rust. Всі права захищені.',
+    accentColor: '#7C5CFC', discord: 'https://discord.gg/FJJYfhqvgj',
+    tiktok: 'https://www.tiktok.com/@volia.rust', telegram: '',
+  };
+
+  function getSettings() {
+    const raw = localStorage.getItem('volia_site_settings');
+    return raw ? { ...DEFAULT_SETTINGS, ...JSON.parse(raw) } : DEFAULT_SETTINGS;
+  }
+  function saveSettings(obj) { localStorage.setItem('volia_site_settings', JSON.stringify(obj)); }
+
+  function renderSettings() {
+    const s = getSettings();
+    document.getElementById('set-siteName').value = s.siteName;
+    document.getElementById('set-siteSub').value = s.siteSub;
+    document.getElementById('set-heroTitle').value = s.heroTitle;
+    document.getElementById('set-heroSub').value = s.heroSub;
+    document.getElementById('set-heroBtn').value = s.heroBtn;
+    document.getElementById('set-serverIp').value = s.serverIp;
+    document.getElementById('set-footerCopy').value = s.footerCopy;
+    document.getElementById('set-accentPicker').value = s.accentColor;
+    document.getElementById('set-accentHex').value = s.accentColor;
+    document.getElementById('set-discord').value = s.discord;
+    document.getElementById('set-tiktok').value = s.tiktok;
+    document.getElementById('set-telegram').value = s.telegram || '';
+    applyPreviewColor(s.accentColor);
+    updateSwatchSelected(s.accentColor);
+  }
+
+  async function checkMonoWebhook() {
+    const el = document.getElementById('monoWebhookStatus');
+    el.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Перевіряємо...';
+    const r = await fetch(`${API}/admin/mono-webhook`, { headers: { 'x-admin-token': ADMIN_TOKEN } });
+    const d = await r.json();
+    if (!d.ok) {
+      el.innerHTML = `<span style="color:#f87171"><i class="fas fa-times-circle"></i> ${d.error}</span><br><small>URL: <code>${d.webhook_url||''}</code></small>`;
+    } else {
+      el.innerHTML = `<span style="color:#10b981"><i class="fas fa-check-circle"></i> MONO_TOKEN налаштований</span> (${d.client||''})<br><small>URL вебхуку: <code>${d.webhook_url}</code></small>`;
+    }
+  }
+
+  async function registerMonoWebhook() {
+    const el = document.getElementById('monoWebhookStatus');
+    el.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Реєструємо...';
+    const r = await fetch(`${API}/admin/mono-webhook`, { method: 'POST', headers: { 'x-admin-token': ADMIN_TOKEN } });
+    const d = await r.json();
+    if (d.ok) {
+      el.innerHTML = `<span style="color:#10b981"><i class="fas fa-check-circle"></i> Вебхук зареєстровано!</span><br><small>URL: <code>${d.webhook_url}</code></small>`;
+      showToast('✅ Monobank вебхук зареєстровано! Тепер оплати будуть автоматичними.');
+    } else {
+      el.innerHTML = `<span style="color:#f87171"><i class="fas fa-times-circle"></i> Помилка: ${d.error||d.mono_response}</span>`;
+      showToast('Помилка реєстрації: ' + (d.error || ''), 'error');
+    }
+  }
+
+  function saveAllSettings() {
+    const g = id => document.getElementById(id)?.value?.trim() || '';
+    const s = {
+      siteName:    g('set-siteName')   || DEFAULT_SETTINGS.siteName,
+      siteSub:     g('set-siteSub')    || DEFAULT_SETTINGS.siteSub,
+      heroTitle:   g('set-heroTitle')  || DEFAULT_SETTINGS.heroTitle,
+      heroSub:     g('set-heroSub')    || DEFAULT_SETTINGS.heroSub,
+      heroBtn:     g('set-heroBtn')    || DEFAULT_SETTINGS.heroBtn,
+      serverIp:    g('set-serverIp')   || DEFAULT_SETTINGS.serverIp,
+      footerCopy:  g('set-footerCopy') || DEFAULT_SETTINGS.footerCopy,
+      accentColor: g('set-accentHex')  || '#7C5CFC',
+      discord:     g('set-discord')    || DEFAULT_SETTINGS.discord,
+      tiktok:      g('set-tiktok')     || DEFAULT_SETTINGS.tiktok,
+      telegram:    g('set-telegram'),
+    };
+    saveSettings(s);
+    applyAccentColor(s.accentColor);
+    showToast('✅ Налаштування збережено! Перезавантаж сторінки сайту щоб побачити зміни.');
+  }
+
+  function applyPreviewColor(color) {
+    const el = document.getElementById('set-accentPicker');
+    if (el) el.value = color;
+    const hex = document.getElementById('set-accentHex');
+    if (hex) hex.value = color;
+    const btn = document.getElementById('previewBtn');
+    if (btn) btn.style.background = color;
+    const text = document.getElementById('previewText');
+    if (text) text.style.color = color;
+    const badge = document.getElementById('previewBadge');
+    if (badge) { badge.style.color = color; badge.style.background = color + '26'; }
+    const dot = document.getElementById('previewDot');
+    if (dot) { dot.style.color = color; dot.style.background = color + '20'; }
+    updateSwatchSelected(color);
+  }
+
+  function onColorPick(val) {
+    document.getElementById('set-accentPicker').value = val;
+    document.getElementById('set-accentHex').value = val;
+    applyPreviewColor(val);
+  }
+
+  function onColorHex(val) {
+    if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+      document.getElementById('set-accentPicker').value = val;
+      applyPreviewColor(val);
+    }
+  }
+
+  function updateSwatchSelected(color) {
+    // Compare hex via data attribute since browser converts hex to rgb in .style.background
+    document.querySelectorAll('.color-swatch').forEach(sw => {
+      const swColor = sw.getAttribute('onclick')?.match(/#[0-9A-Fa-f]{6}/)?.[0] || '';
+      sw.classList.toggle('selected', swColor.toLowerCase() === color.toLowerCase());
+    });
+  }
+
+  // ── Utils ─────────────────────────────────────────────────
+  let _toastTm;
+  function showToast(msg, type) {
+    const el = document.getElementById('toast');
+    if (!el) return;
+    el.textContent = msg;
+    el.style.background = type === 'error' ? 'rgba(239,68,68,0.95)' : '';
+    el.classList.add('show');
+    clearTimeout(_toastTm);
+    _toastTm = setTimeout(() => el.classList.remove('show'), 3000);
+  }
+
+  function openModal(id) { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  function closeOverlay(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
+  function statusLabel(s) { return s==='open'?'Відкрито':s==='answered'?'Відповідь':'Закрито'; }
+  function escHtml(str) { return (str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+  function logout() { localStorage.removeItem('volia_user'); window.location.href = '/'; }
+
+  function applyAccentColor(color) {
+    document.documentElement.style.setProperty('--purple', color);
+    document.documentElement.style.setProperty('--purple-h', color + 'cc');
+  }
+
+  function resetSettings() {
+    if (!confirm('Скинути всі налаштування до стандартних?')) return;
+    localStorage.removeItem('volia_site_settings');
+    renderSettings();
+    showToast('Налаштування скинуто');
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  //  CONTENT EDITOR PANEL
+  // ═══════════════════════════════════════════════════════════
+
+  const CONTENT_KEY = 'volia_content';
+
+  function getContentData() {
+    try { return JSON.parse(localStorage.getItem(CONTENT_KEY) || '{}'); }
+    catch { return {}; }
+  }
+  function saveContentData(obj) { localStorage.setItem(CONTENT_KEY, JSON.stringify(obj)); }
+
+  // Open any site page with edit mode flag set
+  function openEditPage(url) {
+    localStorage.setItem('volia_edit_mode', '1');
+    window.open(url, '_blank');
+  }
+
+  // Legacy alias — opens homepage
+  function openEditMode() { openEditPage('../index.html'); }
+
+  // Render saved content table
+  function renderContent(filter) {
+    const data = getContentData();
+    const keys = Object.keys(data);
+    const query = (filter || document.getElementById('contentSearch')?.value || '').toLowerCase();
+
+    const filtered = keys.filter(k =>
+      k.toLowerCase().includes(query) || (data[k] || '').toLowerCase().includes(query)
+    );
+
+    document.getElementById('contentTable').innerHTML = filtered.length
+      ? filtered.map(k => {
+          const val = escHtml(data[k]);
+          const short = val.length > 120 ? val.slice(0, 120) + '…' : val;
+          return `<tr>
+            <td><code style="font-size:0.8rem;color:var(--purple);background:rgba(124,92,252,0.1);padding:2px 7px;border-radius:5px">${escHtml(k)}</code></td>
+            <td style="font-size:0.83rem;color:var(--text-sub);max-width:400px;word-break:break-word">${short}</td>
+            <td>
+              <div style="display:flex;gap:6px">
+                <button class="btn-a btn-gray btn-sm-a" onclick="editContentItem('${escHtml(k)}')" title="Редагувати"><i class="fas fa-edit"></i></button>
+                <button class="btn-a btn-red  btn-sm-a" onclick="deleteContentItem('${escHtml(k)}')" title="Видалити"><i class="fas fa-trash"></i></button>
+              </div>
+            </td>
+          </tr>`;
+        }).join('')
+      : `<tr><td colspan="3" class="empty-cell"><i class="fas fa-edit"></i>${keys.length ? 'Нічого не знайдено' : 'Ще немає збережених текстів. Відкрий сайт у режимі редагування!'}</td></tr>`;
+  }
+
+  function filterContent(q) { renderContent(q); }
+
+  function editContentItem(key) {
+    const data = getContentData();
+    const newVal = prompt(`Редагувати "${key}":`, data[key] || '');
+    if (newVal === null) return; // cancelled
+    data[key] = newVal;
+    saveContentData(data);
+    renderContent();
+    showToast('Збережено!');
+  }
+
+  function deleteContentItem(key) {
+    if (!confirm(`Видалити "${key}"?`)) return;
+    const data = getContentData();
+    delete data[key];
+    saveContentData(data);
+    renderContent();
+    showToast('Видалено');
+  }
+
+  function clearContent() {
+    if (!confirm('Видалити ВСІ збережені тексти? Сторінки покажуть дефолтний контент.')) return;
+    localStorage.removeItem(CONTENT_KEY);
+    renderContent();
+    showToast('Всі тексти видалено');
+  }
+
+  // Export volia_content as downloadable JSON
+  function exportContent() {
+    const data = getContentData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = 'volia-content.json'; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // Import JSON and merge with existing content
+  function importContent() {
+    const input = document.createElement('input');
+    input.type  = 'file';
+    input.accept = '.json,application/json';
+    input.onchange = e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = r => {
+        try {
+          const imported = JSON.parse(r.result);
+          if (typeof imported !== 'object' || Array.isArray(imported)) throw new Error();
+          const merged = { ...getContentData(), ...imported };
+          saveContentData(merged);
+          renderContent();
+          showToast(`✅ Імпортовано ${Object.keys(imported).length} ключів`);
+        } catch { showToast('❌ Невалідний JSON файл'); }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  //  MEDIA MANAGER PANEL
+  // ═══════════════════════════════════════════════════════════
+
+  const MEDIA_KEY = 'volia_media';
+  const MEDIA_MAX_BYTES  = 900 * 1024;
+  const MEDIA_MAX_DIM    = 1920;
+
+  function getMediaList() {
+    try { return JSON.parse(localStorage.getItem(MEDIA_KEY) || '[]'); }
+    catch { return []; }
+  }
+  function saveMediaList(arr) { localStorage.setItem(MEDIA_KEY, JSON.stringify(arr)); }
+
+  function mediaFormatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+  }
+
+  // Canvas resize: повертає Promise<string> — base64 JPEG ≤ MEDIA_MAX_BYTES
+  function resizeImageToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        let { width, height } = img;
+
+        // Scale down if too large
+        if (width > MEDIA_MAX_DIM || height > MEDIA_MAX_DIM) {
+          const ratio = Math.min(MEDIA_MAX_DIM / width, MEDIA_MAX_DIM / height);
+          width  = Math.round(width  * ratio);
+          height = Math.round(height * ratio);
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width  = width;
+        canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+
+        // Знижуємо якість поки не вліземо в ліміт
+        let quality = 0.92;
+        let base64  = canvas.toDataURL('image/jpeg', quality);
+        while (base64.length * 0.75 > MEDIA_MAX_BYTES && quality > 0.25) {
+          quality -= 0.08;
+          base64   = canvas.toDataURL('image/jpeg', quality);
+        }
+
+        if (base64.length * 0.75 > MEDIA_MAX_BYTES) {
+          reject(new Error('Файл занадто великий навіть після стиснення'));
+          return;
+        }
+        resolve({ base64, quality: Math.round(quality * 100), width, height });
+      };
+
+      img.onerror = () => reject(new Error('Не вдалось прочитати зображення'));
+      img.src = url;
+    });
+  }
+
+  // Handle file input or drop
+  async function handleMediaUpload(files) {
+    const progressBox  = document.getElementById('mediaProgress');
+    const progressText = document.getElementById('mediaProgressText');
+    progressBox.style.display = 'block';
+
+    const list = getMediaList();
+    let uploaded = 0;
+
+    for (const file of files) {
+      if (!file.type.startsWith('image/')) {
+        showToast(`❌ ${file.name} — не зображення`); continue;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        showToast(`❌ ${file.name} — більше 5 МБ, пропущено`); continue;
+      }
+
+      progressText.textContent = `Стискаю ${file.name}…`;
+
+      try {
+        const { base64, quality, width, height } = await resizeImageToBase64(file);
+        list.push({
+          id:      Date.now() + uploaded,
+          name:    file.name.replace(/\.[^.]+$/, '') + '.jpg',
+          base64,
+          size:    Math.round(base64.length * 0.75),
+          quality,
+          width,
+          height,
+          date:    new Date().toLocaleDateString('uk'),
+          key:     '',
+        });
+        uploaded++;
+      } catch (err) {
+        showToast(`❌ ${file.name}: ${err.message}`);
+      }
+    }
+
+    if (uploaded) {
+      saveMediaList(list);
+      showToast(`✅ Завантажено ${uploaded} зображень`);
+    }
+
+    progressBox.style.display = 'none';
+    document.getElementById('mediaInput').value = '';
+    renderMedia();
+  }
+
+  // Delete media item
+  function deleteMedia(id) {
+    if (!confirm('Видалити це зображення?')) return;
+    saveMediaList(getMediaList().filter(m => m.id !== id));
+    renderMedia();
+    showToast('Видалено');
+  }
+
+  // Apply selected media to a section (saves key binding)
+  function applyMediaToSection() {
+    const key    = document.getElementById('mediaSectionKey').value;
+    const idStr  = document.getElementById('mediaSelectFile').value;
+    if (!idStr) { showToast('Обери зображення зі списку'); return; }
+
+    const id   = +idStr;
+    const list = getMediaList();
+    // Remove old key binding for this section
+    list.forEach(m => { if (m.key === key) m.key = ''; });
+    const item = list.find(m => m.id === id);
+    if (item) item.key = key;
+    saveMediaList(list);
+    showToast(`✅ Зображення «${item.name}» прив'язано до секції «${key}»`);
+    renderMedia();
+  }
+
+  // Copy base64 URL to clipboard
+  function copyMediaUrl(id) {
+    const item = getMediaList().find(m => m.id === id);
+    if (!item) return;
+    navigator.clipboard.writeText(item.base64).then(() => showToast('URL скопійовано!'));
+  }
+
+  // Render media panel
+  function renderMedia() {
+    const list = getMediaList();
+    const grid   = document.getElementById('mediaGrid');
+    const empty  = document.getElementById('mediaEmpty');
+    const stats  = document.getElementById('mediaStats');
+    const select = document.getElementById('mediaSelectFile');
+
+    // Stats
+    const totalSize = list.reduce((s, m) => s + (m.size || 0), 0);
+    stats.textContent = `${list.length} файлів · ${mediaFormatSize(totalSize)}`;
+
+    // Update select dropdown
+    select.innerHTML = '<option value="">— Оберіть зображення з бібліотеки —</option>' +
+      list.map(m => `<option value="${m.id}">${m.name}${m.key ? ` [${m.key}]` : ''}</option>`).join('');
+
+    if (!list.length) {
+      grid.style.display  = 'none';
+      empty.style.display = 'block';
+      return;
+    }
+    grid.style.display  = '';
+    empty.style.display = 'none';
+
+    grid.innerHTML = list.map(m => `
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;overflow:hidden;position:relative">
+        <!-- Thumbnail -->
+        <div style="height:130px;overflow:hidden;background:#0c0c18">
+          <img src="${m.base64}" alt="${escHtml(m.name)}" style="width:100%;height:100%;object-fit:cover" loading="lazy" />
+        </div>
+        <!-- Info -->
+        <div style="padding:10px">
+          <div style="font-size:0.8rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${escHtml(m.name)}">${escHtml(m.name)}</div>
+          <div style="font-size:0.72rem;color:var(--text-sub);margin-top:3px">
+            ${mediaFormatSize(m.size)} · ${m.width}×${m.height}px · ${m.date}
+          </div>
+          ${m.key ? `<div style="font-size:0.7rem;color:var(--purple);margin-top:3px"><i class="fas fa-link"></i> ${escHtml(m.key)}</div>` : ''}
+        </div>
+        <!-- Actions -->
+        <div style="padding:0 10px 10px;display:flex;gap:6px">
+          <button class="btn-a btn-gray btn-sm-a" onclick="copyMediaUrl(${m.id})" title="Копіювати URL" style="flex:1">
+            <i class="fas fa-copy"></i>
+          </button>
+          <button class="btn-a btn-red btn-sm-a" onclick="deleteMedia(${m.id})" title="Видалити" style="flex:1">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── Orders ────────────────────────────────────────────────
+  async function loadOrders() {
+    try {
+      const r = await fetch('/api/admin/orders', { headers: { 'x-admin-token': ADMIN_TOKEN } });
+      const data = await r.json();
+      if (!data.ok) return;
+      const orders = data.orders || [];
+
+      document.getElementById('ordersTotal').textContent     = orders.length;
+      document.getElementById('ordersCompleted').textContent = orders.filter(o => o.status === 'completed').length;
+      const pending = orders.filter(o => o.status === 'pending');
+      document.getElementById('ordersPending').textContent   = pending.length;
+      document.getElementById('ordersCount').textContent     = pending.length;
+
+      const STATUS_LABEL = { pending:'Очікує', completed:'Виконано', underpaid:'Недоплата', expired:'Прострочено' };
+      const STATUS_COLOR = { pending:'#f59e0b', completed:'#4ade80', underpaid:'#ef4444', expired:'#6b7280' };
+
+      document.getElementById('ordersTable').innerHTML = orders.length ? orders.map(o => `
+        <tr>
+          <td style="font-size:0.8rem;color:var(--text-sub)">${new Date(o.createdAt).toLocaleString('uk-UA')}</td>
+          <td><div style="font-size:0.88rem">${escHtml(o.playerName)}</div><div style="font-size:0.72rem;color:var(--text-sub)">${o.steamId}</div></td>
+          <td>${escHtml(o.productName)}</td>
+          <td style="font-weight:700;color:var(--purple)">${o.price} ₴</td>
+          <td style="font-size:0.82rem">${o.server === 'monday' ? 'Monday' : 'Main'}</td>
+          <td><code style="font-size:0.72rem;color:var(--text-sub)">${o.confirmCode}</code></td>
+          <td><span style="color:${STATUS_COLOR[o.status]||'#fff'};font-weight:600">${STATUS_LABEL[o.status]||o.status}</span></td>
+          <td style="display:flex;gap:4px;flex-wrap:wrap">
+            ${o.status === 'pending' ? `<button class="btn-a btn-green" style="padding:4px 10px;font-size:0.78rem" onclick="confirmOrder(${o.id})"><i class="fas fa-check"></i> Підтвердити</button>` : ''}
+            ${o.status === 'completed' ? `<button class="btn-a" style="padding:4px 10px;font-size:0.78rem;background:rgba(99,102,241,0.15);color:#818cf8;border:1px solid rgba(99,102,241,0.3)" onclick="resendRcon(${o.id})"><i class="fas fa-redo"></i> RCON</button>` : ''}
+          </td>
+        </tr>`).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--text-sub);padding:30px">Замовлень поки немає</td></tr>';
+    } catch (e) { showToast('Помилка завантаження замовлень', 'error'); }
+  }
+
+  async function createManualOrder() {
+    const steamId   = document.getElementById('moSteamId').value.trim();
+    const name      = document.getElementById('moName').value.trim() || 'Manual';
+    const productId = document.getElementById('moProduct').value;
+    const price     = document.getElementById('moPrice').value;
+    const server    = document.getElementById('moServer').value;
+    if (!steamId || !price) return showToast('Заповни Steam ID та суму!', 'error');
+    const r = await fetch(`${API}/admin/orders`, {
+      method: 'POST',
+      headers: { 'x-admin-token': ADMIN_TOKEN, 'content-type': 'application/json' },
+      body: JSON.stringify({ steamId, playerName: name, productId: +productId, price: +price, server })
+    });
+    const data = await r.json();
+    if (data.ok) {
+      showToast(data.delivered ? '✅ Замовлення створено + RCON виконано!' : '✅ Замовлення створено (RCON в черзі)');
+      document.getElementById('manualOrderForm').style.display = 'none';
+      loadOrders();
+    } else showToast('Помилка: ' + (data.error || ''), 'error');
+  }
+
+  async function confirmOrder(id) {
+    const r = await fetch(`/api/admin/orders/${id}/complete`, {
+      method: 'POST',
+      headers: { 'x-admin-token': ADMIN_TOKEN },
+    });
+    const data = await r.json();
+    if (data.ok) {
+      showToast(data.delivered ? '✅ Підтверджено + RCON виконано!' : '✅ Підтверджено (RCON не налаштований)');
+      loadOrders();
+    } else showToast('Помилка: ' + (data.error || ''), 'error');
+  }
+
+  async function resendRcon(id) {
+    const r = await fetch(`/api/admin/orders/${id}/rcon`, {
+      method: 'POST',
+      headers: { 'x-admin-token': ADMIN_TOKEN },
+    });
+    const data = await r.json();
+    showToast(data.delivered ? '✅ RCON команда відправлена!' : '❌ RCON не доступний — перевір налаштування');
+  }
+
+  // ── Init ──────────────────────────────────────────────────
+  renderDashboard();
+  </script>
+</body>
+</html>

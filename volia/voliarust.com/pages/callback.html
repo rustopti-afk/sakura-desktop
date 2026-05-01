@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Вхід... — Воля Rust</title>
+  <link rel="icon" href="../assets/logo.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/auth.css" />
+</head>
+<body>
+
+  <main class="auth-page">
+    <div class="auth-bg"><div class="auth-glow"></div></div>
+
+    <div class="auth-card callback-card" id="statusCard">
+      <div class="callback-spinner">
+        <i class="fas fa-spinner fa-spin"></i>
+      </div>
+      <h2 id="statusTitle">Обробка входу...</h2>
+      <p id="statusText">Отримуємо дані з Steam</p>
+    </div>
+  </main>
+
+  <script>
+    function getSteamId(claimedId) {
+      const match = claimedId.match(/\/openid\/id\/(\d+)/);
+      return match ? match[1] : null;
+    }
+
+    async function handleCallback() {
+      const params = new URLSearchParams(window.location.search);
+      const claimedId = params.get('openid.claimed_id') || '';
+      const mode = params.get('openid.mode');
+
+      if (mode === 'cancel' || !claimedId) {
+        showError('Ти скасував вхід', 'Закрий це вікно або спробуй знову.');
+        return;
+      }
+
+      const steamId = getSteamId(claimedId);
+      if (!steamId) {
+        showError('Помилка Steam ID', 'Не вдалось отримати ідентифікатор Steam.');
+        return;
+      }
+
+      // Save to localStorage
+      const user = {
+        steamId,
+        steamProfileUrl: `https://steamcommunity.com/profiles/${steamId}`,
+        loginAt: Date.now(),
+      };
+
+      // Fetch Steam profile via our backend
+      try {
+        const res = await fetch(`/api/auth/steam/profile?steamId=${steamId}`);
+        const data = await res.json();
+        user.nickname = data.name || `Player_${steamId.slice(-6)}`;
+        user.avatar = data.avatar || '';
+      } catch {
+        user.nickname = `Player_${steamId.slice(-6)}`;
+        user.avatar = '';
+      }
+
+      localStorage.setItem('volia_user', JSON.stringify(user));
+      showSuccess(user);
+    }
+
+    function esc(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c =>
+        ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+    }
+    function safeAvatarUrl(u) {
+      try {
+        const url = new URL(u);
+        if (url.protocol !== 'https:') return '';
+        // Only allow Steam CDN
+        if (!/(^|\.)steamstatic\.com$|(^|\.)akamaihd\.net$/.test(url.hostname)) return '';
+        return url.href;
+      } catch { return ''; }
+    }
+    function showSuccess(user) {
+      const card = document.getElementById('statusCard');
+      const avatar = safeAvatarUrl(user.avatar);
+      const nick = esc(user.nickname);
+      card.innerHTML = `
+        <div class="callback-avatar">
+          ${avatar
+            ? `<img src="${esc(avatar)}" alt="${nick}" />`
+            : `<div class="avatar-placeholder"><i class="fas fa-user"></i></div>`
+          }
+          <div class="avatar-check"><i class="fas fa-check"></i></div>
+        </div>
+        <h2 class="callback-welcome">Ласкаво просимо!</h2>
+        <p class="callback-nick">${nick}</p>
+        <p class="callback-sub">Вхід через Steam успішний</p>
+        <div class="callback-redirect">
+          <div class="redirect-bar"><div class="redirect-fill" id="redirectBar"></div></div>
+          <span>Перенаправлення на головну...</span>
+        </div>
+      `;
+
+      // Animate redirect bar
+      let w = 0;
+      const bar = document.getElementById('redirectBar');
+      const t = setInterval(() => {
+        w += 2;
+        if (bar) bar.style.width = w + '%';
+        if (w >= 100) { clearInterval(t); window.location.href = '/'; }
+      }, 50);
+    }
+
+    function showError(title, text) {
+      document.getElementById('statusCard').innerHTML = `
+        <div class="callback-error-icon"><i class="fas fa-times-circle"></i></div>
+        <h2>${title}</h2>
+        <p>${text}</p>
+        <a href="login.html" class="btn btn-primary" style="margin-top:20px">Спробувати знову</a>
+      `;
+    }
+
+    handleCallback();
+  </script>
+</body>
+</html>

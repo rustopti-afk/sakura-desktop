@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="uk" data-lang="uk">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Профіль — Воля Rust</title>
+  <link rel="icon" href="../assets/logo.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    .profile-hero {
+      position: relative;
+      padding: 100px 0 48px;
+      text-align: center;
+      overflow: hidden;
+    }
+    .profile-hero-bg {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124,92,252,0.12) 0%, transparent 70%);
+    }
+
+    .profile-card {
+      position: relative; z-index: 2;
+      display: inline-flex; flex-direction: column; align-items: center; gap: 14px;
+    }
+    .profile-avatar {
+      position: relative; width: 96px; height: 96px;
+    }
+    .profile-avatar img {
+      width: 96px; height: 96px; border-radius: 50%;
+      border: 3px solid var(--purple);
+      object-fit: cover;
+    }
+    .profile-avatar-placeholder {
+      width: 96px; height: 96px; border-radius: 50%;
+      border: 3px solid var(--purple);
+      background: var(--bg-card2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem; color: var(--text-sub);
+    }
+    .profile-vip-badge {
+      position: absolute; bottom: 0; right: 0;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--purple);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; border: 2px solid var(--bg);
+    }
+    .profile-name {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.8rem; font-weight: 700; color: var(--text);
+    }
+    .profile-steamid {
+      font-size: 0.8rem; color: var(--text-sub);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .profile-steamid a { color: var(--purple); text-decoration: none; }
+    .profile-steamid a:hover { text-decoration: underline; }
+
+    /* Tabs */
+    .profile-tabs {
+      display: flex; gap: 4px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 28px;
+    }
+    .profile-tab {
+      padding: 10px 20px;
+      background: none; border: none;
+      color: var(--text-sub);
+      font-family: 'Inter', sans-serif; font-size: 0.88rem;
+      cursor: pointer; border-bottom: 2px solid transparent;
+      margin-bottom: -1px; transition: color 0.2s, border-color 0.2s;
+    }
+    .profile-tab:hover { color: var(--text); }
+    .profile-tab.active { color: var(--purple); border-bottom-color: var(--purple); }
+
+    .profile-tab-content { display: none; }
+    .profile-tab-content.active { display: block; }
+
+    /* Stats grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px; margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 16px;
+      text-align: center;
+    }
+    .stat-card-num {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.8rem; font-weight: 700; color: var(--purple);
+      line-height: 1;
+    }
+    .stat-card-label {
+      font-size: 0.78rem; color: var(--text-sub); margin-top: 4px;
+    }
+
+    /* VIP cards */
+    .vip-list { display: flex; flex-direction: column; gap: 12px; }
+    .vip-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    }
+    .vip-item-left { display: flex; align-items: center; gap: 14px; }
+    .vip-icon {
+      width: 44px; height: 44px; border-radius: 10px;
+      background: var(--bg-card2);
+      display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+    }
+    .vip-name { font-weight: 600; font-size: 0.95rem; }
+    .vip-expires { font-size: 0.78rem; color: var(--text-sub); margin-top: 2px; }
+    .vip-status {
+      font-size: 0.75rem; padding: 4px 12px; border-radius: 20px;
+      font-weight: 700;
+    }
+    .vip-active { background: rgba(34,197,94,0.15); color: var(--green); }
+    .vip-expired { background: rgba(75,85,99,0.2); color: var(--text-sub); }
+
+    /* Ticket history */
+    .ticket-list { display: flex; flex-direction: column; gap: 10px; }
+    .ticket-row {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      cursor: pointer; transition: border-color 0.2s;
+    }
+    .ticket-row:hover { border-color: var(--purple); }
+    .ticket-row-title { font-weight: 600; font-size: 0.9rem; }
+    .ticket-row-meta { font-size: 0.78rem; color: var(--text-sub); margin-top: 2px; }
+    .ticket-badge {
+      font-size: 0.72rem; padding: 3px 10px; border-radius: 20px; font-weight: 700; white-space: nowrap;
+    }
+    .badge-open { background: rgba(124,92,252,0.15); color: var(--purple); }
+    .badge-closed { background: rgba(75,85,99,0.2); color: var(--text-sub); }
+
+    /* Logout btn */
+    .btn-logout {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 20px;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.25);
+      border-radius: 8px; color: #ef4444;
+      font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+    .btn-logout:hover { background: rgba(239,68,68,0.2); border-color: #ef4444; }
+
+    .empty-state {
+      text-align: center; padding: 40px 0; color: var(--text-sub);
+    }
+    .empty-state i { font-size: 2rem; opacity: 0.25; display: block; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <nav class="navbar" id="navbar">
+    <div class="container nav-inner">
+      <a href="/" class="nav-logo">
+        <img src="../assets/logo.png" alt="Воля Rust" />
+        <div class="nav-logo-text">
+          <span class="nav-logo-name">Воля <span class="accent">Rust</span></span>
+          <span class="nav-logo-sub">Ukraine Rust Community</span>
+        </div>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="shop.html"><i class="fas fa-store"></i> <span data-i18n="nav.shop">Магазин</span></a></li>
+        <li><a href="news.html"><i class="fas fa-newspaper"></i> <span data-i18n="nav.news">Новини</span></a></li>
+        <li><a href="vote.html"><i class="fas fa-map"></i> <span data-i18n="nav.vote">Голосування</span></a></li>
+        <li><a href="statistics.html"><i class="fas fa-chart-bar"></i> <span data-i18n="nav.stats">Статистика</span></a></li>
+        <li><a href="support.html"><i class="fas fa-headset"></i> <span data-i18n="nav.support">Підтримка</span></a></li>
+      </ul>
+      <div class="nav-actions">
+        <div class="lang-dropdown" id="langDropdown">
+          <button class="lang-switch" onclick="toggleLangMenu()">
+            <span class="lang-flag" id="langFlag">UA</span>
+            <i class="fas fa-chevron-down lang-arrow" id="langArrow"></i>
+          </button>
+          <div class="lang-menu" id="langMenu">
+            <button class="lang-option active" data-lang="uk" onclick="selectLang('uk')">UA — Українська</button>
+            <button class="lang-option" data-lang="en" onclick="selectLang('en')">EN — English</button>
+            <button class="lang-option" data-lang="ru" onclick="selectLang('ru')">RU — Русский</button>
+          </div>
+        </div>
+        <div id="navAuth"></div>
+        <button class="burger" id="burger"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Profile hero -->
+  <div class="profile-hero">
+    <div class="profile-hero-bg"></div>
+    <div class="profile-card" id="profileCard">
+      <div class="profile-avatar-placeholder"><i class="fas fa-user"></i></div>
+      <div class="profile-name" data-i18n="profile.loading">Завантаження...</div>
+    </div>
+  </div>
+
+  <section style="padding: 0 0 80px;">
+    <div class="container" style="max-width:820px">
+
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
+        <div class="profile-tabs" style="margin-bottom:0; border-bottom:none;">
+          <button class="profile-tab active" onclick="switchTab('overview', this)"><i class="fas fa-chart-bar"></i> <span data-i18n="profile.tab.overview">Огляд</span></button>
+          <button class="profile-tab" onclick="switchTab('vip', this)"><i class="fas fa-crown"></i> VIP</button>
+          <button class="profile-tab" onclick="switchTab('tickets', this)"><i class="fas fa-ticket-alt"></i> <span data-i18n="profile.tab.tickets">Тікети</span></button>
+        </div>
+        <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> <span data-i18n="profile.logout">Вийти</span></button>
+      </div>
+
+      <div class="profile-tab-content active" id="tab-overview">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card-num" id="statVip">—</div>
+            <div class="stat-card-label" data-i18n="profile.stat.vip">Активний VIP</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-num" id="statTickets">0</div>
+            <div class="stat-card-label" data-i18n="profile.stat.tickets">Тікетів відкрито</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-card-num" id="statDays">0</div>
+            <div class="stat-card-label" data-i18n="profile.stat.days">Днів на сайті</div>
+          </div>
+        </div>
+
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:20px;">
+          <h3 style="font-family:'Rajdhani',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:14px;color:var(--text)">
+            <i class="fas fa-info-circle" style="color:var(--purple);margin-right:8px"></i>Інформація акаунту
+          </h3>
+          <div id="accountInfo" style="display:flex;flex-direction:column;gap:10px;"></div>
+        </div>
+      </div>
+
+      <div class="profile-tab-content" id="tab-vip">
+        <div class="vip-list" id="vipList">
+          <div class="empty-state">
+            <i class="fas fa-crown"></i>
+            <span data-i18n="profile.no.vip">У тебе немає активних VIP привілеїв</span>
+            <br><a href="shop.html" style="color:var(--purple);font-size:0.85rem;margin-top:8px;display:inline-block" data-i18n="nav.shop">Магазин</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-tab-content" id="tab-tickets">
+        <div class="ticket-list" id="ticketListProfile">
+          <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <span data-i18n="profile.no.tickets">Тікетів поки немає</span>
+            <br><a href="support.html" style="color:var(--purple);font-size:0.85rem;margin-top:8px;display:inline-block" data-i18n="support.new.title">Новий тікет</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <div class="footer-logo"><img src="../assets/logo.png" alt="" /><span>Воля <span class="accent">Rust</span></span></div>
+        <p data-i18n="footer.desc">Українська Rust спільнота. Воля в кожному бою.</p>
+        <div class="socials">
+          <a href="https://discord.gg/FJJYfhqvgj" target="_blank"><i class="fab fa-discord"></i></a>
+          <a href="https://www.tiktok.com/@volia.rust" target="_blank"><i class="fab fa-tiktok"></i></a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4 data-i18n="footer.nav">Навігація</h4>
+        <a href="/" data-i18n="nav.home">Головна</a>
+        <a href="shop.html" data-i18n="nav.shop">Магазин</a>
+        <a href="news.html" data-i18n="nav.news">Новини</a>
+        <a href="support.html">Підтримка</a>
+      </div>
+      <div class="footer-links">
+        <h4 data-i18n="footer.legal">Правова інфо</h4>
+        <a href="#" data-i18n="footer.rules">Правила</a>
+        <a href="#" data-i18n="footer.terms">Угода</a>
+        <a href="#" data-i18n="footer.privacy">Конфіденційність</a>
+      </div>
+    </div>
+    <div class="footer-bottom"><span data-i18n="footer.copy">© 2025–2026 Воля Rust. Всі права захищені.</span></div>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    const user = JSON.parse(localStorage.getItem('volia_user') || 'null');
+    if (!user) window.location.href = 'login.html';
+
+    // Render profile hero
+    const card = document.getElementById('profileCard');
+    card.innerHTML = `
+      <div class="profile-avatar">
+        ${user.avatar
+          ? `<img src="${user.avatar}" alt="${user.nickname}" />`
+          : `<div class="profile-avatar-placeholder"><i class="fas fa-user"></i></div>`}
+        <div class="profile-vip-badge"><i class="fas fa-star" style="font-size:0.6rem"></i></div>
+      </div>
+      <div class="profile-name">${user.nickname}</div>
+      <div class="profile-steamid">
+        <i class="fab fa-steam"></i>
+        <a href="${user.steamProfileUrl}" target="_blank">${user.steamId}</a>
+      </div>
+    `;
+
+    // Overview tab
+    const tickets = JSON.parse(localStorage.getItem('volia_tickets') || '[]');
+    const openTickets = tickets.filter(t => t.status === 'open').length;
+    const loginDate = new Date(user.loginAt);
+    const daysSince = Math.floor((Date.now() - user.loginAt) / 86400000);
+
+    document.getElementById('statTickets').textContent = openTickets;
+    document.getElementById('statDays').textContent = daysSince || 1;
+    document.getElementById('statVip').textContent = user.vip || '—';
+
+    document.getElementById('accountInfo').innerHTML = `
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.88rem">
+        <span style="color:var(--text-sub)">Нікнейм Steam</span>
+        <span style="font-weight:500">${user.nickname}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.88rem">
+        <span style="color:var(--text-sub)">Steam ID</span>
+        <span style="font-weight:500">${user.steamId}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.88rem">
+        <span style="color:var(--text-sub)">Перший вхід</span>
+        <span style="font-weight:500">${loginDate.toLocaleDateString('uk')}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;font-size:0.88rem">
+        <span style="color:var(--text-sub)">Профіль Steam</span>
+        <a href="${user.steamProfileUrl}" target="_blank" style="color:var(--purple)">Відкрити <i class="fas fa-external-link-alt" style="font-size:0.7rem"></i></a>
+      </div>
+    `;
+
+    // VIP tab
+    if (user.vip) {
+      const icons = { GOLD: '👑', TITAN: '💎', IMPERIAL: '💎' };
+      document.getElementById('vipList').innerHTML = `
+        <div class="vip-item">
+          <div class="vip-item-left">
+            <div class="vip-icon">${icons[user.vip] || '⭐'}</div>
+            <div>
+              <div class="vip-name">${user.vip} VIP</div>
+              <div class="vip-expires">Активний до: ${user.vipExpires || 'Безстроково'}</div>
+            </div>
+          </div>
+          <span class="vip-status vip-active">Активний</span>
+        </div>`;
+    }
+
+    // Tickets tab
+    if (tickets.length) {
+      document.getElementById('ticketListProfile').innerHTML = tickets.slice().reverse().map(t => `
+        <div class="ticket-row">
+          <div>
+            <div class="ticket-row-title">${t.subject}</div>
+            <div class="ticket-row-meta">${t.date} · ${t.category}</div>
+          </div>
+          <span class="ticket-badge ${t.status === 'open' ? 'badge-open' : 'badge-closed'}">
+            ${t.status === 'open' ? 'Відкрито' : 'Закрито'}
+          </span>
+        </div>`).join('');
+    }
+
+    function switchTab(name, btn) {
+      document.querySelectorAll('.profile-tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.profile-tab').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    // Show admin button if admin (check DB)
+    const OWNER_IDS = ['76561199571061873'];
+    (async function showAdminBtn() {
+      let isAdmin = OWNER_IDS.includes(user.steamId);
+      if (!isAdmin) {
+        try {
+          const r = await fetch('/api/admin/admins', { headers: { 'X-Admin-Token': 'dbe9fb7b9f563ee4f4d2f939dc86502ea23258064f691eb31a4d90c1658cc3df' } });
+          const list = await r.json();
+          isAdmin = Array.isArray(list) && list.some(a => String(a.steamId).trim() === String(user.steamId).trim());
+        } catch(e) {}
+      }
+      if (isAdmin) {
+        document.querySelector('.btn-logout').insertAdjacentHTML('beforebegin',
+          `<a href="admin.html" style="display:inline-flex;align-items:center;gap:8px;padding:9px 20px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:8px;color:#ef4444;font-size:0.85rem;text-decoration:none;margin-right:8px"><i class="fas fa-shield-alt"></i> Адмінка</a>`
+        );
+      }
+    })();
+
+    function logout() {
+      localStorage.removeItem('volia_user');
+      window.location.href = '/';
+    }
+  </script>
+</body>
+</html>

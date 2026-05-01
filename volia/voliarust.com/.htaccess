@@ -1,0 +1,40 @@
+Options -Indexes                                                                                 
+  RewriteEngine On                                                                                 
+  RewriteBase /                                                                                  
+                                                                                                 
+  # ── Force HTTPS (works behind reverse proxy too) ──────────────                                 
+  RewriteCond %{HTTPS} off
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https                                                    
+  RewriteCond %{HTTP:X-Forwarded-Ssl}   !=on                   
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]                                  
+                                                                                                   
+  # ── Block sensitive files ──────────────────────────────────────                                
+  <FilesMatch "^\.(env|git|htaccess|installed)|composer\.(json|lock)$">                            
+      Require all denied                                                                           
+  </FilesMatch>                                                                                  
+  RewriteRule ^\.env$              - [F,L]                                                         
+  RewriteRule ^\.env\.             - [F,L]                                                         
+  RewriteRule ^\.installed$        - [F,L]                                                       
+  RewriteRule ^\.git               - [F,L]                                                         
+  RewriteRule ^api/config\.php$    - [F,L]                     
+  RewriteRule ^api/db\.php$        - [F,L]                                                         
+  RewriteRule ^Dockerfile          - [F,L]                     
+  RewriteRule ^docker-compose      - [F,L]                                                         
+  RewriteRule ^sql/                - [F,L]                     
+  RewriteRule ^MIGRATION           - [F,L]                                                         
+  RewriteRule ^DEPLOY              - [F,L]                                                         
+  RewriteRule ^VoliaStats\.cs$     - [F,L]                                                         
+                                                                                                   
+  # ── API routing — /api/* → /api/index.php ─────────────────────                                 
+  RewriteCond %{REQUEST_URI} ^/api/                                                                
+  RewriteCond %{REQUEST_FILENAME} !-f                                                              
+  RewriteCond %{REQUEST_FILENAME} !-d                                                            
+  RewriteRule ^api/(.*)$ api/index.php [QSA,L]                                                     
+                                                                                                   
+  # ── Security headers ──────────────────────────────────────────                               
+  <IfModule mod_headers.c>                                                                         
+      Header set X-Content-Type-Options "nosniff"                                                  
+      Header set X-Frame-Options "SAMEORIGIN"                                                    
+      Header set Referrer-Policy "strict-origin-when-cross-origin"                                 
+      Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"                     
+  </IfModule>

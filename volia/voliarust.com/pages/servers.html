@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Сервери — Воля Rust</title>
+  <link rel="icon" href="../assets/logo.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav class="navbar" id="navbar">
+    <div class="container nav-inner">
+      <a href="/" class="nav-logo">
+        <img src="../assets/logo.png" alt="Воля Rust" />
+        <span>Воля <span class="accent">Раст</span></span>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="/">Головна</a></li>
+        <li><a href="servers.html" class="active">Сервери</a></li>
+        <li><a href="shop.html">Магазин</a></li>
+        <li><a href="support.html">Підтримка</a></li>
+      </ul>
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-outline">Увійти</a>
+        <a href="register.html" class="btn btn-primary">Реєстрація</a>
+        <button class="burger" id="burger" aria-label="Меню">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <div class="page-hero">
+    <div class="hero-bg"></div>
+    <div class="container">
+      <h1 class="page-hero-title">Наші <span class="gradient-text">сервери</span></h1>
+      <p class="page-hero-sub">Обери сервер під свій стиль — від хардкору до фану</p>
+    </div>
+  </div>
+
+  <!-- SERVERS -->
+  <section class="servers-section">
+    <div class="container">
+
+      <!-- Total bar -->
+      <div class="servers-total-bar">
+        <span><i class="fas fa-circle online-dot"></i> Всього онлайн: <strong>847</strong> / 1030 слотів</span>
+        <span class="servers-updated"><i class="fas fa-sync-alt"></i> Оновлено щойно</span>
+      </div>
+
+      <div class="servers-grid">
+
+        <div class="server-card">
+          <div class="server-card-header">
+            <div class="server-info">
+              <span class="server-badge x2">x2</span>
+              <h3>Воля Соло</h3>
+            </div>
+            <span class="server-type">Соло</span>
+          </div>
+          <div class="server-connect">
+            <i class="fas fa-terminal"></i>
+            <code id="ip-1">connect solo.volia-rust.ua</code>
+            <button class="copy-btn" onclick="copyIP('ip-1')"><i class="fas fa-copy"></i></button>
+          </div>
+          <div class="server-players">
+            <div class="players-info">
+              <span><i class="fas fa-users"></i> <span class="online">63</span> / 100</span>
+              <span class="players-pct">63%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:63%"></div></div>
+          </div>
+          <div class="server-wipe">
+            <div class="wipe-info"><i class="fas fa-calendar-alt"></i> Вайп: <strong>П'ятниця 18:00</strong></div>
+            <div class="wipe-timer" data-wipe="2026-04-25T18:00:00"></div>
+          </div>
+          <a href="shop.html" class="btn btn-primary server-btn">Магазин</a>
+        </div>
+
+        <div class="server-card featured">
+          <div class="featured-label">Популярний</div>
+          <div class="server-card-header">
+            <div class="server-info">
+              <span class="server-badge x5">x5</span>
+              <h3>Воля Дуо</h3>
+            </div>
+            <span class="server-type">Дуо</span>
+          </div>
+          <div class="server-connect">
+            <i class="fas fa-terminal"></i>
+            <code id="ip-2">connect duo.volia-rust.ua</code>
+            <button class="copy-btn" onclick="copyIP('ip-2')"><i class="fas fa-copy"></i></button>
+          </div>
+          <div class="server-players">
+            <div class="players-info">
+              <span><i class="fas fa-users"></i> <span class="online">128</span> / 150</span>
+              <span class="players-pct">85%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:85%"></div></div>
+          </div>
+          <div class="server-wipe">
+            <div class="wipe-info"><i class="fas fa-calendar-alt"></i> Вайп: <strong>Четвер 19:00</strong></div>
+            <div class="wipe-timer" data-wipe="2026-04-24T19:00:00"></div>
+          </div>
+          <a href="shop.html" class="btn btn-primary server-btn">Магазин</a>
+        </div>
+
+        <div class="server-card">
+          <div class="server-card-header">
+            <div class="server-info">
+              <span class="server-badge x10">x10</span>
+              <h3>Воля Груповий</h3>
+            </div>
+            <span class="server-type">Груп</span>
+          </div>
+          <div class="server-connect">
+            <i class="fas fa-terminal"></i>
+            <code id="ip-3">connect group.volia-rust.ua</code>
+            <button class="copy-btn" onclick="copyIP('ip-3')"><i class="fas fa-copy"></i></button>
+          </div>
+          <div class="server-players">
+            <div class="players-info">
+              <span><i class="fas fa-users"></i> <span class="online">187</span> / 200</span>
+              <span class="players-pct">94%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:94%"></div></div>
+          </div>
+          <div class="server-wipe">
+            <div class="wipe-info"><i class="fas fa-calendar-alt"></i> Вайп: <strong>Субота 17:00</strong></div>
+            <div class="wipe-timer" data-wipe="2026-04-26T17:00:00"></div>
+          </div>
+          <a href="shop.html" class="btn btn-primary server-btn">Магазин</a>
+        </div>
+
+        <div class="server-card">
+          <div class="server-card-header">
+            <div class="server-info">
+              <span class="server-badge vanilla">x1</span>
+              <h3>Воля Ваніла</h3>
+            </div>
+            <span class="server-type">Хардкор</span>
+          </div>
+          <div class="server-connect">
+            <i class="fas fa-terminal"></i>
+            <code id="ip-4">connect vanilla.volia-rust.ua</code>
+            <button class="copy-btn" onclick="copyIP('ip-4')"><i class="fas fa-copy"></i></button>
+          </div>
+          <div class="server-players">
+            <div class="players-info">
+              <span><i class="fas fa-users"></i> <span class="online">41</span> / 80</span>
+              <span class="players-pct">51%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:51%"></div></div>
+          </div>
+          <div class="server-wipe">
+            <div class="wipe-info"><i class="fas fa-calendar-alt"></i> Вайп: <strong>Понеділок 20:00</strong></div>
+            <div class="wipe-timer" data-wipe="2026-04-27T20:00:00"></div>
+          </div>
+          <a href="shop.html" class="btn btn-primary server-btn">Магазин</a>
+        </div>
+
+        <div class="server-card">
+          <div class="server-card-header">
+            <div class="server-info">
+              <span class="server-badge x1000">x1000</span>
+              <h3>Воля Фан</h3>
+            </div>
+            <span class="server-type">Fun</span>
+          </div>
+          <div class="server-connect">
+            <i class="fas fa-terminal"></i>
+            <code id="ip-5">connect fun.volia-rust.ua</code>
+            <button class="copy-btn" onclick="copyIP('ip-5')"><i class="fas fa-copy"></i></button>
+          </div>
+          <div class="server-players">
+            <div class="players-info">
+              <span><i class="fas fa-users"></i> <span class="online">428</span> / 500</span>
+              <span class="players-pct">86%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill" style="width:86%"></div></div>
+          </div>
+          <div class="server-wipe">
+            <div class="wipe-info"><i class="fas fa-calendar-alt"></i> Вайп: <strong>Щодня 06:00</strong></div>
+            <div class="wipe-timer" data-wipe="2026-04-21T06:00:00"></div>
+          </div>
+          <a href="shop.html" class="btn btn-primary server-btn">Магазин</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <img src="../assets/logo.png" alt="Воля Rust" />
+          <span>Воля <span class="accent">Раст</span></span>
+        </div>
+        <p>Українська Rust спільнота. Свобода в кожному бою.</p>
+        <div class="socials">
+          <a href="#" aria-label="Discord"><i class="fab fa-discord"></i></a>
+          <a href="#" aria-label="Telegram"><i class="fab fa-telegram"></i></a>
+          <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+          <a href="#" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4>Навігація</h4>
+        <a href="/">Головна</a>
+        <a href="servers.html">Сервери</a>
+        <a href="shop.html">Магазин</a>
+        <a href="support.html">Підтримка</a>
+      </div>
+      <div class="footer-links">
+        <h4>Правова інфо</h4>
+        <a href="#">Правила сервера</a>
+        <a href="#">Угода користувача</a>
+        <a href="#">Конфіденційність</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025–2026 Воля Rust. Всі права захищені.</span>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast">IP скопійовано!</div>
+  <script src="../js/main.js"></script>
+</body>
+</html>
