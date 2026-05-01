@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Sakura.App.Services;
 using Sakura.Core.Integrations;
+using Sakura.Core.Profile;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -69,7 +70,7 @@ public sealed partial class IconsViewModel : ObservableObject
         }
         try
         {
-            var settings = new Sakura.Core.Profile.IconSettings { Pack = SelectedIconPack };
+            var settings = new IconSettings { Pack = SelectedIconPack };
             IconManager.ApplyProfile(settings, _iconsBaseDir);
             StatusSuccess = true;
             StatusMessage = $"Icon pack '{SelectedIconPack}' applied — restart Explorer to see changes";
@@ -97,7 +98,7 @@ public sealed partial class IconsViewModel : ObservableObject
         }
         try
         {
-            var settings = new Sakura.Core.Profile.IconSettings { CursorPack = SelectedCursorPack };
+            var settings = new IconSettings { CursorPack = SelectedCursorPack };
             IconManager.ApplyProfile(settings, _iconsBaseDir);
             StatusSuccess = true;
             StatusMessage = $"Cursor pack '{SelectedCursorPack}' applied";

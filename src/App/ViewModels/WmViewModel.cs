@@ -18,8 +18,6 @@ public sealed partial class WmViewModel : ObservableObject
     [ObservableProperty] private int    _borderWidth   = 2;
     [ObservableProperty] private string _borderActive  = "#E8A0BF";
     [ObservableProperty] private string _borderInactive = "#3E3E5E";
-    [ObservableProperty] private bool   _startOnApply  = true;
-
     [ObservableProperty] private bool   _komorebiInstalled = false;
     [ObservableProperty] private bool   _glazeWmInstalled  = false;
     [ObservableProperty] private bool   _isBusy            = false;
@@ -118,7 +116,14 @@ public sealed partial class WmViewModel : ObservableObject
             if (Engine == "komorebi")
                 await WmManager.StopKomorebiAsync().ConfigureAwait(false);
             else if (Engine == "glazewm")
-                await WmManager.StopGlazeWmAsync().ConfigureAwait(false);
+                await Task.Run(() =>
+                {
+                    foreach (var p in System.Diagnostics.Process.GetProcessesByName("glazewm"))
+                    {
+                        p.Kill(entireProcessTree: true);
+                        p.WaitForExit(2000);
+                    }
+                }).ConfigureAwait(false);
             else
             {
                 StatusMessage = "No window manager is running";

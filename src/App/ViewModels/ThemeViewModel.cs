@@ -74,6 +74,12 @@ public sealed partial class ThemeViewModel : ObservableObject
             StatusSuccess = false;
             return;
         }
+        if (!SecureUxInstalled)
+        {
+            StatusMessage = "SecureUxTheme is not installed — click Install first";
+            StatusSuccess = false;
+            return;
+        }
 
         IsBusy        = true;
         StatusSuccess = false;

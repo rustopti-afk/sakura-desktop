@@ -119,6 +119,7 @@ public sealed partial class WallpaperViewModel : ObservableObject
         }
         catch (Exception ex)
         {
+            StatusSuccess = false;
             StatusMessage = $"Failed: {ex.Message}";
         }
         finally { IsBusy = false; }
