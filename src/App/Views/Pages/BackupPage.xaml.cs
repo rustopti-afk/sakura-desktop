@@ -3,7 +3,7 @@ using System.Windows.Controls;
 
 namespace Sakura.App.Views.Pages;
 
-public partial class BackupPage : Page
+public partial class BackupPage : UserControl
 {
     public BackupPage(BackupViewModel vm)
     {

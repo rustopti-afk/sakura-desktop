@@ -1,12 +1,11 @@
-<Page x:Class="Sakura.App.Views.Pages.ProfileEditorPage"
+<UserControl x:Class="Sakura.App.Views.Pages.ProfileEditorPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:loc="clr-namespace:Sakura.App.Localization"
-      Title="Profile Editor">
+      xmlns:loc="clr-namespace:Sakura.App.Localization">
 
-    <Page.InputBindings>
+    <UserControl.InputBindings>
         <KeyBinding Key="S" Modifiers="Ctrl" Command="{Binding SaveProfileCommand}"/>
-    </Page.InputBindings>
+    </UserControl.InputBindings>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="24,16,24,24">
@@ -254,4 +253,4 @@
 
         </StackPanel>
     </ScrollViewer>
-</Page>
+</UserControl>

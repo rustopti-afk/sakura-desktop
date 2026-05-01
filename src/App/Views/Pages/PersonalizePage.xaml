@@ -1,4 +1,4 @@
-<Page x:Class="Sakura.App.Views.Pages.PersonalizePage"
+<UserControl x:Class="Sakura.App.Views.Pages.PersonalizePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:loc="clr-namespace:Sakura.App.Localization"
@@ -521,4 +521,4 @@
 
         </StackPanel>
     </ScrollViewer>
-</Page>
+</UserControl>

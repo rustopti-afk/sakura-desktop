@@ -4,7 +4,7 @@ using System.Windows.Controls;
 
 namespace Sakura.App.Views.Pages;
 
-public partial class ProfilesPage : Page
+public partial class ProfilesPage : UserControl
 {
     public ProfilesPage(ProfilesViewModel vm)
     {

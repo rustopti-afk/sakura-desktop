@@ -1,11 +1,10 @@
-<Page x:Class="Sakura.App.Views.Pages.ProfilesPage"
+<UserControl x:Class="Sakura.App.Views.Pages.ProfilesPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:vm="clr-namespace:Sakura.App.ViewModels"
-      xmlns:loc="clr-namespace:Sakura.App.Localization"
-      Title="Profiles">
+      xmlns:loc="clr-namespace:Sakura.App.Localization">
 
-    <Page.Resources>
+    <UserControl.Resources>
         <!-- Tag chip style -->
         <Style x:Key="TagChip" TargetType="Border">
             <Setter Property="Background"       Value="{StaticResource Sakura.Brush.Surface}"/>
@@ -15,7 +14,7 @@
             <Setter Property="Padding"          Value="8,2"/>
             <Setter Property="Margin"           Value="0,0,4,4"/>
         </Style>
-    </Page.Resources>
+    </UserControl.Resources>
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -289,4 +288,4 @@
             </StackPanel>
         </ScrollViewer>
     </Grid>
-</Page>
+</UserControl>

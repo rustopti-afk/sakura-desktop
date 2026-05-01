@@ -3,7 +3,7 @@ using System.Windows.Controls;
 
 namespace Sakura.App.Views.Pages;
 
-public partial class SettingsPage : Page
+public partial class SettingsPage : UserControl
 {
     public SettingsPage(SettingsViewModel vm)
     {

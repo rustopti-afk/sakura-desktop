@@ -1,12 +1,11 @@
-<Page x:Class="Sakura.App.Views.Pages.BackupPage"
+<UserControl x:Class="Sakura.App.Views.Pages.BackupPage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:loc="clr-namespace:Sakura.App.Localization"
-      Title="Backups">
+      xmlns:loc="clr-namespace:Sakura.App.Localization">
 
-    <Page.InputBindings>
+    <UserControl.InputBindings>
         <KeyBinding Key="F5" Command="{Binding RefreshCommand}"/>
-    </Page.InputBindings>
+    </UserControl.InputBindings>
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -268,4 +267,4 @@
             </StackPanel>
         </ScrollViewer>
     </Grid>
-</Page>
+</UserControl>
