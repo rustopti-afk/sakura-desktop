@@ -75,12 +75,9 @@ public sealed partial class BootViewModel : ObservableObject
 
         try
         {
-            await Task.Run(async () =>
-            {
-                BootManager.DeploySplash(SplashPath);
-                StatusMessage = "Running HackBGRT setup...";
-                await BootManager.InstallAsync().ConfigureAwait(false);
-            }).ConfigureAwait(false);
+            await Task.Run(() => BootManager.DeploySplash(SplashPath)).ConfigureAwait(false);
+            StatusMessage = "Running HackBGRT setup...";
+            await BootManager.InstallAsync().ConfigureAwait(false);
 
             StatusSuccess = true;
             StatusMessage = "Boot splash installed — takes effect on next reboot";

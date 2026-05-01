@@ -15,7 +15,7 @@ public sealed partial class IconsViewModel : ObservableObject
 
     private readonly string _iconsBaseDir = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-        "Sakura", "icons");
+        "Sakura");
 
     [ObservableProperty] private string? _selectedIconPack   = null;
     [ObservableProperty] private string? _selectedCursorPack = null;

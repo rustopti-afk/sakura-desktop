@@ -117,6 +117,13 @@ public sealed partial class WmViewModel : ObservableObject
         {
             if (Engine == "komorebi")
                 await WmManager.StopKomorebiAsync().ConfigureAwait(false);
+            else if (Engine == "glazewm")
+                await WmManager.StopGlazeWmAsync().ConfigureAwait(false);
+            else
+            {
+                StatusMessage = "No window manager is running";
+                return;
+            }
             StatusSuccess = true;
             StatusMessage = "Window manager stopped";
         }
