@@ -43,7 +43,8 @@ public sealed partial class BackupViewModel : ObservableObject
             return;
         }
 
-        foreach (string dir in Directory.GetDirectories(_backupRoot).OrderByDescending(d => d))
+        foreach (string dir in Directory.GetDirectories(_backupRoot)
+                     .OrderByDescending(d => Directory.GetCreationTimeUtc(d)))
         {
             string manifestPath = Path.Combine(dir, "manifest.json");
             if (!File.Exists(manifestPath)) continue;

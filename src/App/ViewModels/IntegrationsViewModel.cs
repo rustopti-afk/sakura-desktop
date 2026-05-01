@@ -101,7 +101,7 @@ public sealed partial class IntegrationsViewModel : ObservableObject
     [RelayCommand]
     public void ToggleMod(WindhawkModInfo mod)
     {
-        if (!WindhawkManager.IsInstalled()) return;
+        if (mod is null || !WindhawkManager.IsInstalled()) return;
         try
         {
             WindhawkManager.SetModEnabled(mod.Id, !mod.Enabled);

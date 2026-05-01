@@ -275,9 +275,11 @@ public sealed partial class PersonalizeViewModel : ObservableObject
 
     private static uint ParseHex(string hex)
     {
+        if (string.IsNullOrWhiteSpace(hex)) return 0xFF000000;
         hex = hex.TrimStart('#');
         if (hex.Length == 6) hex = "FF" + hex;
-        return Convert.ToUInt32(hex, 16);
+        try { return Convert.ToUInt32(hex, 16); }
+        catch { return 0xFF000000; }
     }
 }
 
