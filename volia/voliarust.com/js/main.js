@@ -211,67 +211,29 @@ function showAnnouncements() {
 }
 
 // ── Navbar burger ─────────────────────────────────────────────
-(function initBurger() {
+document.addEventListener('DOMContentLoaded', () => {
   const burger   = document.getElementById('burger');
   const navLinks = document.getElementById('navLinks');
-  if (!burger || !navLinks) return;
-  burger.addEventListener('click', () => {
-    const open = navLinks.classList.toggle('open');
-    burger.classList.toggle('active', open);
-    burger.setAttribute('aria-expanded', open);
-  });
-  document.addEventListener('click', e => {
-    if (!burger.contains(e.target) && !navLinks.contains(e.target)) {
-      navLinks.classList.remove('open');
-      burger.classList.remove('active');
-    }
-  });
-})();
+  if (burger && navLinks) {
+    burger.addEventListener('click', () => {
+      const open = navLinks.classList.toggle('open');
+      burger.classList.toggle('active', open);
+      burger.setAttribute('aria-expanded', open);
+    });
+    document.addEventListener('click', e => {
+      if (!burger.contains(e.target) && !navLinks.contains(e.target)) {
+        navLinks.classList.remove('open');
+        burger.classList.remove('active');
+      }
+    });
+  }
 
-// ── Navbar scroll shadow ──────────────────────────────────────
-(function initNavScroll() {
+  // Navbar scroll shadow
   const nav = document.getElementById('navbar');
-  if (!nav) return;
-  window.addEventListener('scroll', () => {
-    nav.classList.toggle('scrolled', window.scrollY > 20);
-  }, { passive: true });
-})();
-
-// ── Language switcher ─────────────────────────────────────────
-function toggleLangMenu() {
-  const menu  = document.getElementById('langMenu');
-  const arrow = document.getElementById('langArrow');
-  if (!menu) return;
-  const open = menu.classList.toggle('open');
-  if (arrow) arrow.style.transform = open ? 'rotate(180deg)' : '';
-}
-
-function selectLang(lang) {
-  localStorage.setItem('volia_lang', lang);
-  const flag = document.getElementById('langFlag');
-  if (flag) flag.textContent = lang.toUpperCase();
-  // close menu
-  const menu  = document.getElementById('langMenu');
-  const arrow = document.getElementById('langArrow');
-  if (menu)  menu.classList.remove('open');
-  if (arrow) arrow.style.transform = '';
-  // update active option
-  document.querySelectorAll('.lang-option').forEach(b => {
-    b.classList.toggle('active', b.dataset.lang === lang);
-  });
-  // trigger i18n re-render if available
-  if (typeof window.I18n?.setLang === 'function') window.I18n.setLang(lang);
-  else location.reload();
-}
-
-// close lang menu on outside click
-document.addEventListener('click', e => {
-  const dd = document.getElementById('langDropdown');
-  if (dd && !dd.contains(e.target)) {
-    const menu = document.getElementById('langMenu');
-    const arrow = document.getElementById('langArrow');
-    if (menu)  menu.classList.remove('open');
-    if (arrow) arrow.style.transform = '';
+  if (nav) {
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
   }
 });
 
@@ -285,12 +247,4 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(fetchServerStats, 60000);
   setInterval(updateTimers, 1000);
   updateTimers();
-
-  // Restore saved language flag
-  const savedLang = localStorage.getItem('volia_lang') || 'uk';
-  const flag = document.getElementById('langFlag');
-  if (flag) flag.textContent = savedLang.toUpperCase();
-  document.querySelectorAll('.lang-option').forEach(b => {
-    b.classList.toggle('active', b.dataset.lang === savedLang);
-  });
 });
