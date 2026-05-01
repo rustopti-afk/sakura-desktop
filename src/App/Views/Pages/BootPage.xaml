@@ -1,0 +1,135 @@
+<UserControl x:Class="Sakura.App.Views.Pages.BootPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24,16,24,24" MaxWidth="680">
+
+            <TextBlock Text="Boot Splash"
+                       Style="{StaticResource Sakura.Text.Title}"
+                       Margin="0,0,0,4"/>
+            <TextBlock Text="Replace the Windows boot logo via HackBGRT"
+                       Style="{StaticResource Sakura.Text.Caption}"
+                       Opacity="0.65" Margin="0,0,0,24"/>
+
+            <!-- HackBGRT status -->
+            <Border Style="{StaticResource Sakura.Card}" Margin="0,0,0,12">
+                <StackPanel>
+                    <Grid Margin="0,0,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="HackBGRT"
+                                       Style="{StaticResource Sakura.Text.Body}"
+                                       FontWeight="SemiBold"/>
+                            <TextBlock Text="{Binding HackBgrtDir}"
+                                       Style="{StaticResource Sakura.Text.Caption}"
+                                       Opacity="0.6"
+                                       TextTrimming="CharacterEllipsis"
+                                       MaxWidth="380"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                            <Button Content="Refresh"
+                                    Command="{Binding RefreshStatusCommand}"
+                                    Style="{StaticResource Sakura.Button.Secondary}"
+                                    Padding="10,5" Margin="0,0,8,0"/>
+                            <Button Content="Open Folder"
+                                    Command="{Binding OpenHackBgrtFolderCommand}"
+                                    IsEnabled="{Binding HackBgrtInstalled}"
+                                    Style="{StaticResource Sakura.Button.Secondary}"
+                                    Padding="10,5"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Not installed hint -->
+                    <Border Background="{StaticResource Sakura.Brush.BgOverlay}"
+                            CornerRadius="6" Padding="12,8">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HackBgrtInstalled}" Value="False">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock TextWrapping="Wrap"
+                                   Style="{StaticResource Sakura.Text.Caption}"
+                                   Opacity="0.8">
+                            HackBGRT replaces the ACPI BGRT boot logo. Download it from
+                            github.com/Metabolix/HackBGRT and run setup.exe install to register it.
+                            Then come back here to set a custom splash image.
+                        </TextBlock>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- Splash image picker -->
+            <Border Style="{StaticResource Sakura.Card}" Margin="0,0,0,12">
+                <StackPanel IsEnabled="{Binding HackBgrtInstalled}">
+                    <TextBlock Text="Splash Image"
+                               Style="{StaticResource Sakura.Text.Body}"
+                               FontWeight="SemiBold" Margin="0,0,0,12"/>
+
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Image path"
+                                   Style="{StaticResource Sakura.Text.Caption}"
+                                   Opacity="0.7" VerticalAlignment="Center"/>
+                        <TextBox Grid.Column="1"
+                                 Text="{Binding SplashPath, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource Sakura.TextBox}"
+                                 IsReadOnly="True" Margin="0,0,8,0"/>
+                        <Button Grid.Column="2" Content="Browse..."
+                                Command="{Binding BrowseSplashCommand}"
+                                Style="{StaticResource Sakura.Button.Secondary}"
+                                Padding="12,5"/>
+                    </Grid>
+
+                    <TextBlock Text="Supported: BMP (native), PNG/JPG (HackBGRT 0.5+)"
+                               Style="{StaticResource Sakura.Text.Caption}"
+                               Opacity="0.5" Margin="0,0,0,12"/>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Deploy &amp; Install"
+                                Command="{Binding DeployAndInstallCommand}"
+                                IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
+                                Style="{StaticResource Sakura.Button.Primary}"
+                                Padding="18,8" Margin="0,0,8,0"/>
+                        <Button Content="Uninstall"
+                                Command="{Binding UninstallCommand}"
+                                IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
+                                Style="{StaticResource Sakura.Button.Secondary}"
+                                Padding="14,8"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <ProgressBar Minimum="0" Maximum="100" IsIndeterminate="True"
+                         Height="4" Margin="0,0,0,8"
+                         Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+            <TextBlock Text="{Binding StatusMessage}"
+                       TextWrapping="Wrap"
+                       Visibility="{Binding StatusMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource Sakura.Text.Caption}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding StatusSuccess}" Value="True">
+                                <Setter Property="Foreground" Value="{StaticResource Sakura.Brush.Accent}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

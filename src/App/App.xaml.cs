@@ -37,6 +37,11 @@ public partial class App : Application
                 services.AddSingleton<TerminalViewModel>();
                 services.AddSingleton<SettingsViewModel>();
                 services.AddSingleton<ProfileEditorViewModel>();
+                services.AddSingleton<ThemeViewModel>();
+                services.AddSingleton<WallpaperViewModel>();
+                services.AddSingleton<WmViewModel>();
+                services.AddSingleton<IconsViewModel>();
+                services.AddSingleton<BootViewModel>();
 
                 // Views
                 services.AddSingleton<MainWindow>();
@@ -47,6 +52,11 @@ public partial class App : Application
                 services.AddTransient<TerminalPage>();
                 services.AddTransient<SettingsPage>();
                 services.AddTransient<ProfileEditorPage>();
+                services.AddTransient<ThemePage>();
+                services.AddTransient<WallpaperPage>();
+                services.AddTransient<WmPage>();
+                services.AddTransient<IconsPage>();
+                services.AddTransient<BootPage>();
                 services.AddSingleton<ComingSoonPage>();
             })
             .Build();

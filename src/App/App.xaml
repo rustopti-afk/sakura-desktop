@@ -29,6 +29,7 @@
             <conv:StringSplitConverter                x:Key="StringSplitConverter"/>
             <conv:IntToVisibilityConverter            x:Key="IntToVisibilityConverter"/>
             <conv:IntToZeroVisibilityConverter        x:Key="IntToZeroVisibilityConverter"/>
+            <conv:InverseBoolToVisibilityConverter    x:Key="InverseBoolToVisibilityConverter"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -102,6 +102,11 @@ public sealed partial class MainViewModel : ObservableObject
             "editor"       => _services.GetRequiredService<ProfileEditorPage>(),
             "terminal"     => _services.GetRequiredService<TerminalPage>(),
             "settings"     => _services.GetRequiredService<SettingsPage>(),
+            "theme"        => _services.GetRequiredService<ThemePage>(),
+            "wallpaper"    => _services.GetRequiredService<WallpaperPage>(),
+            "wm"           => _services.GetRequiredService<WmPage>(),
+            "icons"        => _services.GetRequiredService<IconsPage>(),
+            "boot"         => _services.GetRequiredService<BootPage>(),
             not null       => _services.GetRequiredService<ComingSoonPage>(),
             _              => null
         };

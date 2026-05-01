@@ -96,6 +96,17 @@ public sealed class IntToZeroVisibilityConverter : IValueConverter
         => throw new NotSupportedException();
 }
 
+/// <summary>Returns Visible when bool is false, Collapsed when true.</summary>
+[ValueConversion(typeof(bool), typeof(Visibility))]
+public sealed class InverseBoolToVisibilityConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        => value is bool b && b ? Visibility.Collapsed : Visibility.Visible;
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        => throw new NotSupportedException();
+}
+
 /// <summary>Splits a " · " delimited string into IEnumerable&lt;string&gt; for feature chips.</summary>
 [ValueConversion(typeof(string), typeof(IEnumerable<string>))]
 public sealed class StringSplitConverter : IValueConverter

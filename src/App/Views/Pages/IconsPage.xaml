@@ -1,0 +1,106 @@
+<UserControl x:Class="Sakura.App.Views.Pages.IconsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <UserControl.InputBindings>
+        <KeyBinding Key="F5" Command="{Binding RefreshCommand}"/>
+    </UserControl.InputBindings>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24,16,24,24" MaxWidth="680">
+
+            <TextBlock Text="Icons &amp; Cursors"
+                       Style="{StaticResource Sakura.Text.Title}"
+                       Margin="0,0,0,4"/>
+            <TextBlock Text="Apply shell icon packs and cursor themes"
+                       Style="{StaticResource Sakura.Text.Caption}"
+                       Opacity="0.65" Margin="0,0,0,24"/>
+
+            <!-- Toolbar -->
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                <Button Content="Refresh"
+                        Command="{Binding RefreshCommand}"
+                        Style="{StaticResource Sakura.Button.Secondary}"
+                        Padding="12,5" Margin="0,0,8,0"/>
+                <Button Content="Open Packs Folder"
+                        Command="{Binding OpenIconsFolderCommand}"
+                        Style="{StaticResource Sakura.Button.Secondary}"
+                        Padding="12,5" Margin="0,0,8,0"/>
+                <Button Content="Restore Windows Defaults"
+                        Command="{Binding RestoreDefaultsCommand}"
+                        IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
+                        Style="{StaticResource Sakura.Button.Secondary}"
+                        Padding="12,5"/>
+            </StackPanel>
+
+            <!-- Icon packs -->
+            <Border Style="{StaticResource Sakura.Card}" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="Icon Packs"
+                               Style="{StaticResource Sakura.Text.Body}"
+                               FontWeight="SemiBold" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Place icon pack folders in %AppData%\Sakura\icons\icons\"
+                               Style="{StaticResource Sakura.Text.Caption}"
+                               Opacity="0.5" Margin="0,0,0,8"/>
+
+                    <ComboBox ItemsSource="{Binding IconPacks}"
+                              SelectedItem="{Binding SelectedIconPack}"
+                              Style="{StaticResource Sakura.ComboBox}"
+                              Margin="0,0,0,12"/>
+
+                    <Button Content="Apply Icon Pack"
+                            Command="{Binding ApplyIconPackCommand}"
+                            IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
+                            Style="{StaticResource Sakura.Button.Primary}"
+                            HorizontalAlignment="Left"
+                            Padding="16,7"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Cursor packs -->
+            <Border Style="{StaticResource Sakura.Card}" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="Cursor Packs"
+                               Style="{StaticResource Sakura.Text.Body}"
+                               FontWeight="SemiBold" Margin="0,0,0,12"/>
+
+                    <TextBlock Text="Place cursor pack folders in %AppData%\Sakura\icons\cursors\"
+                               Style="{StaticResource Sakura.Text.Caption}"
+                               Opacity="0.5" Margin="0,0,0,8"/>
+
+                    <ComboBox ItemsSource="{Binding CursorPacks}"
+                              SelectedItem="{Binding SelectedCursorPack}"
+                              Style="{StaticResource Sakura.ComboBox}"
+                              Margin="0,0,0,12"/>
+
+                    <Button Content="Apply Cursor Pack"
+                            Command="{Binding ApplyCursorPackCommand}"
+                            IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
+                            Style="{StaticResource Sakura.Button.Primary}"
+                            HorizontalAlignment="Left"
+                            Padding="16,7"/>
+                </StackPanel>
+            </Border>
+
+            <ProgressBar Minimum="0" Maximum="100" IsIndeterminate="True"
+                         Height="4" Margin="0,0,0,8"
+                         Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+            <TextBlock Text="{Binding StatusMessage}"
+                       TextWrapping="Wrap"
+                       Visibility="{Binding StatusMessage, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock" BasedOn="{StaticResource Sakura.Text.Caption}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding StatusSuccess}" Value="True">
+                                <Setter Property="Foreground" Value="{StaticResource Sakura.Brush.Accent}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
