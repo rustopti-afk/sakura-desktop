@@ -30,7 +30,8 @@ public partial class NavigationControl : UserControl
 
 public sealed class NavItem
 {
-    public string Key { get; set; } = string.Empty;
-    public string Label { get; set; } = string.Empty;
-    public string IconGlyph { get; set; } = string.Empty;
+    public string Key         { get; set; } = string.Empty;
+    public string Label       { get; set; } = string.Empty;
+    public string IconGlyph   { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
 }

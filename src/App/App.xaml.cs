@@ -47,6 +47,7 @@ public partial class App : Application
                 services.AddTransient<TerminalPage>();
                 services.AddTransient<SettingsPage>();
                 services.AddTransient<ProfileEditorPage>();
+                services.AddSingleton<ComingSoonPage>();
             })
             .Build();
 

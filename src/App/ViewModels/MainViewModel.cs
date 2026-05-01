@@ -95,13 +95,14 @@ public sealed partial class MainViewModel : ObservableObject
     {
         CurrentPage = key switch
         {
-            "personalize" => _services.GetRequiredService<PersonalizePage>(),
-            "profiles"    => _services.GetRequiredService<ProfilesPage>(),
+            "personalize"  => _services.GetRequiredService<PersonalizePage>(),
+            "profiles"     => _services.GetRequiredService<ProfilesPage>(),
             "backup"       => _services.GetRequiredService<BackupPage>(),
             "integrations" => _services.GetRequiredService<IntegrationsPage>(),
             "editor"       => _services.GetRequiredService<ProfileEditorPage>(),
             "terminal"     => _services.GetRequiredService<TerminalPage>(),
             "settings"     => _services.GetRequiredService<SettingsPage>(),
+            not null       => _services.GetRequiredService<ComingSoonPage>(),
             _              => null
         };
 

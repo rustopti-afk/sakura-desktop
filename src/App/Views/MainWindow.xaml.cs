@@ -1,6 +1,10 @@
 using Sakura.App.Services;
+using Sakura.App.ViewModels;
+using System.ComponentModel;
+using System.Media;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media.Animation;
 using System.Windows.Shell;
 
 namespace Sakura.App.Views;
@@ -10,7 +14,32 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        StateChanged += OnStateChanged;
+        StateChanged      += OnStateChanged;
+        DataContextChanged += OnDataContextChanged;
+    }
+
+    private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+    {
+        if (e.OldValue is MainViewModel old)
+            old.PropertyChanged -= OnVmPropertyChanged;
+        if (e.NewValue is MainViewModel vm)
+            vm.PropertyChanged += OnVmPropertyChanged;
+    }
+
+    private void OnVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName != nameof(MainViewModel.CurrentPage)) return;
+
+        // Fade-in animation when switching pages
+        PageContent.Opacity = 0;
+        var anim = new DoubleAnimation(0, 1, new Duration(TimeSpan.FromMilliseconds(180)))
+        {
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+        };
+        PageContent.BeginAnimation(OpacityProperty, anim);
+
+        // Soft navigation click sound (respects Windows sound scheme)
+        try { SystemSounds.Asterisk.Play(); } catch { }
     }
 
     private void OnStateChanged(object? sender, EventArgs e)

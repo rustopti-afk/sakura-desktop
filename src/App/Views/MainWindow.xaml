@@ -23,13 +23,18 @@
 
     <Window.Resources>
         <x:Array x:Key="NavItems" Type="{x:Type ctl:NavItem}">
-            <ctl:NavItem Key="personalize"  Label="Personalize"   IconGlyph="&#xE790;"/>
-            <ctl:NavItem Key="profiles"     Label="Profiles"      IconGlyph="&#xE74E;"/>
-            <ctl:NavItem Key="editor"       Label="New Profile"   IconGlyph="&#xE70F;"/>
-            <ctl:NavItem Key="terminal"     Label="Terminal"      IconGlyph="&#xE756;"/>
-            <ctl:NavItem Key="integrations" Label="Integrations"  IconGlyph="&#xE737;"/>
-            <ctl:NavItem Key="backup"       Label="Backups"       IconGlyph="&#xE81C;"/>
-            <ctl:NavItem Key="settings"     Label="Settings"      IconGlyph="&#xE713;"/>
+            <ctl:NavItem Key="personalize"  Label="Personalize"     IconGlyph="&#xE790;" Description="Colors, DWM, fonts"/>
+            <ctl:NavItem Key="theme"        Label="Theme Engine"     IconGlyph="&#xE771;" Description="SecureUxTheme patches"/>
+            <ctl:NavItem Key="wallpaper"    Label="Wallpaper"        IconGlyph="&#xEB9F;" Description="Lively animated wallpaper"/>
+            <ctl:NavItem Key="wm"           Label="Window Manager"   IconGlyph="&#xE737;" Description="Komorebi / GlazeWM"/>
+            <ctl:NavItem Key="integrations" Label="Integrations"     IconGlyph="&#xECAA;" Description="Rainmeter, Windhawk"/>
+            <ctl:NavItem Key="icons"        Label="Icons &amp; Cursors" IconGlyph="&#xE8B7;" Description="Shell icon packs"/>
+            <ctl:NavItem Key="boot"         Label="Boot Splash"      IconGlyph="&#xE7E8;" Description="HackBGRT custom logo"/>
+            <ctl:NavItem Key="terminal"     Label="Terminal"         IconGlyph="&#xE756;" Description="Oh My Posh, color scheme"/>
+            <ctl:NavItem Key="profiles"     Label="Profiles"         IconGlyph="&#xE74E;" Description="Load &amp; apply rice"/>
+            <ctl:NavItem Key="editor"       Label="Profile Editor"   IconGlyph="&#xE70F;" Description="Create / edit profiles"/>
+            <ctl:NavItem Key="backup"       Label="Backups"          IconGlyph="&#xE81C;" Description="Restore previous state"/>
+            <ctl:NavItem Key="settings"     Label="Settings"         IconGlyph="&#xE713;" Description="Paths, language, about"/>
         </x:Array>
 
         <Storyboard x:Key="PreviewExpand">
@@ -190,7 +195,7 @@
                         </Border>
 
                         <!-- Page content — each page owns its own scroll -->
-                        <ContentControl Grid.Row="1" Content="{Binding CurrentPage}"/>
+                        <ContentControl x:Name="PageContent" Grid.Row="1" Content="{Binding CurrentPage}"/>
                     </Grid>
                 </Grid>
 
