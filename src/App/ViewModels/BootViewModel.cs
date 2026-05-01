@@ -106,6 +106,7 @@ public sealed partial class BootViewModel : ObservableObject
             await BootManager.UninstallAsync().ConfigureAwait(false);
             StatusSuccess = true;
             StatusMessage = "HackBGRT uninstalled — original boot logo restored on next reboot";
+            RefreshStatus();
         }
         catch (Exception ex)
         {

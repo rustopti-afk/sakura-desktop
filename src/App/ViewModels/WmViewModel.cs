@@ -130,6 +130,7 @@ public sealed partial class WmViewModel : ObservableObject
         catch (Exception ex)
         {
             StatusMessage = $"Stop failed: {ex.Message}";
+            _logger.LogError(ex, "WM stop failed");
         }
         finally { IsBusy = false; }
     }

@@ -132,7 +132,8 @@ public sealed partial class IconsViewModel : ObservableObject
     [RelayCommand]
     public void OpenIconsFolder()
     {
-        Directory.CreateDirectory(_iconsBaseDir);
-        Process.Start("explorer.exe", _iconsBaseDir);
+        string iconsDir = Path.Combine(_iconsBaseDir, "icons");
+        Directory.CreateDirectory(iconsDir);
+        Process.Start("explorer.exe", iconsDir);
     }
 }
