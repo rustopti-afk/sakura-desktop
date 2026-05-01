@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="uk" data-lang="uk">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Магазин — Воля Rust</title>
+  <link rel="icon" href="../assets/logo.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="../css/style.css" />
+  <style>
+    /* ── Modal ── */
+    .modal-overlay { display:none; position:fixed; inset:0; z-index:1000; background:rgba(0,0,0,0.75); backdrop-filter:blur(4px); align-items:center; justify-content:center; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:28px; width:100%; margin:16px; position:relative; max-height:90vh; overflow-y:auto; }
+    .modal-close { position:absolute; top:14px; right:16px; background:none; border:none; color:var(--text-sub); font-size:1.2rem; cursor:pointer; line-height:1; }
+    .modal-close:hover { color:var(--text); }
+
+    /* ── Shop tabs ── */
+    .shop-tabs {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      margin: 32px 0 28px;
+    }
+    .shop-tab {
+      padding: 9px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      color: var(--text-sub);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.95rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .shop-tab:hover { border-color: var(--purple); color: var(--text); }
+    .shop-tab.active {
+      background: var(--purple); border-color: var(--purple);
+      color: #fff;
+    }
+
+    /* ── Products grid ── */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    /* ── Product card ── */
+    .product-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+      display: flex; flex-direction: column;
+      position: relative;
+    }
+    .product-card:hover {
+      border-color: var(--purple);
+      transform: translateY(-3px);
+    }
+    .product-card.featured { border-color: #f59e0b; }
+    .product-card.featured:hover { border-color: #fbbf24; }
+
+    .product-badge {
+      position: absolute; top: 12px; right: 12px;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 0.72rem; font-weight: 700;
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      color: #fff; text-transform: uppercase;
+    }
+    .product-badge.new-badge {
+      background: linear-gradient(135deg, var(--purple), #6366f1);
+    }
+
+    .product-img {
+      width: 100%; aspect-ratio: 1/1;
+      object-fit: cover;
+      background: var(--bg-card2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 4rem;
+    }
+    .product-img img {
+      width: 100%; height: 100%; object-fit: cover;
+      aspect-ratio: 1/1;
+    }
+    .product-img-placeholder {
+      width: 100%; aspect-ratio: 1/1;
+      background: var(--bg-card2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 4rem; overflow: hidden;
+    }
+    .product-img-placeholder img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+
+    .product-body {
+      padding: 16px;
+      display: flex; flex-direction: column; flex: 1;
+    }
+    .product-name {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.15rem; font-weight: 700;
+      margin-bottom: 8px; color: var(--text);
+    }
+    .product-name.gold-name { color: #f59e0b; }
+    .product-name.titan-name { color: #a78bfa; }
+    .product-name.imperial-name { color: #60a5fa; }
+    .product-name.coins-name { color: #34d399; }
+
+    .product-perks {
+      list-style: none; margin-bottom: 14px; flex: 1;
+    }
+    .product-perks li {
+      font-size: 0.82rem; color: var(--text-sub);
+      padding: 3px 0; display: flex; align-items: flex-start; gap: 6px;
+    }
+    .product-perks li i {
+      color: var(--green); margin-top: 2px; flex-shrink: 0; font-size: 0.7rem;
+    }
+
+    .product-price-row {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 12px;
+    }
+    .product-price {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.5rem; font-weight: 700; color: var(--text);
+    }
+    .product-price.gold-price { color: #f59e0b; }
+    .product-price.titan-price { color: #a78bfa; }
+    .product-price.imperial-price { color: #60a5fa; }
+    .product-price.coins-price { color: #34d399; }
+
+    .product-price-old {
+      font-size: 0.9rem; color: var(--text-sub);
+      text-decoration: line-through;
+    }
+    .product-discount {
+      font-size: 0.75rem; padding: 2px 8px;
+      background: rgba(239,68,68,0.15); color: #ef4444;
+      border-radius: 20px; font-weight: 700;
+    }
+
+    .btn-buy {
+      width: 100%; padding: 11px;
+      border: none; border-radius: 10px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      margin-top: auto;
+    }
+    .btn-buy.gold-btn {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #000;
+    }
+    .btn-buy.gold-btn:hover { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
+    .btn-buy.titan-btn {
+      background: linear-gradient(135deg, var(--purple), #6366f1);
+      color: #fff;
+    }
+    .btn-buy.titan-btn:hover { background: linear-gradient(135deg, #8b6cff, var(--purple)); }
+    .btn-buy.imperial-btn {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      color: #fff;
+    }
+    .btn-buy.imperial-btn:hover { background: linear-gradient(135deg, #60a5fa, #3b82f6); }
+    .btn-buy.default-btn {
+      background: var(--purple); color: #fff;
+    }
+    .btn-buy.default-btn:hover { background: var(--purple-h); }
+    .btn-buy.coins-btn {
+      background: linear-gradient(135deg, #059669, #10b981);
+      color: #fff;
+    }
+    .btn-buy.coins-btn:hover { background: linear-gradient(135deg, #10b981, #34d399); }
+
+    /* ── Duration badge ── */
+    .product-duration {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 0.75rem; color: var(--text-sub);
+      margin-bottom: 10px;
+    }
+    .product-duration i { color: var(--purple); }
+
+    /* ── Coins big card ── */
+    .coins-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+    .coins-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 16px;
+      text-align: center;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .coins-card:hover { border-color: #34d399; transform: translateY(-2px); }
+    .coins-card .coins-amount {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 2rem; font-weight: 700;
+      color: #34d399; margin-bottom: 4px;
+    }
+    .coins-card .coins-icon { font-size: 2rem; margin-bottom: 8px; display: block; }
+    .coins-card .coins-label { font-size: 0.8rem; color: var(--text-sub); margin-bottom: 14px; }
+
+    /* ── Info banner ── */
+    .shop-info-bar {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 20px;
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 28px;
+      font-size: 0.85rem; color: var(--text-sub);
+    }
+    .shop-info-bar i { color: var(--purple); font-size: 1.1rem; flex-shrink: 0; }
+
+    /* ── Sale banner ── */
+    .sale-banner {
+      background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(239,68,68,0.08));
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: 12px;
+      padding: 14px 20px;
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 24px;
+    }
+    .sale-banner i { color: #f59e0b; font-size: 1.2rem; }
+    .sale-banner span { font-size: 0.9rem; color: var(--text); font-weight: 500; }
+    .sale-banner strong { color: #f59e0b; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+  </style>
+</head>
+<body class="page-bg">
+  <nav class="navbar" id="navbar">
+    <div class="container nav-inner">
+      <a href="/" class="nav-logo">
+        <img src="../assets/logo.png" alt="Воля Rust" />
+        <div class="nav-logo-text">
+          <span class="nav-logo-name">Воля <span class="accent">Rust</span></span>
+          <span class="nav-logo-sub">Ukraine Rust Community</span>
+        </div>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="shop.html" class="active"><i class="fas fa-store"></i> <span data-i18n="nav.shop">Магазин</span></a></li>
+        <li><a href="news.html"><i class="fas fa-newspaper"></i> <span data-i18n="nav.news">Новини</span></a></li>
+        <li><a href="vote.html"><i class="fas fa-map"></i> <span data-i18n="nav.vote">Голосування</span></a></li>
+        <li><a href="statistics.html"><i class="fas fa-chart-bar"></i> <span data-i18n="nav.stats">Статистика</span></a></li>
+        <li><a href="support.html"><i class="fas fa-headset"></i> <span data-i18n="nav.support">Підтримка</span></a></li>
+      </ul>
+      <div class="nav-actions">
+        <div class="lang-dropdown" id="langDropdown">
+          <button class="lang-switch" onclick="toggleLangMenu()">
+            <span class="lang-flag" id="langFlag">UA</span>
+            <i class="fas fa-chevron-down lang-arrow" id="langArrow"></i>
+          </button>
+          <div class="lang-menu" id="langMenu">
+            <button class="lang-option active" data-lang="uk" onclick="selectLang('uk')">UA — Українська</button>
+            <button class="lang-option" data-lang="en" onclick="selectLang('en')">EN — English</button>
+            <button class="lang-option" data-lang="ru" onclick="selectLang('ru')">RU — Русский</button>
+          </div>
+        </div>
+        <div id="navAuth">
+          <a href="login.html" class="btn-steam-mini">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><path d="M11.979 0C5.678 0 .511 4.86.022 11.037l6.432 2.658c.545-.371 1.203-.59 1.912-.59.063 0 .125.004.188.006l2.861-4.142V8.91c0-2.495 2.028-4.524 4.524-4.524 2.494 0 4.524 2.031 4.524 4.527s-2.03 4.525-4.524 4.525h-.105l-4.076 2.911c0 .052.004.105.004.159 0 1.875-1.515 3.396-3.39 3.396-1.635 0-3.016-1.173-3.331-2.727L.436 15.27C1.862 20.307 6.486 24 11.979 24c6.627 0 11.999-5.373 11.999-12S18.606 0 11.979 0z"/></svg>
+            <span data-i18n="nav.login">Увійти</span>
+          </a>
+        </div>
+        <button class="burger" id="burger"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </nav>
+
+
+  <div class="page-hero"></div>
+
+  <section style="padding: 0 0 80px;">
+    <div class="container">
+
+      <!-- Promo code bar -->
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px 20px;display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+        <i class="fas fa-tag" style="color:var(--purple)"></i>
+        <span style="font-size:0.88rem;color:var(--text-sub);flex:1" data-i18n="shop.promo.label">Маєш промокод?</span>
+        <div style="display:flex;gap:8px">
+          <input id="promoInput" data-i18n-placeholder="shop.promo.placeholder" placeholder="Введи промокод" style="background:var(--bg-card2);border:1px solid var(--border);border-radius:8px;padding:7px 13px;color:var(--text);font-family:'Inter',sans-serif;font-size:0.88rem;outline:none;width:180px;text-transform:uppercase" />
+          <button onclick="applyPromoCode()" style="padding:7px 16px;background:var(--purple);color:#fff;border:none;border-radius:8px;font-family:'Rajdhani',sans-serif;font-weight:700;cursor:pointer" data-i18n="shop.promo.btn">Застосувати</button>
+        </div>
+        <div id="promoStatus" style="font-size:0.82rem"></div>
+      </div>
+
+      <!-- Sale banner -->
+      <div class="sale-banner">
+        <i class="fas fa-bolt"></i>
+        <span data-i18n="shop.sale">🔥 Акція: <strong>-50% на всі VIP привілеї!</strong> Встигни поки діє знижка.</span>
+      </div>
+
+      <!-- Info -->
+      <div class="shop-info-bar">
+        <i class="fas fa-info-circle"></i>
+        <span data-i18n="shop.info">Після оплати привілеї активуються автоматично протягом 5–10 хвилин. Питання? <a href="support.html" style="color:var(--purple)">Підтримка</a></span>
+      </div>
+
+      <!-- Tabs -->
+      <div class="shop-tabs">
+        <button class="shop-tab active" onclick="switchTab('vip', this)">
+          <i class="fas fa-crown"></i> <span data-i18n="shop.tab.vip">VIP Привілеї</span>
+        </button>
+        <button class="shop-tab" onclick="switchTab('bundles', this)">
+          <i class="fas fa-box-open"></i> <span data-i18n="shop.tab.bundles">Одноразові набори</span>
+        </button>
+        <button class="shop-tab" onclick="switchTab('coins', this)">
+          <i class="fas fa-coins"></i> <span data-i18n="shop.tab.coins">Воля Койни</span>
+        </button>
+      </div>
+
+      <!-- TAB: VIP -->
+      <div class="tab-content active" id="tab-vip">
+        <div class="products-grid" id="grid-vip"></div>
+      </div>
+
+      <!-- TAB: Bundles -->
+      <div class="tab-content" id="tab-bundles">
+        <div class="products-grid" id="grid-bundles"></div>
+      </div>
+
+      <!-- TAB: Coins -->
+      <div class="tab-content" id="tab-coins">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:24px;display:flex;gap:14px;align-items:flex-start;">
+          <i class="fas fa-coins" style="color:#34d399;font-size:1.4rem;flex-shrink:0;margin-top:2px"></i>
+          <div>
+            <div style="font-weight:600;margin-bottom:4px;color:var(--text)" data-i18n="shop.coins.title">Покупка Воля Койнів</div>
+            <div style="font-size:0.85rem;color:var(--text-sub);line-height:1.6" data-i18n="shop.coins.sub">Поповни баланс — використовуй у магазині на сервері</div>
+          </div>
+        </div>
+        <div class="coins-grid" id="grid-coins"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Buy modal -->
+  <div class="modal-overlay" id="buyModal" onclick="closeBuyModal(event)">
+    <div class="modal" style="max-width:420px">
+      <button class="modal-close" onclick="document.getElementById('buyModal').classList.remove('open')">
+        <i class="fas fa-times"></i>
+      </button>
+      <div id="buyModalContent"></div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <div class="footer-logo"><img src="../assets/logo.png" alt="" /><span>Воля <span class="accent">Rust</span></span></div>
+        <p data-i18n="footer.desc">Українська Rust спільнота. Воля в кожному бою.</p>
+        <div class="socials">
+          <a href="https://discord.gg/FJJYfhqvgj" target="_blank"><i class="fab fa-discord"></i></a>
+          <a href="https://www.tiktok.com/@volia.rust" target="_blank"><i class="fab fa-tiktok"></i></a>
+        </div>
+      </div>
+      <div class="footer-links">
+        <h4 data-i18n="footer.nav">Навігація</h4>
+        <a href="/" data-i18n="nav.home">Головна</a>
+        <a href="shop.html" data-i18n="nav.shop">Магазин</a>
+        <a href="news.html" data-i18n="nav.news">Новини</a>
+        <a href="support.html" data-i18n="nav.support">Підтримка</a>
+      </div>
+      <div class="footer-links">
+        <h4 data-i18n="footer.legal">Правова інфо</h4>
+        <a href="#" data-i18n="footer.rules">Правила</a>
+        <a href="terms.html" data-i18n="footer.terms">Угода користувача</a>
+        <a href="privacy.html" data-i18n="footer.privacy">Конфіденційність</a>
+      </div>
+    </div>
+    <div class="footer-bottom"><span data-i18n="footer.copy">© 2025–2026 Воля Rust. Всі права захищені.</span></div>
+  </footer>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="../js/content.js"></script>
+  <script src="../js/i18n.js"></script>
+  <script src="../js/main.js"></script>
+  <script>
+    // ── Default products (same as admin defaults) ──────────────
+    const SHOP_DEFAULTS = [
+      { id:1, icon:'../assets/shop/GOLD.png',     name:'GOLD VIP',     cat:'vip',     price:50,  oldPrice:100, badge:'-50%', descKey:'shop.desc.gold',     points:0, status:'active' },
+      { id:2, icon:'../assets/shop/TITAN.png',    name:'TITAN VIP',    cat:'vip',     price:100, oldPrice:200, badge:'-50%', descKey:'shop.desc.titan',    points:0, status:'active' },
+      { id:3, icon:'../assets/shop/INPERIAL.png', name:'IMPERIAL VIP', cat:'vip',     price:150, oldPrice:300, badge:'-50%', descKey:'shop.desc.imperial', points:0, status:'active' },
+      { id:4, icon:'../assets/shop/612c3dc6bcff1a38.png', nameKey:'shop.name.tech',  cat:'bundles', price:100, oldPrice:200, badge:'-50%', descKey:'shop.desc.tech',  points:200, status:'active' },
+      { id:5, icon:'../assets/shop/7ae9475d24d62a57.png', nameKey:'shop.name.res',   cat:'bundles', price:125, oldPrice:250, badge:'-50%', descKey:'shop.desc.res',   points:250, status:'active' },
+      { id:6, icon:'../assets/shop/fefd77f4d3078436.png', nameKey:'shop.name.farm',  cat:'bundles', price:150, oldPrice:300, badge:'-50%', descKey:'shop.desc.farm',  points:300, status:'active' },
+      { id:7, icon:'🪙', nameKey:'shop.name.coins10', cat:'coins', price:35,  oldPrice:70,  badge:'-50%', descKey:'shop.desc.coins10', points:10, status:'active' },
+      { id:8, icon:'🪙', nameKey:'shop.name.coins20', cat:'coins', price:65,  oldPrice:130, badge:'-50%', descKey:'shop.desc.coins20', points:20, status:'active' },
+      { id:9, icon:'🪙', nameKey:'shop.name.coins85', cat:'coins', price:275, oldPrice:550, badge:'-50%', descKey:'shop.desc.coins85', points:85, status:'active' },
+    ];
+
+    // VIP tier styling by order index
+    const VIP_STYLES = [
+      { nameClass:'gold-name', priceClass:'gold-price', btnClass:'gold-btn', featured:'' },
+      { nameClass:'titan-name', priceClass:'titan-price', btnClass:'titan-btn', featured:'featured' },
+      { nameClass:'imperial-name', priceClass:'imperial-price', btnClass:'imperial-btn', featured:'' },
+    ];
+
+    function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
+    const t = (key, fallback) => (typeof translations !== 'undefined' && translations[currentLang]?.[key]) || fallback;
+
+    // Map of id → defaults (always authoritative for icon + translation keys)
+    const DEFAULT_MAP = Object.fromEntries(SHOP_DEFAULTS.map(p => [p.id, p]));
+
+    function getShopProducts() {
+      const raw = localStorage.getItem('volia_shop_products');
+      if (!raw) { localStorage.setItem('volia_shop_products', JSON.stringify(SHOP_DEFAULTS)); return SHOP_DEFAULTS; }
+      const prods = JSON.parse(raw);
+      // Sync icon, nameKey, descKey from defaults so translations always work
+      prods.forEach(p => {
+        const d = DEFAULT_MAP[p.id];
+        if (!d) return;
+        if (d.icon) p.icon = d.icon;
+        if (d.nameKey) p.nameKey = d.nameKey; else delete p.nameKey;
+        if (d.descKey) p.descKey = d.descKey; else delete p.descKey;
+      });
+      return prods;
+    }
+
+    function renderShopPage() {
+      const prods = getShopProducts().filter(p => p.status === 'active');
+
+      // Helper: render icon as <img> or emoji
+      function iconHtml(icon, size='4rem') {
+        if (!icon) return '📦';
+        if (icon.startsWith('../') || icon.startsWith('/') || icon.startsWith('http')) {
+          return `<img src="${icon}" onerror="this.replaceWith(document.createTextNode('📦'))">`;
+        }
+        return `<span style="font-size:${size}">${icon}</span>`;
+      }
+
+      // VIP
+      const vips = prods.filter(p => p.cat === 'vip');
+      document.getElementById('grid-vip').innerHTML = vips.length ? vips.map((p, i) => {
+        const st = VIP_STYLES[i] || VIP_STYLES[0];
+        return `<div class="product-card ${st.featured}">
+          ${p.badge ? `<div class="product-badge">${esc(p.badge)}</div>` : ''}
+          <div class="product-img-placeholder" style="display:flex;align-items:center;justify-content:center;aspect-ratio:1/1;background:var(--bg-card2)">${iconHtml(p.icon)}</div>
+          <div class="product-body">
+            <div class="product-name ${st.nameClass}">${esc(t(p.nameKey||'', p.name||''))}</div>
+            ${(p.descKey||p.desc) ? `<p style="font-size:0.83rem;color:var(--text-sub);margin-bottom:12px;line-height:1.5">${esc(t(p.descKey||'', p.desc||''))}</p>` : ''}
+            <div class="product-price-row">
+              <span class="product-price ${st.priceClass}">${p.price} ₴</span>
+              ${p.oldPrice ? `<span class="product-price-old">${p.oldPrice} ₴</span><span class="product-discount">${esc(p.badge||'-')}</span>` : ''}
+            </div>
+            <button class="btn-buy ${st.btnClass}" onclick="buyProduct(&apos;${esc(t(p.nameKey||'', p.name||''))}&apos;, ${p.price}, ${p.id})">
+              <i class="fas fa-shopping-cart"></i> ${t('shop.buy','Придбати')}
+            </button>
+          </div>
+        </div>`;
+      }).join('') : '<p style="color:var(--text-sub);padding:40px 0">Товарів поки немає</p>';
+
+      // Bundles
+      const bundles = prods.filter(p => p.cat === 'bundles');
+      document.getElementById('grid-bundles').innerHTML = bundles.length ? bundles.map(p => `
+        <div class="product-card">
+          ${p.badge ? `<div class="product-badge">${esc(p.badge)}</div>` : ''}
+          <div class="product-img-placeholder" style="display:flex;align-items:center;justify-content:center;aspect-ratio:1/1;background:var(--bg-card2)">${iconHtml(p.icon)}</div>
+          <div class="product-body">
+            <div class="product-name">${esc(t(p.nameKey||'', p.name||''))}</div>
+            ${(p.descKey||p.desc) ? `<p style="font-size:0.83rem;color:var(--text-sub);margin-bottom:12px;line-height:1.5">${esc(t(p.descKey||'', p.desc||''))}</p>` : ''}
+            <div class="product-price-row">
+              <span class="product-price">${p.price} ₴</span>
+              ${p.oldPrice ? `<span class="product-price-old">${p.oldPrice} ₴</span>` : ''}
+              ${p.points ? `<span style="font-size:0.82rem;color:var(--text-sub)">${p.points} <i class="fas fa-coins" style="color:#34d399"></i></span>` : ''}
+            </div>
+            <button class="btn-buy default-btn" onclick="buyProduct(&apos;${esc(t(p.nameKey||'', p.name||''))}&apos;, ${p.price}, ${p.id})">
+              <i class="fas fa-shopping-cart"></i> ${t('shop.buy','Придбати')}
+            </button>
+          </div>
+        </div>`).join('') : '<p style="color:var(--text-sub);padding:40px 0">Товарів поки немає</p>';
+
+      // Coins
+      const coins = prods.filter(p => p.cat === 'coins');
+      const coinIcons = ['🪙','💰','💎','🏅'];
+      document.getElementById('grid-coins').innerHTML = coins.length ? coins.map((p, i) => `
+        <div class="coins-card" ${i === 1 ? 'style="border-color:#34d399"' : ''}>
+          <span class="coins-icon">${iconHtml(p.icon || coinIcons[i] || '🪙', '2.5rem')}</span>
+          <div class="coins-amount">${p.points || t(p.nameKey||'', p.name||'')}</div>
+          <div class="coins-label">${esc(t(p.nameKey||'', p.name||''))}</div>
+          ${p.oldPrice ? `<div style="font-size:0.78rem;color:var(--text-sub);margin-bottom:8px;text-decoration:line-through">${p.oldPrice} балів</div>` : ''}
+          <div class="product-price-row" style="justify-content:center;margin-bottom:12px">
+            <span class="product-price coins-price" style="font-size:1.2rem">${p.price} ₴</span>
+          </div>
+          <button class="btn-buy coins-btn" onclick="buyProduct(&apos;${esc(t(p.nameKey||'', p.name||''))}&apos;, ${p.price}, ${p.id})">${t('shop.buy.coins','Купити')}</button>
+        </div>`).join('') : '<p style="color:var(--text-sub);padding:40px 0">Товарів поки немає</p>';
+    }
+
+    function switchTab(name, btn) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.shop-tab').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    let _pollInterval = null;
+
+    function getSavedSteam() {
+      try {
+        const t = localStorage.getItem('volia_steam_token');
+        const u = JSON.parse(localStorage.getItem('volia_user') || 'null');
+        if (!t || !u?.steamId) return { id: '', name: '' };
+        const p = JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+        if (p.exp && p.exp < Math.floor(Date.now() / 1000)) {
+          localStorage.removeItem('volia_steam_token');
+          localStorage.removeItem('volia_user');
+          return { id: '', name: '' };
+        }
+        return { id: u.steamId, name: u.nickname || u.steamId };
+      } catch {}
+      return { id: '', name: '' };
+    }
+
+    // After returning from Steam (if user had no token at all)
+    (function() {
+      const p = new URLSearchParams(location.search);
+      const t = p.get('token');
+      if (!t) return;
+      localStorage.setItem('volia_steam_token', t);
+      const pending = JSON.parse(localStorage.getItem('volia_pending_buy') || 'null');
+      history.replaceState({}, '', location.pathname);
+      if (pending) {
+        localStorage.removeItem('volia_pending_buy');
+        setTimeout(() => buyProduct(pending.name, pending.price, pending.id), 200);
+      }
+    })();
+
+    function buyProduct(name, price, productId) {
+      const steam = getSavedSteam();
+
+      // Not logged in — show login prompt modal
+      if (!/^[0-9]{17}$/.test(steam.id)) {
+        localStorage.setItem('volia_pending_buy', JSON.stringify({ name, price, id: productId }));
+        const modal   = document.getElementById('buyModal');
+        const content = document.getElementById('buyModalContent');
+        content.innerHTML = `
+          <div style="text-align:center;padding:8px 0">
+            <i class="fab fa-steam" style="font-size:3rem;color:#4ade80;margin-bottom:16px;display:block"></i>
+            <h3 style="font-family:'Rajdhani',sans-serif;font-size:1.4rem;margin-bottom:8px">${t('shop.login.title','Увійдіть через Steam')}</h3>
+            <p style="color:var(--text-sub);font-size:0.88rem;margin-bottom:24px;line-height:1.5">${t('shop.login.desc','Щоб придбати товар, необхідно увійти через Steam. Це безпечно та займе кілька секунд.')}</p>
+            <a href="/api/auth/steam?from=shop" class="btn-buy default-btn" style="display:flex;text-decoration:none;justify-content:center;gap:8px;margin-bottom:12px">
+              <i class="fab fa-steam"></i> ${t('shop.login.btn','Увійти через Steam')}
+            </a>
+            <button onclick="document.getElementById('buyModal').classList.remove('open')"
+              style="background:none;border:none;color:var(--text-sub);font-size:0.85rem;cursor:pointer;font-family:'Inter',sans-serif">
+              ${t('shop.login.cancel','Скасувати')}
+            </button>
+          </div>`;
+        modal.classList.add('open');
+        return;
+      }
+
+      const modal   = document.getElementById('buyModal');
+      const content = document.getElementById('buyModalContent');
+      const wipeDay = currentLang === 'en' ? 'Thursday' : currentLang === 'ru' ? 'Четверг' : 'Четвер';
+      const monDay  = currentLang === 'en' ? 'Monday'   : 'Понеділок';
+
+      content.innerHTML = `
+        <h3 style="font-family:'Rajdhani',sans-serif;font-size:1.3rem;margin-bottom:6px">${esc(name)}</h3>
+        <p style="color:var(--text-sub);font-size:0.85rem;margin-bottom:16px">${t('shop.modal.confirm','Підтвердження покупки')}</p>
+
+        <div style="background:var(--bg-card2);border-radius:10px;padding:14px 16px;margin-bottom:16px">
+
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)">
+            <i class="fab fa-steam" style="font-size:1.4rem;color:var(--purple)"></i>
+            <div>
+              <div style="font-size:0.9rem;font-weight:600">${esc(steam.name)}</div>
+              <div style="font-size:0.75rem;color:var(--text-sub)">${esc(steam.id)}</div>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;font-size:0.88rem;margin-bottom:8px">
+            <span style="color:var(--text-sub)">${t('shop.modal.product','Товар')}</span><span>${esc(name)}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:0.88rem;margin-bottom:8px">
+            <span style="color:var(--text-sub)">${t('shop.modal.server','Сервер')}</span>
+            <select id="serverSelect" style="background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:4px 10px;color:var(--text);font-size:0.85rem;outline:none;cursor:pointer">
+              <option value="main">🏆 Main (${wipeDay})</option>
+              <option value="monday">⚡ Monday (${monDay})</option>
+            </select>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:1.1rem;font-weight:700;color:var(--purple);border-top:1px solid var(--border);padding-top:10px;margin-top:4px">
+            <span>${t('shop.modal.total','Сума')}</span><span>${price} ₴</span>
+          </div>
+        </div>
+
+        <button class="btn-buy default-btn" id="confirmPayBtn" onclick="startPayment('${esc(name)}', ${price}, ${productId||0})">
+          <i class="fas fa-credit-card"></i> ${t('shop.modal.pay','Оплатити')} ${price} ₴
+        </button>`;
+      modal.classList.add('open');
+    }
+
+    function clearSteamId() {
+      localStorage.removeItem('volia_steam_id');
+      localStorage.removeItem('volia_steam_name');
+      location.reload();
+    }
+
+    function validateSteamId(input) {
+      const hint = document.getElementById('steamIdHint');
+      if (!hint) return;
+      const val = input.value.trim();
+      if (/^[0-9]{17}$/.test(val)) {
+        input.style.borderColor = '#4ade80';
+        hint.innerHTML = '<span style="color:#4ade80"><i class="fas fa-check"></i> Вірний Steam ID</span>';
+      } else {
+        input.style.borderColor = '';
+        hint.innerHTML = '17 цифр, починається з 765611';
+      }
+    }
+
+    async function startPayment(name, price, productId) {
+      const steam      = getSavedSteam();
+      const steamId    = steam.id;
+      const playerName = steam.name || steamId;
+      const server     = document.getElementById('serverSelect')?.value || 'main';
+      const btn        = document.getElementById('confirmPayBtn');
+
+      if (!/^[0-9]{17}$/.test(steamId)) {
+        localStorage.setItem('volia_pending_buy', JSON.stringify({ name, price, id: productId }));
+        location.href = '/api/auth/steam?from=shop';
+        return;
+      }
+
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Створення...'; }
+
+      try {
+        const jwt = localStorage.getItem('volia_steam_token') || '';
+        const r = await fetch('/api/shop/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${jwt}` },
+          body: JSON.stringify({ productId, server }),
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.error || 'Помилка сервера');
+        showPaymentModal(data.jarLink, data.orderId, data.code, name, data.price);
+      } catch (e) {
+        showToast('Помилка: ' + e.message, true);
+        if (btn) { btn.disabled = false; btn.innerHTML = `<i class="fas fa-credit-card"></i> Оплатити ${price} ₴`; }
+      }
+    }
+
+    function showPaymentModal(jarLink, orderId, code, name, price) {
+      // Monobank jar: ?t= comment, ?a= amount in UAH
+      jarLink = `${jarLink}?t=${encodeURIComponent(code)}&a=${price}`;
+      const content = document.getElementById('buyModalContent');
+      content.innerHTML = `
+        <div style="text-align:center">
+          <div style="font-size:2.5rem;margin-bottom:12px">🏦</div>
+          <h3 style="font-family:'Rajdhani',sans-serif;font-size:1.25rem;margin-bottom:6px">${esc(name)}</h3>
+          <p style="color:var(--text-sub);font-size:0.85rem;margin-bottom:20px">Переведи <strong style="color:var(--text)">${price} ₴</strong> на банку з кодом у коментарі</p>
+
+          <div style="background:var(--bg-card2);border-radius:10px;padding:14px 16px;margin-bottom:16px;text-align:left">
+            <div style="font-size:0.78rem;color:var(--text-sub);margin-bottom:6px">Код платежу (вкажи у коментарі переказу):</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <code id="payCode" style="font-size:1rem;font-weight:700;color:var(--purple);letter-spacing:2px;flex:1">${code}</code>
+              <button onclick="copyCode('${code}')" style="background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:5px 10px;color:var(--text-sub);cursor:pointer;font-size:0.78rem">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+          </div>
+
+          <a href="${jarLink}" target="_blank" class="btn-buy default-btn" style="display:flex;text-decoration:none;margin-bottom:12px">
+            <i class="fas fa-university"></i>&nbsp; Відкрити Monobank банку
+          </a>
+
+          <div id="payStatus" style="font-size:0.85rem;color:var(--text-sub);padding:10px;background:var(--bg-card2);border-radius:8px">
+            <i class="fas fa-spinner fa-spin" style="margin-right:6px"></i> Очікуємо оплату...
+          </div>
+          <p style="font-size:0.75rem;color:var(--text-sub);margin-top:10px">Після переказу активація займає до 2 хвилин</p>
+        </div>`;
+
+      // Start polling by orderId — wait 10s first so webhook has time to arrive
+      if (_pollInterval) clearInterval(_pollInterval);
+      setTimeout(() => {
+        pollPayment(orderId);
+        _pollInterval = setInterval(() => pollPayment(orderId), 5000);
+      }, 10000);
+    }
+
+    async function pollPayment(orderId) {
+      try {
+        const r = await fetch(`/api/shop/check?orderId=${orderId}`);
+        const data = await r.json();
+        if (data.status === 'completed') {
+          clearInterval(_pollInterval);
+          _pollInterval = null;
+          const statusEl = document.getElementById('payStatus');
+          if (statusEl) statusEl.innerHTML = '<i class="fas fa-check-circle" style="color:#4ade80;margin-right:6px"></i> <strong style="color:#4ade80">Оплату отримано!</strong> Привілеї активуються протягом 5–10 хвилин.';
+          showToast('✅ Оплату підтверджено!');
+        } else if (data.status === 'underpaid') {
+          clearInterval(_pollInterval);
+          _pollInterval = null;
+          const statusEl = document.getElementById('payStatus');
+          if (statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-triangle" style="color:#f59e0b;margin-right:6px"></i> Сума не збіглась. Зверніться в підтримку.';
+        }
+      } catch { /* network error, retry next tick */ }
+    }
+
+    function copyCode(code) {
+      navigator.clipboard.writeText(code).then(() => showToast('Код скопійовано!')).catch(() => {
+        const el = document.getElementById('payCode');
+        if (el) { const r = document.createRange(); r.selectNode(el); window.getSelection().addRange(r); }
+      });
+    }
+
+    function closeBuyModal(e) {
+      if (e.target === document.getElementById('buyModal')) {
+        document.getElementById('buyModal').classList.remove('open');
+        if (_pollInterval) { clearInterval(_pollInterval); _pollInterval = null; }
+      }
+    }
+
+    function applyPromoCode() {
+      const code = document.getElementById('promoInput').value.trim().toUpperCase();
+      const statusEl = document.getElementById('promoStatus');
+      if (!code) { statusEl.innerHTML = '<span style="color:#ef4444">Введи код!</span>'; return; }
+      const promos = JSON.parse(localStorage.getItem('volia_promos') || '[]');
+      const p = promos.find(x => x.code === code);
+      if (!p) { statusEl.innerHTML = '<span style="color:#ef4444">❌ Промокод не знайдено</span>'; return; }
+      const expired = p.expires && new Date(p.expires) < new Date();
+      const maxed = p.max > 0 && (p.uses||0) >= p.max;
+      if (expired) { statusEl.innerHTML = '<span style="color:#ef4444">❌ Промокод протермінований</span>'; return; }
+      if (maxed) { statusEl.innerHTML = '<span style="color:#ef4444">❌ Промокод вичерпано</span>'; return; }
+      const TYPE_DESC = { percent: `${p.value}% знижки`, fixed: `${p.value}₴ знижки`, coins: `+${p.value} монет` };
+      statusEl.innerHTML = `<span style="color:#4ade80">✅ Промокод активовано: ${TYPE_DESC[p.type]||''}</span>`;
+      p.uses = (p.uses||0) + 1;
+      localStorage.setItem('volia_promos', JSON.stringify(promos));
+    }
+
+    renderShopPage();
+    // Re-apply translations after rendering (in case main.js overwrote footer)
+    if (typeof applyLang !== 'undefined') applyLang(currentLang);
+
+    // Re-render shop cards when language changes
+    const _origSelectLang = window.selectLang;
+    window.selectLang = function(lang) {
+      _origSelectLang(lang);
+      renderShopPage();
+    };
+  </script>
+</body>
+</html>
