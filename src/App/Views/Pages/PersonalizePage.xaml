@@ -4,7 +4,7 @@
       xmlns:loc="clr-namespace:Sakura.App.Localization"
       Background="Transparent">
 
-    <ScrollViewer Style="{StaticResource Sakura.ScrollViewer}" Padding="24,20">
+    <ScrollViewer Padding="24,20">
         <StackPanel>
 
             <!-- ══ Header ══════════════════════════════════════════════════════ -->

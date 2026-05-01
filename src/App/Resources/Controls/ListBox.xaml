@@ -33,7 +33,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListBox">
-                    <ScrollViewer Style="{StaticResource Sakura.ScrollViewer}">
+                    <ScrollViewer>
                         <ItemsPresenter/>
                     </ScrollViewer>
                 </ControlTemplate>

@@ -33,4 +33,7 @@
         </Setter>
     </Style>
 
+    <!-- default style — applies to all ScrollViewers without explicit Style -->
+    <Style TargetType="ScrollViewer" BasedOn="{StaticResource Sakura.ScrollViewer}"/>
+
 </ResourceDictionary>
